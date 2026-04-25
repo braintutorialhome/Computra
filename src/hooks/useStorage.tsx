@@ -69,11 +69,11 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const saved = localStorage.getItem('utc_current_user');
     return saved ? JSON.parse(saved) : null;
   });
-  const [scriptUrl, setScriptUrl] = useState<string>(() => localStorage.getItem('utc_script_url') || '');
-
-  useEffect(() => {
-    localStorage.setItem('utc_script_url', scriptUrl);
-  }, [scriptUrl]);
+  
+  // DIRECT GOOGLE SHEETS CONNECTION
+  // Replace the URL below with your Apps Script Web App "Exec" URL 
+  // (Go to Apps Script > Deploy > New Deployment > Web App > Copy URL)
+  const [scriptUrl, setScriptUrl] = useState<string>('https://script.google.com/macros/s/AKfycbz-S3P0Mn-OD9aWcUdfTr92PW15PnMMDO3fNmIhs6dnTy3WEQTQZTS4KGMHaz0j51we/exec');
 
   const syncToCloud = async (action: string, data: any) => {
     if (!scriptUrl) return;
@@ -128,10 +128,11 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, [scriptUrl]);
 
-  // Handle URL change
+  // Initial data load from cloud
   useEffect(() => {
-    localStorage.setItem('utc_script_url', scriptUrl);
-    if (scriptUrl) refreshCloudData();
+    if (scriptUrl && scriptUrl !== 'REPLACE_WITH_YOUR_APPS_SCRIPT_WEB_APP_URL') {
+      refreshCloudData();
+    }
   }, [scriptUrl, refreshCloudData]);
 
   // Auth logic

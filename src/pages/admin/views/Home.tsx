@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { useStorage } from '../../../hooks/useStorage';
 import { 
-  Users, FileCheck, CreditCard, Wallet, Calendar, TrendingUp, DollarSign, Share2, Loader2, CheckCircle2, AlertCircle, RefreshCw, Terminal, Cloud, Lock
+  Users, FileCheck, CreditCard, Wallet, Calendar, TrendingUp, DollarSign, Share2, Loader2, CheckCircle2, AlertCircle, RefreshCw
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
@@ -25,8 +25,8 @@ const StatCard = ({ label, value, icon: Icon, color, subValue }: any) => (
 
 export default function AdminHome() {
   const { 
-    students, expenses, fees, users, attendance, tests, testResults, materials, notices,
-    clearAllData, scriptUrl, setScriptUrl, refreshCloudData 
+    students, expenses, fees, users, attendance, tests, testResults,
+    clearAllData, scriptUrl, refreshCloudData 
   } = useStorage();
   const [isResetting, setIsResetting] = useState(false);
   const [scriptSyncStatus, setScriptSyncStatus] = useState<'idle' | 'syncing' | 'success' | 'error'>('idle');
@@ -43,36 +43,6 @@ export default function AdminHome() {
       console.error(err);
       setScriptSyncStatus('error');
       setErrorMessage(err.message || 'Failed to synchronize with cloud');
-    }
-  };
-
-  const handleBackupToSheets = async () => {
-    if (!scriptUrl) return;
-    setScriptSyncStatus('syncing');
-    try {
-      await fetch(scriptUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({
-          type: 'BACKUP',
-          data: { 
-            students, 
-            fees, 
-            expenses, 
-            users, 
-            attendance, 
-            tests, 
-            testResults, 
-            materials, 
-            notices 
-          }
-        })
-      });
-      setScriptSyncStatus('success');
-      setTimeout(() => setScriptSyncStatus('idle'), 3000);
-    } catch (err) {
-      console.error(err);
-      setScriptSyncStatus('error');
     }
   };
 
@@ -122,81 +92,6 @@ export default function AdminHome() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="glass p-8 rounded-[40px] border border-white/5 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-6 opacity-5 rotate-12 scale-110 pointer-events-none group-hover:rotate-0 transition-all duration-1000">
-               <Cloud size={140} className={scriptUrl ? "text-indigo-500" : "text-slate-500"} />
-            </div>
-            <div className="relative z-10">
-               <div className="flex items-center gap-3 mb-6">
-                 <div className={`p-3 rounded-2xl ${scriptUrl ? 'bg-indigo-500/20 text-indigo-400' : 'bg-slate-800 text-slate-500'}`}>
-                    <Cloud size={20} />
-                 </div>
-                 <div>
-                    <h3 className="text-sm font-black text-white uppercase tracking-widest">Real-Time Cloud Bridge</h3>
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className={`w-1.5 h-1.5 rounded-full animate-pulse transition-all ${scriptUrl ? 'bg-emerald-500' : 'bg-rose-500'}`}></div>
-                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">
-                        {scriptUrl ? 'Live Integration Active' : 'Offline Mode Only'}
-                      </p>
-                    </div>
-                 </div>
-               </div>
-               
-               <div className="space-y-4">
-                 <div className="relative">
-                   <input 
-                     type="text" 
-                     placeholder="PASTE URL HERE..."
-                     value={scriptUrl}
-                     onChange={(e) => setScriptUrl(e.target.value)}
-                     className="w-full bg-slate-900/50 border border-white/5 rounded-2xl py-5 px-6 text-xs font-bold text-indigo-300 placeholder:text-slate-700 focus:outline-none focus:border-indigo-500/50 transition-all pr-12"
-                   />
-                   <div className="absolute right-3 top-3 bottom-3 rounded-xl bg-slate-950 flex items-center px-4 border border-white/5">
-                      <Lock size={12} className="text-slate-600" />
-                   </div>
-                 </div>
-
-                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <button 
-                      onClick={handleRefresh}
-                      disabled={scriptSyncStatus === 'syncing' || !scriptUrl}
-                      className="py-4 bg-white/5 hover:bg-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-400 transition-all flex items-center justify-center gap-2 border border-white/5 disabled:opacity-30"
-                    >
-                      {scriptSyncStatus === 'syncing' ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
-                      Fetch Records
-                    </button>
-                    <button 
-                      onClick={handleBackupToSheets}
-                      disabled={scriptSyncStatus === 'syncing' || !scriptUrl}
-                      className="py-4 bg-indigo-600 hover:bg-indigo-500 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 disabled:opacity-30 border-none text-white cursor-pointer"
-                    >
-                      <Share2 size={14} />
-                      Test & Backup
-                    </button>
-                 </div>
-
-                 {errorMessage && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl"
-                    >
-                      <div className="flex items-start gap-3">
-                        <AlertCircle size={14} className="text-rose-500 mt-0.5 shrink-0" />
-                        <p className="text-[10px] font-bold text-rose-400 uppercase tracking-widest leading-relaxed" title={errorMessage}>
-                          Connection Error Detetcted
-                        </p>
-                      </div>
-                    </motion.div>
-                 )}
-               </div>
-
-               <p className="mt-8 text-[9px] font-bold text-slate-600 leading-relaxed uppercase tracking-widest border-t border-white/5 pt-6">
-                 System is currently in <span className={scriptUrl ? "text-indigo-400" : "text-rose-400"}>{scriptUrl ? "DIRECT MIRROR" : "LOCAL CACHE"}</span> mode. 
-               </p>
-            </div>
-        </div>
-
         <div className="glass p-8 rounded-[40px] border border-white/5 flex flex-col justify-center">
             <div className="flex items-center gap-4 mb-6">
                <div className="p-3 bg-rose-500/10 text-rose-400 rounded-2xl">
