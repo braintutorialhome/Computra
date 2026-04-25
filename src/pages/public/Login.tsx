@@ -6,7 +6,7 @@ import { useStorage } from '../../hooks/useStorage';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login, signup } = useStorage();
+  const { login, signup, isInitialSyncing, syncError } = useStorage();
   const [isLogin, setIsLogin] = useState(true);
   const [role, setRole] = useState<'admin' | 'student'>('student');
   const [username, setUsername] = useState('');
@@ -152,19 +152,41 @@ export default function Login() {
               <motion.div 
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="p-5 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl flex items-center gap-3"
+                className="p-5 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center gap-3"
               >
-                <p className="text-indigo-400 text-[9px] font-black uppercase tracking-widest">{error}</p>
+                <p className="text-rose-400 text-[9px] font-black uppercase tracking-widest">{error}</p>
+              </motion.div>
+            )}
+
+            {isInitialSyncing && (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="p-5 bg-indigo-500/5 border border-white/5 rounded-2xl flex items-center justify-center gap-3"
+              >
+                <Loader2 className="animate-spin text-indigo-500" size={14} />
+                <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest">Initial cloud sync in progress...</p>
+              </motion.div>
+            )}
+
+            {syncError && !isInitialSyncing && (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="p-5 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex flex-col gap-2"
+              >
+                <p className="text-amber-500 text-[9px] font-black uppercase tracking-widest flex items-center gap-2"> Cloud connectivity warning </p>
+                <p className="text-slate-400 text-[8px] font-bold uppercase tracking-wider">{syncError}</p>
               </motion.div>
             )}
 
             <button 
               type="submit" 
-              disabled={loading}
-              className="w-full py-6 text-xs font-black uppercase tracking-widest indigo-button shadow-2xl flex items-center justify-center gap-3"
+              disabled={loading || isInitialSyncing}
+              className="w-full py-6 text-xs font-black uppercase tracking-widest indigo-button shadow-2xl flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? <Loader2 className="animate-spin" size={18} /> : isLogin ? <LogIn size={18} /> : <UserPlus size={18} />}
-              <span>{isLogin ? 'Establish Link' : 'Register Identity'}</span>
+              <span>{isInitialSyncing ? 'Synchronizing...' : isLogin ? 'Establish Link' : 'Register Identity'}</span>
             </button>
           </form>
           
