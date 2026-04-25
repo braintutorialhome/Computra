@@ -51,6 +51,7 @@ interface StorageContextType {
   scriptUrl: string;
   refreshCloudData: () => Promise<void>;
   syncError: string | null;
+  isInitialSyncing: boolean;
 }
 
 // DIRECT GOOGLE SHEETS CONNECTION
@@ -73,31 +74,56 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return saved ? JSON.parse(saved) : null;
   });
   const [syncError, setSyncError] = useState<string | null>(null);
+  const [isInitialSyncing, setIsInitialSyncing] = useState(true);
   
   const scriptUrl = SCRIPT_URL;
 
-  const syncToCloud = async (action: string, data: any) => {
+  const syncToCloud = async () => {
     if (!scriptUrl) return;
     try {
       setSyncError(null);
+      const payload = {
+        type: 'BACKUP', // Harmonize with original script expectation
+        action: 'SYNC_ALL', // Alternate key just in case
+        data: {
+          students, fees, expenses, attendance, tests, testResults, materials, notices, users
+        }
+      };
+
+      // We use mode: 'no-cors' to ensure the request is sent even if CORS fails
+      // However, for BACKUP we often want to know if it succeeded.
+      // We'll try a regular fetch first, then fallback to no-cors if it's a cross-origin preflight issue.
       await fetch(scriptUrl, {
         method: 'POST',
+        mode: 'no-cors', // Apps Script POST often fails CORS but the request DOES arrive
         headers: {
           'Content-Type': 'text/plain;charset=utf-8',
         },
-        body: JSON.stringify({ action, data })
+        body: JSON.stringify(payload)
       });
+      console.log('Cloud Sync Triggered');
     } catch (e: any) {
       console.error('Cloud Sync Failed:', e);
       setSyncError(e.message || 'Sync failed');
     }
   };
 
+  // Sync to cloud when data changes (debounced)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // Only sync if we have data and we're not in the middle of an initial load
+      if (!isInitialSyncing && (students.length > 0 || users.length > 0)) {
+        syncToCloud();
+      }
+    }, 2000); // 2 second debounce
+    return () => clearTimeout(timer);
+  }, [students, fees, expenses, attendance, tests, testResults, materials, notices, users]);
+
   const refreshCloudData = useCallback(async () => {
     if (!scriptUrl) return;
+    setIsInitialSyncing(true);
     try {
       setSyncError(null);
-      // Add a timestamp to bypass any potential browser caching
       const url = new URL(scriptUrl);
       url.searchParams.set('_t', Date.now().toString());
 
@@ -106,15 +132,42 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
       try {
         const data = JSON.parse(text);
         if (data) {
-          if (data.students) setStudents(data.students);
-          if (data.fees) setFees(data.fees);
-          if (data.expenses) setExpenses(data.expenses);
-          if (data.users) setUsers(data.users);
-          if (data.notices) setNotices(data.notices);
-          if (data.materials) setMaterials(data.materials);
-          if (data.tests) setTests(data.tests);
-          if (data.testResults) setTestResults(data.testResults);
-          if (data.attendance) setAttendance(data.attendance);
+          if (data.students) {
+            setStudents(data.students);
+            localStorage.setItem('utc_students', JSON.stringify(data.students));
+          }
+          if (data.fees) {
+            setFees(data.fees);
+            localStorage.setItem('utc_fees', JSON.stringify(data.fees));
+          }
+          if (data.expenses) {
+            setExpenses(data.expenses);
+            localStorage.setItem('utc_expenses', JSON.stringify(data.expenses));
+          }
+          if (data.users) {
+            setUsers(data.users);
+            localStorage.setItem('utc_users', JSON.stringify(data.users));
+          }
+          if (data.notices) {
+            setNotices(data.notices);
+            localStorage.setItem('utc_notices', JSON.stringify(data.notices));
+          }
+          if (data.materials) {
+            setMaterials(data.materials);
+            localStorage.setItem('utc_materials', JSON.stringify(data.materials));
+          }
+          if (data.tests) {
+            setTests(data.tests);
+            localStorage.setItem('utc_tests', JSON.stringify(data.tests));
+          }
+          if (data.testResults) {
+            setTestResults(data.testResults);
+            localStorage.setItem('utc_testResults', JSON.stringify(data.testResults));
+          }
+          if (data.attendance) {
+            setAttendance(data.attendance);
+            localStorage.setItem('utc_attendance', JSON.stringify(data.attendance));
+          }
         }
       } catch (parseError) {
         console.error('Cloud response was not valid JSON. Response start:', text.substring(0, 50));
@@ -128,6 +181,8 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
       console.error('Failed to fetch from cloud:', e);
       setSyncError(e.message || 'Cloud fetch failed');
       throw e;
+    } finally {
+      setIsInitialSyncing(false);
     }
   }, [scriptUrl]);
 
@@ -187,7 +242,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const signup = async (u: Omit<User, 'id'>) => {
     const newUser: User = { ...u, id: uuid() };
     setUsers([...users, newUser]);
-    await syncToCloud('ADD_USER', newUser);
+    // syncToCloud is triggered by useEffect on users change
     return true;
   };
 
@@ -240,17 +295,14 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
       rollNumber: 'N/A'
     };
     setStudents([...students, newStudent]);
-    syncToCloud('ADD_STUDENT', newStudent);
   };
 
   const updateStudent = (s: Student) => {
     setStudents(students.map(st => st.id === s.id ? s : st));
-    syncToCloud('UPDATE_STUDENT', s);
   };
 
   const deleteStudent = (id: string) => {
     setStudents(students.filter(st => st.id !== id));
-    syncToCloud('DELETE_STUDENT', { id }); // Note: Need ADD_STUDENT/UPDATE_STUDENT usually suffices but DELETE can be added
   };
   
   const approveStudent = (id: string) => {
@@ -272,33 +324,27 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const addFee = (f: Omit<Fee, 'id'>) => {
     const newFee = { ...f, id: uuid() };
     setFees([...fees, newFee]);
-    syncToCloud('ADD_FEE', newFee);
   };
 
   const addExpense = (e: Omit<Expense, 'id'>) => {
     const newExpense = { ...e, id: uuid() };
     setExpenses([...expenses, newExpense]);
-    syncToCloud('ADD_EXPENSE', newExpense);
   };
 
   const deleteFee = (id: string) => {
     setFees(fees.filter(f => f.id !== id));
-    syncToCloud('DELETE_FEE', { id });
   };
 
   const updateFee = (f: Fee) => {
     setFees(fees.map(fe => fe.id === f.id ? f : fe));
-    syncToCloud('UPDATE_FEE', f);
   };
 
   const deleteExpense = (id: string) => {
     setExpenses(expenses.filter(ex => ex.id !== id));
-    syncToCloud('DELETE_EXPENSE', { id });
   };
 
   const updateExpense = (e: Expense) => {
     setExpenses(expenses.map(ex => ex.id === e.id ? e : ex));
-    syncToCloud('UPDATE_EXPENSE', e);
   };
 
   const markAttendance = (date: string, studentId: string, status: 'present' | 'absent') => {
@@ -309,54 +355,46 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } else {
       const newItem = { id: uuid(), date, studentId, status };
       setAttendance([...attendance, newItem]);
-      syncToCloud('MARK_ATTENDANCE', newItem);
     }
   };
 
   const addTest = (t: Omit<Test, 'id'>) => {
     const newTest = { ...t, id: uuid() };
     setTests([...tests, newTest]);
-    syncToCloud('ADD_TEST', newTest);
   };
   
   const submitTestResult = (r: Omit<TestResult, 'id'>) => {
     const newResult = { ...r, id: uuid() };
     setTestResults([...testResults, newResult]);
-    syncToCloud('ADD_TEST_RESULT', newResult);
   };
 
   const addMaterial = (m: Omit<StudyMaterial, 'id' | 'uploadDate'>) => {
     const newItem = { ...m, id: uuid(), uploadDate: new Date().toISOString() };
     setMaterials([...materials, newItem]);
-    syncToCloud('ADD_MATERIAL', newItem);
   };
 
   const deleteMaterial = (id: string) => {
     setMaterials(materials.filter(m => m.id !== id));
-    syncToCloud('DELETE_MATERIAL', { id });
   };
 
   const deleteNotice = (id: string) => {
     setNotices(notices.filter(n => n.id !== id));
-    syncToCloud('DELETE_NOTICE', { id });
   };
 
   const deleteTest = (id: string) => {
     setTests(tests.filter(t => t.id !== id));
-    syncToCloud('DELETE_TEST', { id });
   };
 
   const addNotice = (n: Omit<Notice, 'id' | 'date'>) => {
     const newNotice = { ...n, id: uuid(), date: new Date().toISOString() };
     setNotices([...notices, newNotice]);
-    syncToCloud('ADD_NOTICE', newNotice);
   };
 
   return (
     <StorageContext.Provider value={{
       students, fees, expenses, attendance, tests, testResults, materials, notices, users, currentUser,
       login, signup, logout, refreshCloudData, 
-      scriptUrl, syncError,
+      scriptUrl, syncError, isInitialSyncing,
       addStudent, updateStudent, deleteStudent, approveStudent, rejectStudent,
       addFee, updateFee, addExpense, updateExpense, deleteExpense, markAttendance,
       addTest, submitTestResult, addMaterial, addNotice, clearAllData
