@@ -21,7 +21,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; allowedRole: UserRol
 export default function App() {
   return (
     <StorageProvider>
-      <BrowserRouter>
+      <BrowserRouter basename="/Computra">
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<PublicHome />} />
