@@ -1,6 +1,17 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Student, Fee, Expense, Attendance, Test, TestResult, StudyMaterial, Notice, User, UserRole } from '../types';
 
+// Fallback for crypto.randomUUID
+const uuid = () => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
+
 interface StorageContextType {
   students: Student[];
   fees: Fee[];
@@ -152,7 +163,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const signup = async (u: Omit<User, 'id'>) => {
-    const newUser: User = { ...u, id: crypto.randomUUID() };
+    const newUser: User = { ...u, id: uuid() };
     setUsers([...users, newUser]);
     await syncToCloud('ADD_USER', newUser);
     return true;
@@ -201,7 +212,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const addStudent = (s: Omit<Student, 'id' | 'admissionDate' | 'status'>) => {
     const newStudent: Student = { 
       ...s, 
-      id: crypto.randomUUID(), 
+      id: uuid(), 
       admissionDate: new Date().toISOString(), 
       status: 'pending',
       rollNumber: 'N/A'
@@ -237,13 +248,13 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const addFee = (f: Omit<Fee, 'id'>) => {
-    const newFee = { ...f, id: crypto.randomUUID() };
+    const newFee = { ...f, id: uuid() };
     setFees([...fees, newFee]);
     syncToCloud('ADD_FEE', newFee);
   };
 
   const addExpense = (e: Omit<Expense, 'id'>) => {
-    const newExpense = { ...e, id: crypto.randomUUID() };
+    const newExpense = { ...e, id: uuid() };
     setExpenses([...expenses, newExpense]);
     syncToCloud('ADD_EXPENSE', newExpense);
   };
@@ -274,26 +285,26 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
       const updated = { ...existing, status };
       setAttendance(attendance.map(a => a.id === existing.id ? updated : a));
     } else {
-      const newItem = { id: crypto.randomUUID(), date, studentId, status };
+      const newItem = { id: uuid(), date, studentId, status };
       setAttendance([...attendance, newItem]);
       syncToCloud('MARK_ATTENDANCE', newItem);
     }
   };
 
   const addTest = (t: Omit<Test, 'id'>) => {
-    const newTest = { ...t, id: crypto.randomUUID() };
+    const newTest = { ...t, id: uuid() };
     setTests([...tests, newTest]);
     syncToCloud('ADD_TEST', newTest);
   };
   
   const submitTestResult = (r: Omit<TestResult, 'id'>) => {
-    const newResult = { ...r, id: crypto.randomUUID() };
+    const newResult = { ...r, id: uuid() };
     setTestResults([...testResults, newResult]);
     syncToCloud('ADD_TEST_RESULT', newResult);
   };
 
   const addMaterial = (m: Omit<StudyMaterial, 'id' | 'uploadDate'>) => {
-    const newItem = { ...m, id: crypto.randomUUID(), uploadDate: new Date().toISOString() };
+    const newItem = { ...m, id: uuid(), uploadDate: new Date().toISOString() };
     setMaterials([...materials, newItem]);
     syncToCloud('ADD_MATERIAL', newItem);
   };
@@ -314,7 +325,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const addNotice = (n: Omit<Notice, 'id' | 'date'>) => {
-    const newNotice = { ...n, id: crypto.randomUUID(), date: new Date().toISOString() };
+    const newNotice = { ...n, id: uuid(), date: new Date().toISOString() };
     setNotices([...notices, newNotice]);
     syncToCloud('ADD_NOTICE', newNotice);
   };
