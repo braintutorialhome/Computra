@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'motion/react';
 import { useStorage } from '../../../hooks/useStorage';
 import { 
-  Users, FileCheck, CreditCard, Wallet, Calendar, TrendingUp, DollarSign, Share2, Loader2, CheckCircle2, AlertCircle, RefreshCw
+  Users, FileCheck, CreditCard, Calendar, TrendingUp, DollarSign
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
@@ -25,37 +25,8 @@ const StatCard = ({ label, value, icon: Icon, color, subValue }: any) => (
 
 export default function AdminHome() {
   const { 
-    students, expenses, fees, users, attendance, tests, testResults,
-    clearAllData, scriptUrl, refreshCloudData 
+    students, expenses, fees, attendance
   } = useStorage();
-  const [isResetting, setIsResetting] = useState(false);
-  const [scriptSyncStatus, setScriptSyncStatus] = useState<'idle' | 'syncing' | 'success' | 'error'>('idle');
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const handleRefresh = async () => {
-    setScriptSyncStatus('syncing');
-    setErrorMessage(null);
-    try {
-      await refreshCloudData();
-      setScriptSyncStatus('success');
-      setTimeout(() => setScriptSyncStatus('idle'), 2000);
-    } catch (err: any) {
-      console.error(err);
-      setScriptSyncStatus('error');
-      setErrorMessage(err.message || 'Failed to synchronize with cloud');
-    }
-  };
-
-  const handleReset = () => {
-    if (window.confirm('WARNING: This will permanently delete ALL data. This cannot be undone. Are you sure?')) {
-      setIsResetting(true);
-      setTimeout(() => {
-        clearAllData();
-        setIsResetting(false);
-        window.location.reload(); // Refresh to ensure clean state
-      }, 1000);
-    }
-  };
 
   const totalStudents = students.filter(s => s.status === 'approved').length;
   const pendingAdmissions = students.filter(s => s.status === 'pending').length;
@@ -79,44 +50,8 @@ export default function AdminHome() {
     <div className="space-y-10">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-black text-white tracking-tighter uppercase">Operations <span className="text-indigo-500">Center</span></h2>
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={handleRefresh}
-            disabled={scriptSyncStatus === 'syncing'}
-            className="flex items-center gap-2 px-6 py-3 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] glass-button text-indigo-400 hover:text-white transition-all"
-          >
-            {scriptSyncStatus === 'syncing' ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
-            <span>{scriptSyncStatus === 'syncing' ? 'Syncing...' : 'Refresh Cloud Data'}</span>
-          </button>
-        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="glass p-8 rounded-[40px] border border-white/5 flex flex-col justify-center">
-            <div className="flex items-center gap-4 mb-6">
-               <div className="p-3 bg-rose-500/10 text-rose-400 rounded-2xl">
-                 <RefreshCw size={20} />
-               </div>
-               <div>
-                  <h3 className="text-sm font-black text-white uppercase tracking-widest">System Maintenance</h3>
-                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-0.5">Purge Local Memory</p>
-               </div>
-            </div>
-            <div className="flex items-center justify-between gap-6">
-               <p className="text-[9px] font-medium text-slate-500 leading-relaxed flex-1">
-                  Permanently delete all locally cached records. Use this if you want to start with a fresh slate.
-               </p>
-               <button 
-                  onClick={handleReset}
-                  disabled={isResetting}
-                  className="px-8 py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] border border-rose-500/20 text-rose-400 hover:bg-rose-500/10 transition-all flex items-center gap-2 whitespace-nowrap"
-               >
-                  {isResetting ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
-                  <span>Wipe Local Data</span>
-               </button>
-            </div>
-        </div>
-      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard label="Total Students" value={totalStudents} icon={Users} color="blue" />

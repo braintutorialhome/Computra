@@ -49,9 +49,12 @@ interface StorageContextType {
   addNotice: (notice: Omit<Notice, 'id' | 'date'>) => void;
   clearAllData: () => void;
   scriptUrl: string;
-  setScriptUrl: (url: string) => void;
   refreshCloudData: () => Promise<void>;
+  syncError: string | null;
 }
+
+// DIRECT GOOGLE SHEETS CONNECTION
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz-S3P0Mn-OD9aWcUdfTr92PW15PnMMDO3fNmIhs6dnTy3WEQTQZTS4KGMHaz0j51we/exec';
 
 const StorageContext = createContext<StorageContextType | undefined>(undefined);
 
@@ -69,18 +72,14 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const saved = localStorage.getItem('utc_current_user');
     return saved ? JSON.parse(saved) : null;
   });
+  const [syncError, setSyncError] = useState<string | null>(null);
   
-  // DIRECT GOOGLE SHEETS CONNECTION
-  // Replace the URL below with your Apps Script Web App "Exec" URL 
-  // (Go to Apps Script > Deploy > New Deployment > Web App > Copy URL)
-  const [scriptUrl, setScriptUrl] = useState<string>('https://script.google.com/macros/s/AKfycbz-S3P0Mn-OD9aWcUdfTr92PW15PnMMDO3fNmIhs6dnTy3WEQTQZTS4KGMHaz0j51we/exec');
+  const scriptUrl = SCRIPT_URL;
 
   const syncToCloud = async (action: string, data: any) => {
     if (!scriptUrl) return;
     try {
-      // Use standard fetch if mode 'no-cors' is causing issues with response parsing, 
-      // but apps script POST usually requires JSON.stringify and potentially mode: 'no-cors' 
-      // for simple fire-and-forget syncs.
+      setSyncError(null);
       await fetch(scriptUrl, {
         method: 'POST',
         headers: {
@@ -88,14 +87,16 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
         },
         body: JSON.stringify({ action, data })
       });
-    } catch (e) {
+    } catch (e: any) {
       console.error('Cloud Sync Failed:', e);
+      setSyncError(e.message || 'Sync failed');
     }
   };
 
   const refreshCloudData = useCallback(async () => {
     if (!scriptUrl) return;
     try {
+      setSyncError(null);
       // Add a timestamp to bypass any potential browser caching
       const url = new URL(scriptUrl);
       url.searchParams.set('_t', Date.now().toString());
@@ -117,6 +118,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
         }
       } catch (parseError) {
         console.error('Cloud response was not valid JSON. Response start:', text.substring(0, 50));
+        setSyncError('Invalid cloud response format');
         if (text.includes("Online") || text.includes("UTC Backend")) {
           throw new Error("RE-DEPLOYMENT REQUIRED: You updated the Apps Script code but didn't create a 'New Version'. Go to Deploy > Manage Deployments > Edit > Version: New Version > Deploy.");
         }
@@ -124,21 +126,40 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
     } catch (e: any) {
       console.error('Failed to fetch from cloud:', e);
+      setSyncError(e.message || 'Cloud fetch failed');
       throw e;
     }
   }, [scriptUrl]);
 
   // Initial data load from cloud
   useEffect(() => {
-    if (scriptUrl && scriptUrl !== 'REPLACE_WITH_YOUR_APPS_SCRIPT_WEB_APP_URL') {
+    if (scriptUrl) {
       refreshCloudData();
     }
   }, [scriptUrl, refreshCloudData]);
 
   // Auth logic
   const login = async (username: string, password: string, role: UserRole) => {
+    const cleanUsername = username.trim();
+    const cleanPassword = password.trim();
+
+    // 0. Emergency Fallback: If no users exist, allow a default admin
+    if (role === 'admin' && users.length === 0) {
+       if (cleanUsername === 'admin' && cleanPassword === 'admin123') {
+          const fallbackAdmin: User = { id: 'fallback-admin', username: 'admin', name: 'System Administrator', role: 'admin' };
+          setCurrentUser(fallbackAdmin);
+          localStorage.setItem('utc_current_user', JSON.stringify(fallbackAdmin));
+          return true;
+       }
+    }
+
     // 1. Try matching a registered account
-    const user = users.find(u => u.username === username && u.password === password && u.role === role);
+    const user = users.find(u => 
+      u.username.trim() === cleanUsername && 
+      u.password === cleanPassword && 
+      u.role === role
+    );
+    
     if (user) {
       setCurrentUser(user);
       localStorage.setItem('utc_current_user', JSON.stringify(user));
@@ -147,8 +168,8 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     // 2. Fallback for Students: Login via Roll Number
     if (role === 'student') {
-      const student = students.find(s => s.status === 'approved' && s.rollNumber === username);
-      if (student && password === username) {
+      const student = students.find(s => s.status === 'approved' && s.rollNumber?.trim() === cleanUsername);
+      if (student && cleanPassword === cleanUsername) {
         const studentUser: User = { 
           id: student.id, 
           username: student.rollNumber!, 
@@ -334,8 +355,8 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   return (
     <StorageContext.Provider value={{
       students, fees, expenses, attendance, tests, testResults, materials, notices, users, currentUser,
-      login, signup, logout, refreshCloudData,
-      scriptUrl, setScriptUrl,
+      login, signup, logout, refreshCloudData, 
+      scriptUrl, syncError,
       addStudent, updateStudent, deleteStudent, approveStudent, rejectStudent,
       addFee, updateFee, addExpense, updateExpense, deleteExpense, markAttendance,
       addTest, submitTestResult, addMaterial, addNotice, clearAllData

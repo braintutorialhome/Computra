@@ -139,8 +139,13 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="input-glass w-full py-5 rounded-3xl font-bold text-lg"
-                placeholder="••••••••"
+                placeholder={role === 'student' ? "ENTER ROLL NUMBER AGAIN" : "••••••••"}
               />
+              {role === 'student' && isLogin && (
+                <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest ml-2">
+                  Student Hint: Password is your Roll Number (e.g. UTC-1234)
+                </p>
+              )}
             </div>
 
             {error && (
