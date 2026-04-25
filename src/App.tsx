@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { StorageProvider, useStorage } from './hooks/useStorage';
 import PublicHome from './pages/public/Home';
 import AdmissionForm from './pages/public/AdmissionForm';
@@ -21,7 +21,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; allowedRole: UserRol
 export default function App() {
   return (
     <StorageProvider>
-      <BrowserRouter basename="/Computra">
+      <HashRouter>
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<PublicHome />} />
@@ -44,7 +44,7 @@ export default function App() {
           
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </BrowserRouter>
+      </HashRouter>
     </StorageProvider>
   );
 }
