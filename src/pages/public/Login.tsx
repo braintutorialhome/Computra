@@ -38,8 +38,8 @@ export default function Login() {
         setIsLogin(true);
         setError('Account created. Please log in.');
       }
-    } catch (err) {
-      setError('System communication failure');
+    } catch (err: any) {
+      setError(err.message || 'System communication failure');
     } finally {
       setLoading(false);
     }

@@ -171,8 +171,12 @@ export default function OnlineTestManagement() {
                 <Brain size={24} />
               </div>
               <button 
-                onClick={() => deleteTest(t.id)}
-                className="p-3 text-slate-700 hover:text-rose-500 transition-colors bg-white/5 rounded-xl border border-white/5"
+                onClick={() => {
+                  if (confirm('Are you sure you want to delete this test assessment? All results associated with it will remain but the test itself will be gone.')) {
+                    deleteTest(t.id);
+                  }
+                }}
+                className="p-3 text-slate-500 hover:text-rose-500 transition-colors bg-white/5 rounded-xl border border-white/5"
               >
                 <Trash2 size={18} />
               </button>

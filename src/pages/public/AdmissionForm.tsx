@@ -157,14 +157,17 @@ export default function AdmissionForm() {
             <div className="grid md:grid-cols-2 gap-10">
               <div className="space-y-2">
                 <label className="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Subject</label>
-                <input 
+                <select 
                    required
-                  type="text" 
                   value={formData.subject}
                   onChange={(e) => setFormData({...formData, subject: e.target.value})}
-                  className="input-glass w-full py-5 rounded-3xl font-bold"
-                  placeholder="Computer Application"
-                />
+                  className="input-glass w-full py-5 px-8 rounded-3xl font-bold appearance-none cursor-pointer"
+                >
+                  <option value="" disabled>Select Subject</option>
+                  <option value="Computer Application">Computer Application</option>
+                  <option value="Computer Science">Computer Science</option>
+                  <option value="Others">Others</option>
+                </select>
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Class/Level</label>

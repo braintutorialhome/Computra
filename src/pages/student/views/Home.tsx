@@ -77,7 +77,7 @@ export default function StudentHome({ student }: { student: Student }) {
             <div className="w-14 h-14 bg-purple-500/20 text-purple-400 rounded-2xl flex items-center justify-center mb-10 border border-purple-500/20 group-hover:bg-purple-600 group-hover:text-white transition-all duration-500">
                <Trophy size={28} />
             </div>
-            <p className="text-xs font-black uppercase tracking-widest text-slate-500 mb-2">Performance</p>
+            <p className="text-xs font-black uppercase tracking-widest text-slate-500 mb-2">Academic Performance</p>
             <h3 className="text-4xl font-black text-white tracking-tighter">{avgScore}% <span className="text-slate-700 text-lg">Avg</span></h3>
           </div>
           <Link to="/student/tests" className="mt-10 text-xs font-black uppercase tracking-widest text-purple-400 flex items-center gap-2 hover:gap-4 transition-all">
@@ -126,7 +126,7 @@ export default function StudentHome({ student }: { student: Student }) {
               </Link>
             </div>
           ) : (
-            <p className="text-slate-600 font-bold uppercase tracking-widest text-xs">No active signals detected in channel.</p>
+            <p className="text-slate-600 font-bold uppercase tracking-widest text-xs">No active notices.</p>
           )}
         </div>
 

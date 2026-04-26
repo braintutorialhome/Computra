@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useStorage } from '../../../hooks/useStorage';
-import { CreditCard, Plus, X } from 'lucide-react';
+import { CreditCard, Plus, X, Trash2 } from 'lucide-react';
 import { safeFormat } from '../../../lib/utils';
 
 export default function FeeManagement() {
-  const { students, fees, addFee } = useStorage();
+  const { students, fees, addFee, deleteFee } = useStorage();
   const [showAdd, setShowAdd] = useState(false);
 
   const [newFee, setNewFee] = useState({
@@ -136,6 +136,7 @@ export default function FeeManagement() {
                 <th className="px-10 py-6">Paid On</th>
                 <th className="px-10 py-6">Value</th>
                 <th className="px-10 py-6 text-right">Status</th>
+                <th className="px-10 py-6"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5 text-sm">
@@ -161,6 +162,19 @@ export default function FeeManagement() {
                       <span className="bg-emerald-500/10 text-emerald-400 text-[9px] font-black uppercase tracking-[0.2em] px-3 py-1.5 rounded-lg border border-emerald-500/20 shadow-lg shadow-emerald-500/5">
                         {f.status}
                       </span>
+                    </td>
+                    <td className="px-10 py-6 text-right">
+                      <button 
+                        onClick={() => {
+                          if (confirm('Are you sure you want to delete this fee record?')) {
+                            deleteFee(f.id);
+                          }
+                        }}
+                        className="p-3 text-slate-700 hover:text-rose-500 transition-all opacity-0 group-hover:opacity-100"
+                        title="Delete record"
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </td>
                   </tr>
                 );

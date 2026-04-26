@@ -165,7 +165,7 @@ export default function StudentDashboard() {
             className="flex items-center gap-4 px-6 py-4 rounded-2xl transition-all font-black text-xs uppercase tracking-widest text-rose-500 hover:bg-rose-500/10 hover:text-rose-400"
           >
             <LogOut size={18} />
-            <span>Terminate Session</span>
+            <span>Log Out</span>
           </button>
         </div>
       </aside>

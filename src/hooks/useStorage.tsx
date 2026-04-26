@@ -12,6 +12,10 @@ const uuid = () => {
   });
 };
 
+const shortId = () => {
+  return Math.random().toString(36).substring(2, 6).toUpperCase();
+};
+
 interface StorageContextType {
   students: Student[];
   fees: Fee[];
@@ -27,10 +31,13 @@ interface StorageContextType {
   login: (username: string, password: string, role: UserRole) => Promise<boolean>;
   signup: (user: Omit<User, 'id'>) => Promise<boolean>;
   logout: () => void;
+  updateUser: (user: User) => void;
+  addLog: (action: string, details: string) => void;
   
   addStudent: (student: Omit<Student, 'id' | 'admissionDate' | 'status'>) => void;
   updateStudent: (student: Student) => void;
   deleteStudent: (id: string) => void;
+  removeStudentPermanently: (id: string) => void;
   approveStudent: (id: string) => void;
   rejectStudent: (id: string) => void;
   
@@ -46,7 +53,11 @@ interface StorageContextType {
   submitTestResult: (result: Omit<TestResult, 'id'>) => void;
   
   addMaterial: (material: Omit<StudyMaterial, 'id' | 'uploadDate'>) => void;
+  deleteMaterial: (id: string) => void;
   addNotice: (notice: Omit<Notice, 'id' | 'date'>) => void;
+  deleteNotice: (id: string) => void;
+  deleteTest: (id: string) => void;
+  deleteFee: (id: string) => void;
   clearAllData: () => void;
   scriptUrl: string;
   refreshCloudData: () => Promise<void>;
@@ -54,8 +65,13 @@ interface StorageContextType {
   isInitialSyncing: boolean;
 }
 
-// DIRECT GOOGLE SHEETS CONNECTION
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz-S3P0Mn-OD9aWcUdfTr92PW15PnMMDO3fNmIhs6dnTy3WEQTQZTS4KGMHaz0j51we/exec';
+// -------------------------------------------------------------------------
+// CLOUD SYNC CONFIGURATION
+// 1. Deploy your Google Apps Script as a Web App.
+// 2. Paste the Web App URL here.
+// -------------------------------------------------------------------------
+const SCRIPT_URL: string = 'https://script.google.com/macros/s/AKfycbwB0AYIxBHhyJswPNZJyEorTvNE-h8PnwetVlrIt3KJACEwjXvNZ_-0Jsw59HBy0FAJaw/exec';
+// -------------------------------------------------------------------------
 
 const StorageContext = createContext<StorageContextType | undefined>(undefined);
 
@@ -75,33 +91,62 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   });
   const [syncError, setSyncError] = useState<string | null>(null);
   const [isInitialSyncing, setIsInitialSyncing] = useState(true);
+  const [lastSyncTime, setLastSyncTime] = useState<string | null>(() => localStorage.getItem('utc_last_sync'));
   
   const scriptUrl = SCRIPT_URL;
 
   const syncToCloud = async () => {
-    if (!scriptUrl) return;
+    if (!scriptUrl || scriptUrl === 'YOUR_APPS_SCRIPT_URL_HERE') return;
     try {
       setSyncError(null);
+      
+      // Enrich data for sheets as requested
+      const enrichedFees = fees.map(f => ({
+        ...f,
+        studentName: students.find(s => s.id === f.studentId)?.name || 'Unknown'
+      }));
+
+      const enrichedAttendance = attendance.map(a => ({
+        ...a,
+        studentName: students.find(s => s.id === a.studentId)?.name || 'Unknown'
+      }));
+
+      const enrichedTestResults = testResults.map(tr => ({
+        ...tr,
+        studentName: students.find(s => s.id === tr.studentId)?.name || 'Unknown'
+      }));
+
       const payload = {
-        type: 'BACKUP', // Harmonize with original script expectation
-        action: 'SYNC_ALL', // Alternate key just in case
+        type: 'BACKUP',
+        action: 'SYNC_ALL',
         data: {
-          students, fees, expenses, attendance, tests, testResults, materials, notices, users
+          students, 
+          approvedStudents: students.filter(s => s.status === 'approved'),
+          pendingAdmissions: students.filter(s => s.status === 'pending'),
+          deletedStudents: students.filter(s => s.status === 'deleted'),
+          fees: enrichedFees, 
+          expenses, 
+          attendance: enrichedAttendance, 
+          tests, 
+          testResults: enrichedTestResults, 
+          materials, 
+          notices, 
+          users,
+          logs: JSON.parse(localStorage.getItem('utc_activity_logs') || '[]')
         }
       };
 
-      // We use mode: 'no-cors' to ensure the request is sent even if CORS fails
-      // However, for BACKUP we often want to know if it succeeded.
-      // We'll try a regular fetch first, then fallback to no-cors if it's a cross-origin preflight issue.
       await fetch(scriptUrl, {
         method: 'POST',
-        mode: 'no-cors', // Apps Script POST often fails CORS but the request DOES arrive
+        mode: 'no-cors',
         headers: {
           'Content-Type': 'text/plain;charset=utf-8',
         },
         body: JSON.stringify(payload)
       });
       console.log('Cloud Sync Triggered');
+      setLastSyncTime(new Date().toISOString());
+      localStorage.setItem('utc_last_sync', new Date().toISOString());
     } catch (e: any) {
       console.error('Cloud Sync Failed:', e);
       setSyncError(e.message || 'Sync failed');
@@ -120,7 +165,10 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, [students, fees, expenses, attendance, tests, testResults, materials, notices, users]);
 
   const refreshCloudData = useCallback(async () => {
-    if (!scriptUrl) return;
+    if (!scriptUrl || scriptUrl === 'YOUR_APPS_SCRIPT_URL_HERE') {
+      setIsInitialSyncing(false);
+      return;
+    }
     setIsInitialSyncing(true);
     try {
       setSyncError(null);
@@ -128,46 +176,24 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
       url.searchParams.set('_t', Date.now().toString());
 
       const response = await fetch(url.toString());
+      if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+      
       const text = await response.text();
       try {
         const data = JSON.parse(text);
         if (data) {
-          if (data.students) {
-            setStudents(data.students);
-            localStorage.setItem('utc_students', JSON.stringify(data.students));
-          }
-          if (data.fees) {
-            setFees(data.fees);
-            localStorage.setItem('utc_fees', JSON.stringify(data.fees));
-          }
-          if (data.expenses) {
-            setExpenses(data.expenses);
-            localStorage.setItem('utc_expenses', JSON.stringify(data.expenses));
-          }
-          if (data.users) {
-            setUsers(data.users);
-            localStorage.setItem('utc_users', JSON.stringify(data.users));
-          }
-          if (data.notices) {
-            setNotices(data.notices);
-            localStorage.setItem('utc_notices', JSON.stringify(data.notices));
-          }
-          if (data.materials) {
-            setMaterials(data.materials);
-            localStorage.setItem('utc_materials', JSON.stringify(data.materials));
-          }
-          if (data.tests) {
-            setTests(data.tests);
-            localStorage.setItem('utc_tests', JSON.stringify(data.tests));
-          }
-          if (data.testResults) {
-            setTestResults(data.testResults);
-            localStorage.setItem('utc_testResults', JSON.stringify(data.testResults));
-          }
-          if (data.attendance) {
-            setAttendance(data.attendance);
-            localStorage.setItem('utc_attendance', JSON.stringify(data.attendance));
-          }
+          if (data.students) setStudents(data.students);
+          if (data.fees) setFees(data.fees);
+          if (data.expenses) setExpenses(data.expenses);
+          if (data.users) setUsers(data.users);
+          if (data.notices) setNotices(data.notices);
+          if (data.materials) setMaterials(data.materials);
+          if (data.tests) setTests(data.tests);
+          if (data.testResults) setTestResults(data.testResults);
+          if (data.attendance) setAttendance(data.attendance);
+          
+          setLastSyncTime(new Date().toISOString());
+          localStorage.setItem('utc_last_sync', new Date().toISOString());
         }
       } catch (parseError) {
         console.error('Cloud response was not valid JSON. Response start:', text.substring(0, 50));
@@ -180,7 +206,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } catch (e: any) {
       console.error('Failed to fetch from cloud:', e);
       setSyncError(e.message || 'Cloud fetch failed');
-      throw e;
+      // Don't re-throw here to avoid app crashing if initial fetch fails
     } finally {
       setIsInitialSyncing(false);
     }
@@ -189,54 +215,63 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Initial data load from cloud
   useEffect(() => {
     if (scriptUrl) {
-      refreshCloudData();
+      refreshCloudData().catch(e => console.error("Initial sync error:", e));
+    } else {
+      setIsInitialSyncing(false);
     }
   }, [scriptUrl, refreshCloudData]);
 
   // Auth logic
   const login = async (username: string, password: string, role: UserRole) => {
-    const cleanUsername = username.trim();
-    const cleanPassword = password.trim();
+    try {
+      const cleanUsername = username.trim();
+      const cleanPassword = password.trim();
 
-    // 0. Emergency Fallback: If no users exist, allow a default admin
-    if (role === 'admin' && users.length === 0) {
-       if (cleanUsername === 'admin' && cleanPassword === 'admin123') {
-          const fallbackAdmin: User = { id: 'fallback-admin', username: 'admin', name: 'System Administrator', role: 'admin' };
-          setCurrentUser(fallbackAdmin);
-          localStorage.setItem('utc_current_user', JSON.stringify(fallbackAdmin));
-          return true;
-       }
-    }
+      if (!cleanUsername || !cleanPassword) return false;
 
-    // 1. Try matching a registered account
-    const user = users.find(u => 
-      u.username.trim() === cleanUsername && 
-      u.password === cleanPassword && 
-      u.role === role
-    );
-    
-    if (user) {
-      setCurrentUser(user);
-      localStorage.setItem('utc_current_user', JSON.stringify(user));
-      return true;
-    }
-
-    // 2. Fallback for Students: Login via Roll Number
-    if (role === 'student') {
-      const student = students.find(s => s.status === 'approved' && s.rollNumber?.trim() === cleanUsername);
-      if (student && cleanPassword === cleanUsername) {
-        const studentUser: User = { 
-          id: student.id, 
-          username: student.rollNumber!, 
-          name: student.name, 
-          role: 'student' 
-        };
-        setCurrentUser(studentUser);
-        localStorage.setItem('utc_current_user', JSON.stringify(studentUser));
+      // 0. Emergency Fallback: Default admin (always available if users list is problematic)
+      if (role === 'admin' && cleanUsername === 'admin' && (cleanPassword === 'admin123' || cleanPassword === '123')) {
+        const fallbackAdmin: User = { id: 'sys-admin', username: 'admin', name: 'System Administrator', role: 'admin' };
+        setCurrentUser(fallbackAdmin);
+        localStorage.setItem('utc_current_user', JSON.stringify(fallbackAdmin));
         return true;
       }
+
+      // 1. Try matching a registered account
+      const user = users.find(u => 
+        u && 
+        u.username && 
+        u.username.trim() === cleanUsername && 
+        u.password === cleanPassword && 
+        u.role === role
+      );
+      
+      if (user) {
+        setCurrentUser(user);
+        localStorage.setItem('utc_current_user', JSON.stringify(user));
+        return true;
+      }
+
+      // 2. Fallback for Students: Login via Roll Number
+      if (role === 'student') {
+        const student = students.find(s => s.status === 'approved' && s.rollNumber?.trim() === cleanUsername);
+        if (student && cleanPassword === cleanUsername) {
+          const studentUser: User = { 
+            id: student.id, 
+            username: student.rollNumber!, 
+            name: student.name, 
+            role: 'student' 
+          };
+          setCurrentUser(studentUser);
+          localStorage.setItem('utc_current_user', JSON.stringify(studentUser));
+          return true;
+        }
+      }
+      return false;
+    } catch (e) {
+      console.error("Login logic error:", e);
+      throw new Error("Local security check failed. Please refresh.");
     }
-    return false;
   };
 
   const signup = async (u: Omit<User, 'id'>) => {
@@ -249,6 +284,27 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const logout = () => {
     setCurrentUser(null);
     localStorage.removeItem('utc_current_user');
+  };
+
+  const updateUser = (u: User) => {
+    setUsers(users.map(user => user.id === u.id ? u : user));
+    if (currentUser?.id === u.id) {
+       setCurrentUser(u);
+       localStorage.setItem('utc_current_user', JSON.stringify(u));
+    }
+    addLog('USER_UPDATE', `Updated user credentials for ${u.username}`);
+  };
+
+  const addLog = (action: string, details: string) => {
+    const newLog = {
+      timestamp: new Date().toISOString(),
+      user: currentUser ? `${currentUser.name} (${currentUser.role})` : 'System',
+      action,
+      details
+    };
+    const currentLogs = JSON.parse(localStorage.getItem('utc_activity_logs') || '[]');
+    const updatedLogs = [newLog, ...currentLogs].slice(0, 100); // Keep last 100
+    localStorage.setItem('utc_activity_logs', JSON.stringify(updatedLogs));
   };
 
   // Load from localStorage for initial offline access
@@ -289,41 +345,56 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const addStudent = (s: Omit<Student, 'id' | 'admissionDate' | 'status'>) => {
     const newStudent: Student = { 
       ...s, 
-      id: uuid(), 
+      id: shortId(), 
       admissionDate: new Date().toISOString(), 
       status: 'pending',
       rollNumber: 'N/A'
     };
     setStudents([...students, newStudent]);
+    addLog('ADMISSION_REQUEST', `New admission request from ${s.name} for class ${s.class}`);
   };
 
   const updateStudent = (s: Student) => {
-    setStudents(students.map(st => st.id === s.id ? s : st));
+    setStudents(prev => prev.map(st => st.id === s.id ? s : st));
+    addLog('STUDENT_UPDATE', `Updated profile/roll number for student: ${s.name}`);
   };
 
   const deleteStudent = (id: string) => {
-    setStudents(students.filter(st => st.id !== id));
+    setStudents(prev => prev.map(st => st.id === id ? { ...st, status: 'deleted' } : st));
+    addLog('STUDENT_TRASH', `Moved student record ${id} to trash`);
+  };
+
+  const removeStudentPermanently = (id: string) => {
+    setStudents(prev => prev.filter(st => st.id !== id));
+    addLog('STUDENT_DELETE', `Permanently deleted student record ${id}`);
   };
   
   const approveStudent = (id: string) => {
-    const student = students.find(s => s.id === id);
-    if (student) {
-      const updated = { ...student, status: 'approved' as const, rollNumber: `UTC-${Math.floor(1000 + Math.random() * 9000)}` };
-      updateStudent(updated);
-    }
+    setStudents(prev => prev.map(student => {
+      if (student.id === id) {
+        const rollNumber = `UTC-${Math.floor(1000 + Math.random() * 9000)}`;
+        addLog('ADMISSION_APPROVED', `Approved ${student.name}. Assigned Roll No: ${rollNumber}`);
+        return { ...student, status: 'approved' as const, rollNumber };
+      }
+      return student;
+    }));
   };
   
   const rejectStudent = (id: string) => {
-    const student = students.find(s => s.id === id);
-    if (student) {
-      const updated = { ...student, status: 'rejected' as const };
-      updateStudent(updated);
-    }
+    setStudents(prev => prev.map(student => {
+      if (student.id === id) {
+        addLog('ADMISSION_REJECTED', `Rejected admission for ${student.name}`);
+        return { ...student, status: 'rejected' as const };
+      }
+      return student;
+    }));
   };
 
   const addFee = (f: Omit<Fee, 'id'>) => {
     const newFee = { ...f, id: uuid() };
     setFees([...fees, newFee]);
+    const studentName = students.find(s => s.id === f.studentId)?.name || 'Unknown';
+    addLog('FEE_COLLECTION', `Collected ₹${f.amount} from ${studentName} for ${f.month}`);
   };
 
   const addExpense = (e: Omit<Expense, 'id'>) => {
@@ -393,11 +464,11 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   return (
     <StorageContext.Provider value={{
       students, fees, expenses, attendance, tests, testResults, materials, notices, users, currentUser,
-      login, signup, logout, refreshCloudData, 
+      login, signup, logout, refreshCloudData, updateUser,
       scriptUrl, syncError, isInitialSyncing,
-      addStudent, updateStudent, deleteStudent, approveStudent, rejectStudent,
-      addFee, updateFee, addExpense, updateExpense, deleteExpense, markAttendance,
-      addTest, submitTestResult, addMaterial, addNotice, clearAllData
+      addStudent, updateStudent, deleteStudent, removeStudentPermanently, approveStudent, rejectStudent,
+      addFee, updateFee, deleteFee, addExpense, updateExpense, deleteExpense, markAttendance,
+      addTest, deleteTest, submitTestResult, addMaterial, deleteMaterial, addNotice, deleteNotice, clearAllData, addLog
     }}>
       {children}
     </StorageContext.Provider>

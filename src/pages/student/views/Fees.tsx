@@ -56,7 +56,7 @@ export default function StudentFees({ student }: { student: Student }) {
              <History size={24} />
            </div>
            <div>
-              <h4 className="text-lg font-black text-white uppercase tracking-tight">Audit Ready</h4>
+              <h4 className="text-lg font-black text-white uppercase tracking-tight">Remarks</h4>
               <p className="text-xs font-bold text-slate-500 mt-2">All transactions are digitally signed and verified by UTC central processing.</p>
            </div>
         </div>
@@ -81,7 +81,7 @@ export default function StudentFees({ student }: { student: Student }) {
                 <tr key={f.id} className="group hover:bg-white/[0.02] transition-colors">
                   <td className="px-10 py-8">
                      <p className="text-lg font-black text-white uppercase tracking-tight">{f.month}</p>
-                     <p className="text-xs font-black text-slate-600 uppercase tracking-widest">Instalment {f.month.slice(0, 3)}</p>
+                     {/* Removed Instalment text */}
                   </td>
                   <td className="px-10 py-8">
                      <p className="text-sm font-bold text-slate-400">{safeFormat(f.date, 'dd MMMM yyyy')}</p>

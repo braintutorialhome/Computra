@@ -40,7 +40,7 @@ export default function NoticeManagement() {
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-xl z-[60] flex items-center justify-center p-6">
           <div className="glass rounded-[50px] shadow-2xl w-full max-w-xl overflow-hidden animate-in fade-in zoom-in duration-500">
             <div className="p-10 bg-gradient-to-r from-orange-600 to-rose-600 text-white flex justify-between items-center">
-              <h2 className="text-3xl font-black tracking-tighter uppercase">New Broadcast</h2>
+              <h2 className="text-3xl font-black tracking-tighter uppercase">New Notice</h2>
               <button onClick={() => setShowAdd(false)} className="p-3 hover:bg-white/20 rounded-2xl transition-all">
                 <X size={28} />
               </button>
@@ -81,7 +81,7 @@ export default function NoticeManagement() {
                 />
               </label>
               <button type="submit" className="w-full py-5 bg-indigo-600 text-white rounded-3xl font-black uppercase tracking-widest hover:bg-indigo-500 transition-all shadow-2xl">
-                Broadcast Now
+                Post Notice Now
               </button>
             </form>
           </div>
@@ -106,8 +106,12 @@ export default function NoticeManagement() {
                   </div>
                 </div>
                 <button 
-                  onClick={() => deleteNotice(n.id)}
-                  className="p-4 text-slate-700 hover:text-rose-500 hover:bg-white/5 rounded-2xl transition-all opacity-0 group-hover:opacity-100"
+                  onClick={() => {
+                    if (confirm('Are you sure you want to delete this notice?')) {
+                      deleteNotice(n.id);
+                    }
+                  }}
+                  className="p-4 text-slate-500 hover:text-rose-500 hover:bg-white/5 rounded-2xl transition-all"
                 >
                   <Trash2 size={20} />
                 </button>

@@ -144,7 +144,7 @@ export default function StudentTests({ student }: { student: Student }) {
              <div className="p-3 bg-indigo-500/20 text-indigo-400 rounded-2xl">
                 <Brain size={24} />
              </div>
-             <h3 className="font-black text-xl text-white tracking-tight uppercase">Active Modules</h3>
+             <h3 className="font-black text-xl text-white tracking-tight uppercase">Active Test</h3>
           </div>
           
           <div className="grid gap-6">
@@ -190,7 +190,7 @@ export default function StudentTests({ student }: { student: Student }) {
              <div className="p-3 bg-purple-500/20 text-purple-400 rounded-2xl">
                 <Trophy size={24} />
              </div>
-             <h3 className="font-black text-xl text-white tracking-tight uppercase">Performance Log</h3>
+             <h3 className="font-black text-xl text-white tracking-tight uppercase">Academic Performance</h3>
           </div>
 
           <div className="glass rounded-[50px] border border-white/5 overflow-hidden shadow-2xl divide-y divide-white/5">

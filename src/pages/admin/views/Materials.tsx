@@ -105,8 +105,12 @@ export default function StudyMaterialManagement() {
                     {m.type === 'pdf' ? <FileText size={28}/> : m.type === 'video' ? <Video size={28}/> : <BookOpen size={28}/>}
                   </div>
                   <button 
-                    onClick={() => deleteMaterial(m.id)}
-                    className="p-3 text-slate-600 hover:text-rose-500 hover:bg-white/5 rounded-xl transition-all opacity-0 group-hover:opacity-100"
+                    onClick={() => {
+                      if (confirm('Are you sure you want to delete this study material asset?')) {
+                        deleteMaterial(m.id);
+                      }
+                    }}
+                    className="p-3 text-slate-500 hover:text-rose-500 hover:bg-white/5 rounded-xl transition-all"
                   >
                     <Trash2 size={18} />
                   </button>

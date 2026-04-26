@@ -49,7 +49,7 @@ export default function AdminHome() {
   return (
     <div className="space-y-10">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-black text-white tracking-tighter uppercase">Operations <span className="text-indigo-500">Center</span></h2>
+        <h2 className="text-3xl font-black text-white tracking-tighter uppercase">Overview <span className="text-indigo-500">Center</span></h2>
       </div>
 
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
-  BarChart2, Users, FileCheck, CreditCard, Wallet, Calendar, Brain, BookMarked, Bell, LogOut, Menu, X, Plus, Trash2, Edit2, TrendingUp, TrendingDown, DollarSign
+  BarChart2, Users, FileCheck, CreditCard, Wallet, Calendar, Brain, BookMarked, Bell, LogOut, Menu, X, Plus, Trash2, Edit2, TrendingUp, TrendingDown, DollarSign, Settings
 } from 'lucide-react';
 import { useStorage } from '../../hooks/useStorage';
 import AdminHome from './views/Home';
@@ -10,6 +10,7 @@ import AdmissionManagement from './views/Admissions';
 import FeeManagement from './views/Fees';
 import ExpenseManagement from './views/Expenses';
 import AccountManagement from './views/Accounts';
+import SystemSettings from './views/Settings';
 import AttendanceManagement from './views/Attendance';
 import OnlineTestManagement from './views/Tests';
 import StudyMaterialManagement from './views/Materials';
@@ -68,6 +69,7 @@ export default function AdminDashboard() {
     { to: '/admin/expenses', icon: Wallet, label: 'Expenses' },
     { to: '/admin/accounts', icon: DollarSign, label: 'Accounts' },
     { to: '/admin/attendance', icon: Calendar, label: 'Attendance' },
+    { to: '/admin/settings', icon: Settings, label: 'Settings' },
     { to: '/admin/tests', icon: Brain, label: 'Online Tests' },
     { to: '/admin/materials', icon: BookMarked, label: 'Materials' },
     { to: '/admin/notices', icon: Bell, label: 'Notices' },
@@ -81,6 +83,7 @@ export default function AdminDashboard() {
     '/admin/expenses': 'Expense Tracker',
     '/admin/accounts': 'Institutional Accounts',
     '/admin/attendance': 'Attendance System',
+    '/admin/settings': 'System Settings',
     '/admin/tests': 'Test Creation',
     '/admin/materials': 'Study Materials',
     '/admin/notices': 'Notice Board',
@@ -172,6 +175,7 @@ export default function AdminDashboard() {
             <Route path="expenses" element={<ExpenseManagement />} />
             <Route path="accounts" element={<AccountManagement />} />
             <Route path="attendance" element={<AttendanceManagement />} />
+            <Route path="settings" element={<SystemSettings />} />
             <Route path="tests" element={<OnlineTestManagement />} />
             <Route path="materials" element={<StudyMaterialManagement />} />
             <Route path="notices" element={<NoticeManagement />} />

@@ -20,7 +20,7 @@ export interface Student {
   mobile: string;
   address: string;
   admissionDate: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'rejected' | 'deleted';
   rollNumber?: string;
 }
 

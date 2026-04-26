@@ -1,7 +1,6 @@
 import React from 'react';
 import { useStorage } from '../../../hooks/useStorage';
 import { DollarSign, TrendingUp, TrendingDown, Wallet, CreditCard } from 'lucide-react';
-
 import { safeFormat } from '../../../lib/utils';
 
 export default function AccountManagement() {
@@ -12,7 +11,8 @@ export default function AccountManagement() {
   const balance = totalIncome - totalExpenses;
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-12 pb-20">
+      {/* Stats row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="glass p-10 rounded-[40px] bg-gradient-to-br from-emerald-500/10 to-transparent">
           <div className="w-14 h-14 bg-emerald-500/10 text-emerald-400 rounded-3xl flex items-center justify-center mb-6 border border-emerald-500/20">
@@ -42,14 +42,15 @@ export default function AccountManagement() {
         </div>
       </div>
 
+      {/* Finance Logs */}
       <div className="grid lg:grid-cols-2 gap-8">
         <div className="glass p-8 rounded-[40px]">
           <h3 className="text-sm font-black text-white uppercase tracking-widest mb-8 flex items-center gap-2">
             <CreditCard size={16} className="text-emerald-400" /> Revenue Stream
           </h3>
-          <div className="space-y-4 max-h-[300px] overflow-y-auto pr-4 custom-scrollbar">
-            {fees.slice().reverse().map(f => (
-              <div key={f.id} className="flex justify-between items-center p-5 bg-white/5 rounded-2xl border border-white/5 group hover:bg-white/10 transition-all">
+          <div className="space-y-4 max-h-[400px] overflow-y-auto pr-4 custom-scrollbar">
+            {fees.slice().reverse().map((f, i) => (
+              <div key={`${f.id}-${i}`} className="flex justify-between items-center p-5 bg-white/5 rounded-2xl border border-white/5 group hover:bg-white/10 transition-all">
                 <div>
                   <p className="text-xs font-black text-white">{f.month}</p>
                   <p className="text-[9px] font-bold text-slate-500">Recieved on {safeFormat(f.date, 'dd MMM yyyy')}</p>
@@ -64,9 +65,9 @@ export default function AccountManagement() {
           <h3 className="text-sm font-black text-white uppercase tracking-widest mb-8 flex items-center gap-2">
             <Wallet size={16} className="text-rose-400" /> Spending Logs
           </h3>
-          <div className="space-y-4 max-h-[300px] overflow-y-auto pr-4 custom-scrollbar">
-            {expenses.slice().reverse().map(e => (
-              <div key={e.id} className="flex justify-between items-center p-5 bg-white/5 rounded-2xl border border-white/5 group hover:bg-white/10 transition-all">
+          <div className="space-y-4 max-h-[400px] overflow-y-auto pr-4 custom-scrollbar">
+            {expenses.slice().reverse().map((e, i) => (
+              <div key={`${e.id}-${i}`} className="flex justify-between items-center p-5 bg-white/5 rounded-2xl border border-white/5 group hover:bg-white/10 transition-all">
                 <div>
                   <p className="text-xs font-black text-white">{e.title}</p>
                   <p className="text-[9px] font-bold text-slate-500">{e.category} • {safeFormat(e.date, 'dd MMM yyyy')}</p>
@@ -77,6 +78,7 @@ export default function AccountManagement() {
           </div>
         </div>
       </div>
+
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 0px; }
         .custom-scrollbar { scrollbar-width: none; }
@@ -84,3 +86,5 @@ export default function AccountManagement() {
     </div>
   );
 }
+
+
