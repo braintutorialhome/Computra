@@ -1,12 +1,12 @@
 import React from 'react';
 import { useStorage } from '../../../hooks/useStorage';
 import { Student } from '../../../types';
-import { CreditCard, Brain, Calendar, Bell, ArrowRight, BookMarked, Trophy } from 'lucide-react';
+import { CreditCard, Brain, Calendar, Bell, ArrowRight, BookMarked, Trophy, AlertCircle, ExternalLink, FileCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 
 export default function StudentHome({ student }: { student: Student }) {
-  const { fees, attendance, testResults, notices } = useStorage();
+  const { fees, attendance, testResults, notices, dueFees } = useStorage();
   const [currentTime, setCurrentTime] = React.useState(new Date());
 
   React.useEffect(() => {
@@ -42,6 +42,9 @@ export default function StudentHome({ student }: { student: Student }) {
     ? Math.round(studentResults.reduce((sum, r) => sum + (r.score / r.totalQuestions * 100), 0) / studentResults.length)
     : 0;
 
+  const myDueFees = dueFees.filter(df => df.studentId === student.id);
+  const totalDue = myDueFees.reduce((sum, item) => sum + item.amount, 0);
+
   const today = new Date().toISOString().split('T')[0];
   const isPresentToday = attendance.find(a => a.date === today && a.studentId === student.id)?.status === 'present';
 
@@ -59,6 +62,27 @@ export default function StudentHome({ student }: { student: Student }) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {totalDue > 0 && (
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="col-span-full bg-rose-500 rounded-[30px] p-8 flex flex-col md:flex-row items-center justify-between gap-6 border border-white/10 shadow-2xl shadow-rose-500/20"
+          >
+            <div className="flex items-center gap-6 text-center md:text-left">
+              <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-white">
+                <AlertCircle size={32} />
+              </div>
+              <div>
+                <h3 className="text-2xl font-black text-white uppercase tracking-tight">Outstanding Due: ₹{totalDue}</h3>
+                <p className="text-white/60 text-xs font-bold uppercase tracking-[0.2em] mt-1">Please clear your dues as soon as possible</p>
+              </div>
+            </div>
+            <Link to="/student/due-fees" className="bg-white text-rose-500 px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-rose-50 hover:scale-105 transition-all">
+              View Breakdown
+            </Link>
+          </motion.div>
+        )}
+        
         <div className="glass p-10 rounded-[40px] bg-gradient-to-br from-indigo-500/10 to-transparent flex flex-col justify-between group">
           <div>
             <div className="w-14 h-14 bg-indigo-500/20 text-indigo-400 rounded-2xl flex items-center justify-center mb-10 border border-indigo-500/20 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-500">
@@ -75,13 +99,13 @@ export default function StudentHome({ student }: { student: Student }) {
         <div className="glass p-10 rounded-[40px] bg-gradient-to-br from-purple-500/10 to-transparent flex flex-col justify-between group">
           <div>
             <div className="w-14 h-14 bg-purple-500/20 text-purple-400 rounded-2xl flex items-center justify-center mb-10 border border-purple-500/20 group-hover:bg-purple-600 group-hover:text-white transition-all duration-500">
-               <Trophy size={28} />
+               <FileCheck size={28} />
             </div>
             <p className="text-xs font-black uppercase tracking-widest text-slate-500 mb-2">Academic Performance</p>
-            <h3 className="text-4xl font-black text-white tracking-tighter">{avgScore}% <span className="text-slate-700 text-lg">Avg</span></h3>
+            <h3 className="text-4xl font-black text-white tracking-tighter">Reports <span className="text-slate-700 text-lg">Live</span></h3>
           </div>
-          <Link to="/student/tests" className="mt-10 text-xs font-black uppercase tracking-widest text-purple-400 flex items-center gap-2 hover:gap-4 transition-all">
-            Review Scorecaps <ArrowRight size={14} />
+          <Link to="/student/results" className="mt-10 text-xs font-black uppercase tracking-widest text-purple-400 flex items-center gap-2 hover:gap-4 transition-all">
+            Access My Results <ArrowRight size={14} />
           </Link>
         </div>
 
@@ -130,23 +154,32 @@ export default function StudentHome({ student }: { student: Student }) {
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-8">
-           <Link to="/student/tests" className="glass p-8 rounded-[40px] group hover:bg-indigo-600/20 transition-all border border-white/5 flex flex-col justify-between">
-              <div className="w-12 h-12 bg-indigo-500/20 text-indigo-400 rounded-2xl flex items-center justify-center group-hover:bg-indigo-500 group-hover:text-white transition-all">
-                <Brain size={24} />
+        <div className="grid grid-cols-2 lg:grid-cols-2 gap-8">
+           <Link to="/student/test-master" className="glass p-8 rounded-[40px] group hover:bg-slate-400/20 transition-all border border-white/5 flex flex-col justify-between">
+              <div className="w-12 h-12 bg-amber-500/20 text-amber-400 rounded-2xl flex items-center justify-center group-hover:bg-amber-500 group-hover:text-white transition-all">
+                <ExternalLink size={24} />
               </div>
               <div className="mt-8">
-                <p className="text-xs font-black uppercase tracking-widest text-slate-500 group-hover:text-white/60">Online Test</p>
-                <h4 className="text-xl font-black text-white tracking-tight">Assessments</h4>
+                <p className="text-xs font-black uppercase tracking-widest text-slate-500 group-hover:text-white/60">Exam Portal</p>
+                <h4 className="text-xl font-black text-white tracking-tight">External Links</h4>
               </div>
            </Link>
-           <Link to="/student/materials" className="glass p-8 rounded-[40px] group hover:bg-emerald-600/20 transition-all border border-white/5 flex flex-col justify-between">
+           <Link to="/student/results" className="glass p-8 rounded-[40px] group hover:bg-slate-400/20 transition-all border border-white/5 flex flex-col justify-between">
+              <div className="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-all">
+                <FileCheck size={24} />
+              </div>
+              <div className="mt-8">
+                <p className="text-xs font-black uppercase tracking-widest text-slate-500 group-hover:text-white/60">Performance</p>
+                <h4 className="text-xl font-black text-white tracking-tight">Exam Results</h4>
+              </div>
+           </Link>
+           <Link to="/student/materials" className="lg:col-span-1 glass p-8 rounded-[40px] group hover:bg-slate-400/20 transition-all border border-white/5 flex flex-col justify-between">
               <div className="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-all">
                 <BookMarked size={24} />
               </div>
               <div className="mt-8">
-                <p className="text-xs font-black uppercase tracking-widest text-slate-500 group-hover:text-white/60">Study Materials</p>
-                <h4 className="text-xl font-black text-white tracking-tight">Study Materials</h4>
+                <p className="text-xs font-black uppercase tracking-widest text-slate-500 group-hover:text-white/60">Repository</p>
+                <h4 className="text-xl font-black text-white tracking-tight">Documents</h4>
               </div>
            </Link>
         </div>

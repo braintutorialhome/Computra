@@ -139,13 +139,8 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="input-glass w-full py-5 rounded-3xl font-bold text-lg"
-                placeholder={role === 'student' ? "ENTER ROLL NUMBER AGAIN" : "••••••••"}
+                placeholder="••••••••"
               />
-              {role === 'student' && isLogin && (
-                <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest ml-2">
-                  Student Hint: Password is your Roll Number (e.g. UTC-1234)
-                </p>
-              )}
             </div>
 
             {error && (
@@ -186,7 +181,7 @@ export default function Login() {
               className="w-full py-6 text-xs font-black uppercase tracking-widest indigo-button shadow-2xl flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? <Loader2 className="animate-spin" size={18} /> : isLogin ? <LogIn size={18} /> : <UserPlus size={18} />}
-              <span>{isInitialSyncing ? 'Synchronizing...' : isLogin ? 'Establish Link' : 'Register Identity'}</span>
+              <span>{isInitialSyncing ? 'Synchronizing...' : isLogin ? 'Login' : 'Sign Up'}</span>
             </button>
           </form>
           

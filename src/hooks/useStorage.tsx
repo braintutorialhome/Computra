@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { Student, Fee, Expense, Attendance, Test, TestResult, StudyMaterial, Notice, User, UserRole } from '../types';
+import { Student, Fee, Expense, Attendance, Test, TestResult, StudyMaterial, Notice, User, UserRole, DueFee, ExternalTest, ResultLink } from '../types';
 
 // Fallback for crypto.randomUUID
 const uuid = () => {
@@ -25,6 +25,8 @@ interface StorageContextType {
   testResults: TestResult[];
   materials: StudyMaterial[];
   notices: Notice[];
+  dueFees: DueFee[];
+  externalTests: ExternalTest[];
   users: User[];
   currentUser: User | null;
   
@@ -56,6 +58,13 @@ interface StorageContextType {
   deleteMaterial: (id: string) => void;
   addNotice: (notice: Omit<Notice, 'id' | 'date'>) => void;
   deleteNotice: (id: string) => void;
+  addDueFee: (dueFee: Omit<DueFee, 'id' | 'date'>) => void;
+  updateDueFee: (dueFee: DueFee) => void;
+  deleteDueFee: (id: string) => void;
+  addExternalTest: (test: Omit<ExternalTest, 'id' | 'date'>) => void;
+  deleteExternalTest: (id: string) => void;
+  addResultLink: (result: Omit<ResultLink, 'id' | 'date'>) => void;
+  deleteResultLink: (id: string) => void;
   deleteTest: (id: string) => void;
   deleteFee: (id: string) => void;
   clearAllData: () => void;
@@ -70,7 +79,7 @@ interface StorageContextType {
 // 1. Deploy your Google Apps Script as a Web App.
 // 2. Paste the Web App URL here.
 // -------------------------------------------------------------------------
-const SCRIPT_URL: string = 'https://script.google.com/macros/s/AKfycbwB0AYIxBHhyJswPNZJyEorTvNE-h8PnwetVlrIt3KJACEwjXvNZ_-0Jsw59HBy0FAJaw/exec';
+const SCRIPT_URL: string = 'https://script.google.com/macros/s/AKfycbz6hmunZWBRwUXWbPzSSLoz64IcqH7EcxtI2CMyiwFUlqPPKYxzNqAoHEpJ1nEsFjqH/exec';
 // -------------------------------------------------------------------------
 
 const StorageContext = createContext<StorageContextType | undefined>(undefined);
@@ -84,6 +93,9 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [materials, setMaterials] = useState<StudyMaterial[]>([]);
   const [notices, setNotices] = useState<Notice[]>([]);
+  const [dueFees, setDueFees] = useState<DueFee[]>([]);
+  const [externalTests, setExternalTests] = useState<ExternalTest[]>([]);
+  const [resultLinks, setResultLinks] = useState<ResultLink[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
     const saved = localStorage.getItem('utc_current_user');
@@ -97,10 +109,10 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const syncToCloud = async () => {
     if (!scriptUrl || scriptUrl === 'YOUR_APPS_SCRIPT_URL_HERE') return;
+    const cleanUrl = scriptUrl.trim();
     try {
       setSyncError(null);
       
-      // Enrich data for sheets as requested
       const enrichedFees = fees.map(f => ({
         ...f,
         studentName: students.find(s => s.id === f.studentId)?.name || 'Unknown'
@@ -131,12 +143,15 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
           testResults: enrichedTestResults, 
           materials, 
           notices, 
+          dueFees,
+          externalTests,
+          resultLinks,
           users,
           logs: JSON.parse(localStorage.getItem('utc_activity_logs') || '[]')
         }
       };
 
-      await fetch(scriptUrl, {
+      await fetch(cleanUrl, {
         method: 'POST',
         mode: 'no-cors',
         headers: {
@@ -148,8 +163,12 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setLastSyncTime(new Date().toISOString());
       localStorage.setItem('utc_last_sync', new Date().toISOString());
     } catch (e: any) {
-      console.error('Cloud Sync Failed:', e);
-      setSyncError(e.message || 'Sync failed');
+      console.error('Cloud Sync Diagnostic:', e);
+      let errorMsg = e.message || 'Sync failed';
+      if (errorMsg === 'Failed to fetch') {
+        errorMsg = 'CLOUD UPDATE BLOCKED: Ensure "Who has access" is set to "Anyone" and you have authorized all permissions in Apps Script.';
+      }
+      setSyncError(errorMsg);
     }
   };
 
@@ -162,23 +181,45 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
     }, 2000); // 2 second debounce
     return () => clearTimeout(timer);
-  }, [students, fees, expenses, attendance, tests, testResults, materials, notices, users]);
+  }, [students, fees, expenses, attendance, tests, testResults, materials, notices, dueFees, externalTests, resultLinks, users]);
 
   const refreshCloudData = useCallback(async () => {
-    if (!scriptUrl || scriptUrl === 'YOUR_APPS_SCRIPT_URL_HERE') {
+    const cleanUrl = scriptUrl.trim();
+    if (!cleanUrl || cleanUrl.includes('YOUR_APPS_SCRIPT_URL_HERE')) {
       setIsInitialSyncing(false);
       return;
     }
+
     setIsInitialSyncing(true);
     try {
       setSyncError(null);
-      const url = new URL(scriptUrl);
+      
+      if (!cleanUrl.startsWith('https://script.google.com')) {
+        throw new Error('INVALID SCRIPT URL: Ensure you are using the Web App URL from Apps Script.');
+      }
+
+      const url = new URL(cleanUrl);
+      url.searchParams.set('action', 'get_all');
       url.searchParams.set('_t', Date.now().toString());
 
-      const response = await fetch(url.toString());
-      if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+      console.log('Attempting Cloud Handshake:', url.toString());
+      
+      const response = await fetch(url.toString(), {
+        method: 'GET',
+        mode: 'cors',
+        credentials: 'omit',
+        redirect: 'follow'
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Cloud Connection Error: ${response.status} ${response.statusText}`);
+      }
       
       const text = await response.text();
+      if (!text || text.trim().length === 0) {
+        throw new Error('Cloud response was empty. Check if your script logic is correct.');
+      }
+      
       try {
         const data = JSON.parse(text);
         if (data) {
@@ -187,26 +228,38 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
           if (data.expenses) setExpenses(data.expenses);
           if (data.users) setUsers(data.users);
           if (data.notices) setNotices(data.notices);
+          if (data.dueFees) setDueFees(data.dueFees);
+          if (data.externalTests) setExternalTests(data.externalTests);
+          if (data.resultLinks) setResultLinks(data.resultLinks);
           if (data.materials) setMaterials(data.materials);
           if (data.tests) setTests(data.tests);
           if (data.testResults) setTestResults(data.testResults);
           if (data.attendance) setAttendance(data.attendance);
           
+          if (data.logs) {
+            localStorage.setItem('utc_activity_logs', JSON.stringify(data.logs.slice(0, 100)));
+          }
+          
           setLastSyncTime(new Date().toISOString());
           localStorage.setItem('utc_last_sync', new Date().toISOString());
+          console.log('✓ Cloud Data Synchronized');
         }
       } catch (parseError) {
-        console.error('Cloud response was not valid JSON. Response start:', text.substring(0, 50));
-        setSyncError('Invalid cloud response format');
-        if (text.includes("Online") || text.includes("UTC Backend")) {
-          throw new Error("RE-DEPLOYMENT REQUIRED: You updated the Apps Script code but didn't create a 'New Version'. Go to Deploy > Manage Deployments > Edit > Version: New Version > Deploy.");
+        console.error('JSON Parse Error. Raw response:', text.substring(0, 200));
+        if (text.includes("<!DOCTYPE html>") || text.includes("<html")) {
+          setSyncError("AUTHENTICATION REQUIRED: The script returned a login page. In Apps Script, go to Deploy > Manage Deployments and set 'Who has access' to 'Anyone'.");
+          throw new Error("Target returned HTML (likely a login page). Check deployment settings.");
         }
-        throw new Error("Invalid Cloud Response: The script is returning plain text instead of data.");
+        setSyncError('Data format mismatch from cloud');
+        throw new Error("Invalid Cloud Data: The script is not returning JSON.");
       }
     } catch (e: any) {
-      console.error('Failed to fetch from cloud:', e);
-      setSyncError(e.message || 'Cloud fetch failed');
-      // Don't re-throw here to avoid app crashing if initial fetch fails
+      console.error('Fetch Diagnostic:', e);
+      let errorMsg = e.message || 'Unknown sync error';
+      if (errorMsg === 'Failed to fetch') {
+        errorMsg = 'ACCESS DENIED: Browser blocked the request. Ensure "Who has access" is set to "Anyone" in your Apps Script deployment and you have authorized permissions.';
+      }
+      setSyncError(errorMsg);
     } finally {
       setIsInitialSyncing(false);
     }
@@ -229,15 +282,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
       if (!cleanUsername || !cleanPassword) return false;
 
-      // 0. Emergency Fallback: Default admin (always available if users list is problematic)
-      if (role === 'admin' && cleanUsername === 'admin' && (cleanPassword === 'admin123' || cleanPassword === '123')) {
-        const fallbackAdmin: User = { id: 'sys-admin', username: 'admin', name: 'System Administrator', role: 'admin' };
-        setCurrentUser(fallbackAdmin);
-        localStorage.setItem('utc_current_user', JSON.stringify(fallbackAdmin));
-        return true;
-      }
-
-      // 1. Try matching a registered account
+      // 1. Try matching a registered account first
       const user = users.find(u => 
         u && 
         u.username && 
@@ -252,21 +297,21 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
         return true;
       }
 
-      // 2. Fallback for Students: Login via Roll Number
-      if (role === 'student') {
-        const student = students.find(s => s.status === 'approved' && s.rollNumber?.trim() === cleanUsername);
-        if (student && cleanPassword === cleanUsername) {
-          const studentUser: User = { 
-            id: student.id, 
-            username: student.rollNumber!, 
-            name: student.name, 
-            role: 'student' 
-          };
-          setCurrentUser(studentUser);
-          localStorage.setItem('utc_current_user', JSON.stringify(studentUser));
-          return true;
-        }
+      // 2. Emergency Fallback: Only allow if NO admins exist in the registered users list
+      const hasRegisteredAdmin = users.some(u => u.role === 'admin');
+      if (!hasRegisteredAdmin && role === 'admin' && cleanUsername === 'admin' && (cleanPassword === 'admin123' || cleanPassword === '123')) {
+        const fallbackAdmin: User = { 
+          id: 'sys-admin', 
+          username: 'admin', 
+          password: cleanPassword,
+          name: 'System Administrator', 
+          role: 'admin' 
+        };
+        setCurrentUser(fallbackAdmin);
+        localStorage.setItem('utc_current_user', JSON.stringify(fallbackAdmin));
+        return true;
       }
+
       return false;
     } catch (e) {
       console.error("Login logic error:", e);
@@ -287,7 +332,14 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const updateUser = (u: User) => {
-    setUsers(users.map(user => user.id === u.id ? u : user));
+    setUsers(prev => {
+      const exists = prev.some(user => user.id === u.id);
+      if (exists) {
+        return prev.map(user => user.id === u.id ? u : user);
+      }
+      return [...prev, u];
+    });
+    
     if (currentUser?.id === u.id) {
        setCurrentUser(u);
        localStorage.setItem('utc_current_user', JSON.stringify(u));
@@ -322,6 +374,9 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     load('utc_testResults', setTestResults);
     load('utc_materials', setMaterials);
     load('utc_notices', setNotices);
+    load('utc_due_fees', setDueFees);
+    load('utc_external_tests', setExternalTests);
+    load('utc_result_links', setResultLinks);
     load('utc_users', setUsers);
   }, []);
 
@@ -334,12 +389,15 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   useEffect(() => { localStorage.setItem('utc_testResults', JSON.stringify(testResults)); }, [testResults]);
   useEffect(() => { localStorage.setItem('utc_materials', JSON.stringify(materials)); }, [materials]);
   useEffect(() => { localStorage.setItem('utc_notices', JSON.stringify(notices)); }, [notices]);
+  useEffect(() => { localStorage.setItem('utc_due_fees', JSON.stringify(dueFees)); }, [dueFees]);
+  useEffect(() => { localStorage.setItem('utc_external_tests', JSON.stringify(externalTests)); }, [externalTests]);
+  useEffect(() => { localStorage.setItem('utc_result_links', JSON.stringify(resultLinks)); }, [resultLinks]);
   useEffect(() => { localStorage.setItem('utc_users', JSON.stringify(users)); }, [users]);
 
   const clearAllData = () => {
-    const keys = ['students', 'fees', 'expenses', 'attendance', 'tests', 'testResults', 'materials', 'notices', 'users'];
+    const keys = ['students', 'fees', 'expenses', 'attendance', 'tests', 'testResults', 'materials', 'notices', 'due_fees', 'external_tests', 'result_links', 'users'];
     keys.forEach(k => localStorage.removeItem(`utc_${k}`));
-    setStudents([]); setFees([]); setExpenses([]); setAttendance([]); setTests([]); setTestResults([]); setMaterials([]); setNotices([]); setUsers([]);
+    setStudents([]); setFees([]); setExpenses([]); setAttendance([]); setTests([]); setTestResults([]); setMaterials([]); setNotices([]); setDueFees([]); setExternalTests([]); setResultLinks([]); setUsers([]);
   };
 
   const addStudent = (s: Omit<Student, 'id' | 'admissionDate' | 'status'>) => {
@@ -361,11 +419,13 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const deleteStudent = (id: string) => {
     setStudents(prev => prev.map(st => st.id === id ? { ...st, status: 'deleted' } : st));
-    addLog('STUDENT_TRASH', `Moved student record ${id} to trash`);
+    setUsers(prev => prev.filter(u => u.id !== id));
+    addLog('STUDENT_TRASH', `Moved student record ${id} to trash and revoked system access`);
   };
 
   const removeStudentPermanently = (id: string) => {
     setStudents(prev => prev.filter(st => st.id !== id));
+    setUsers(prev => prev.filter(u => u.id !== id));
     addLog('STUDENT_DELETE', `Permanently deleted student record ${id}`);
   };
   
@@ -374,6 +434,17 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (student.id === id) {
         const rollNumber = `UTC-${Math.floor(1000 + Math.random() * 9000)}`;
         addLog('ADMISSION_APPROVED', `Approved ${student.name}. Assigned Roll No: ${rollNumber}`);
+        
+        // Create user account for student
+        const studentUser: User = {
+          id: student.id,
+          username: rollNumber,
+          password: rollNumber, // Default password same as roll number
+          name: student.name,
+          role: 'student'
+        };
+        setUsers(prevUsers => [...prevUsers, studentUser]);
+        
         return { ...student, status: 'approved' as const, rollNumber };
       }
       return student;
@@ -403,19 +474,21 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const deleteFee = (id: string) => {
-    setFees(fees.filter(f => f.id !== id));
+    setFees(prev => prev.filter(f => f.id !== id));
+    addLog('FEE_DELETE', `Removed fee record ${id}`);
   };
 
   const updateFee = (f: Fee) => {
-    setFees(fees.map(fe => fe.id === f.id ? f : fe));
+    setFees(prev => prev.map(fe => fe.id === f.id ? f : fe));
   };
 
   const deleteExpense = (id: string) => {
-    setExpenses(expenses.filter(ex => ex.id !== id));
+    setExpenses(prev => prev.filter(ex => ex.id !== id));
+    addLog('EXPENSE_DELETE', `Removed expense record ${id}`);
   };
 
   const updateExpense = (e: Expense) => {
-    setExpenses(expenses.map(ex => ex.id === e.id ? e : ex));
+    setExpenses(prev => prev.map(ex => ex.id === e.id ? e : ex));
   };
 
   const markAttendance = (date: string, studentId: string, status: 'present' | 'absent') => {
@@ -445,15 +518,15 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const deleteMaterial = (id: string) => {
-    setMaterials(materials.filter(m => m.id !== id));
+    setMaterials(prev => prev.filter(m => m.id !== id));
   };
 
   const deleteNotice = (id: string) => {
-    setNotices(notices.filter(n => n.id !== id));
+    setNotices(prev => prev.filter(n => n.id !== id));
   };
 
   const deleteTest = (id: string) => {
-    setTests(tests.filter(t => t.id !== id));
+    setTests(prev => prev.filter(t => t.id !== id));
   };
 
   const addNotice = (n: Omit<Notice, 'id' | 'date'>) => {
@@ -461,14 +534,54 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setNotices([...notices, newNotice]);
   };
 
+  const addDueFee = (df: Omit<DueFee, 'id' | 'date'>) => {
+    const newDueFee = { ...df, id: uuid(), date: new Date().toISOString() };
+    setDueFees([...dueFees, newDueFee]);
+    const studentName = students.find(s => s.id === df.studentId)?.name || 'Unknown';
+    addLog('DUE_FEE_ADDED', `Added due amount of ₹${df.amount} for ${studentName}: ${df.remarks}`);
+  };
+
+  const updateDueFee = (df: DueFee) => {
+    setDueFees(prev => prev.map(item => item.id === df.id ? df : item));
+    addLog('DUE_FEE_UPDATE', `Updated due amount for student ${df.id}`);
+  };
+
+  const deleteDueFee = (id: string) => {
+    setDueFees(prev => prev.filter(item => item.id !== id));
+    addLog('DUE_FEE_DELETE', `Removed due record ${id}`);
+  };
+
+  const addExternalTest = (t: Omit<ExternalTest, 'id' | 'date'>) => {
+    const newTest = { ...t, id: uuid(), date: new Date().toISOString() };
+    setExternalTests([...externalTests, newTest]);
+    addLog('EXTERNAL_TEST_ADDED', `Added new external test link: ${t.title}`);
+  };
+
+  const deleteExternalTest = (id: string) => {
+    setExternalTests(prev => prev.filter(item => item.id !== id));
+    addLog('EXTERNAL_TEST_DELETED', `Deleted external test link ${id}`);
+  };
+
+  const addResultLink = (t: Omit<ResultLink, 'id' | 'date'>) => {
+    const newResult = { ...t, id: uuid(), date: new Date().toISOString() };
+    setResultLinks([...resultLinks, newResult]);
+    addLog('RESULT_ADDED', `Added new result link: ${t.title}`);
+  };
+
+  const deleteResultLink = (id: string) => {
+    setResultLinks(prev => prev.filter(item => item.id !== id));
+    addLog('RESULT_DELETED', `Deleted result link ${id}`);
+  };
+
   return (
     <StorageContext.Provider value={{
-      students, fees, expenses, attendance, tests, testResults, materials, notices, users, currentUser,
+      students, fees, expenses, attendance, tests, testResults, materials, notices, dueFees, externalTests, resultLinks, users, currentUser,
       login, signup, logout, refreshCloudData, updateUser,
       scriptUrl, syncError, isInitialSyncing,
       addStudent, updateStudent, deleteStudent, removeStudentPermanently, approveStudent, rejectStudent,
       addFee, updateFee, deleteFee, addExpense, updateExpense, deleteExpense, markAttendance,
-      addTest, deleteTest, submitTestResult, addMaterial, deleteMaterial, addNotice, deleteNotice, clearAllData, addLog
+      addTest, deleteTest, submitTestResult, addMaterial, deleteMaterial, addNotice, deleteNotice, 
+      addDueFee, updateDueFee, deleteDueFee, addExternalTest, deleteExternalTest, addResultLink, deleteResultLink, clearAllData, addLog
     }}>
       {children}
     </StorageContext.Provider>

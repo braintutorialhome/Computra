@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
-  BarChart2, User, CreditCard, Brain, BookMarked, Bell, LogOut, Menu, X, ArrowRight, Phone, MessageSquare, Compass
+  BarChart2, User, CreditCard, BookMarked, Bell, LogOut, Menu, X, ArrowRight, Phone, MessageSquare, Compass, AlertCircle, ExternalLink, FileCheck
 } from 'lucide-react';
 import { useStorage } from '../../hooks/useStorage';
 import { motion, AnimatePresence } from 'motion/react';
 import StudentHome from './views/Home';
 import StudentProfile from './views/Profile';
 import StudentFees from './views/Fees';
-import StudentTests from './views/Tests';
+import StudentTestMaster from './views/TestMaster';
+import StudentResults from './views/Results';
 import StudentMaterials from './views/Materials';
 import StudentNotices from './views/Notices';
+import StudentDueFees from '../../components/student/StudentDueFees';
 
 const NavItem = ({ to, icon: Icon, label, active, onClick }: any) => (
   <Link 
@@ -83,7 +85,9 @@ export default function StudentDashboard() {
     { to: '/student/dashboard', icon: BarChart2, label: 'Dashboard' },
     { to: '/student/profile', icon: User, label: 'Profile' },
     { to: '/student/fees', icon: CreditCard, label: 'Fees Status' },
-    { to: '/student/tests', icon: Brain, label: 'Online Test' },
+    { to: '/student/due-fees', icon: AlertCircle, label: 'Due Fees' },
+    { to: '/student/test-master', icon: ExternalLink, label: 'Exam Portal' },
+    { to: '/student/results', icon: FileCheck, label: 'Results' },
     { to: '/student/materials', icon: BookMarked, label: 'Study Material' },
     { to: '/student/notices', icon: Bell, label: 'Notice' },
   ];
@@ -198,7 +202,9 @@ export default function StudentDashboard() {
                   <Route path="dashboard" element={<StudentHome student={currentStudent} />} />
                   <Route path="profile" element={<StudentProfile student={currentStudent} />} />
                   <Route path="fees" element={<StudentFees student={currentStudent} />} />
-                  <Route path="tests" element={<StudentTests student={currentStudent} />} />
+                  <Route path="due-fees" element={<StudentDueFees />} />
+                  <Route path="test-master" element={<StudentTestMaster />} />
+                  <Route path="results" element={<StudentResults />} />
                   <Route path="materials" element={<StudentMaterials />} />
                   <Route path="notices" element={<StudentNotices student={currentStudent} />} />
                   <Route path="/" element={<StudentHome student={currentStudent} />} />

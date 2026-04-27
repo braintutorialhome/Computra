@@ -89,3 +89,27 @@ export interface Notice {
   date: string;
   isImportant: boolean;
 }
+
+export interface DueFee {
+  id: string;
+  studentId: string;
+  amount: number;
+  remarks: string;
+  date: string;
+}
+
+export interface ExternalTest {
+  id: string;
+  title: string;
+  description: string;
+  url: string;
+  date: string;
+}
+
+export interface ResultLink {
+  id: string;
+  title: string;
+  description: string;
+  url: string;
+  date: string;
+}
