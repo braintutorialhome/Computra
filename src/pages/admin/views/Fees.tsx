@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useStorage } from '../../../hooks/useStorage';
-import { CreditCard, Plus, X, Trash2, Search, Filter } from 'lucide-react';
+import { CreditCard, Plus, X, Trash2, Search, Filter, Calendar } from 'lucide-react';
 import { safeFormat } from '../../../lib/utils';
 import SearchableSelect from '../../../components/ui/SearchableSelect';
 
@@ -9,6 +9,7 @@ export default function FeeManagement() {
   const [showAdd, setShowAdd] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [subjectFilter, setSubjectFilter] = useState('');
+  const [monthFilter, setMonthFilter] = useState('');
 
   const [newFee, setNewFee] = useState({
     studentId: '',
@@ -27,7 +28,22 @@ export default function FeeManagement() {
       })),
     [students]
   );
+  
   const subjects = useMemo(() => Array.from(new Set(students.map(s => s.subject).filter(Boolean))), [students]);
+  
+  const availableMonths = useMemo(() => {
+    const months = fees.map(f => f.month);
+    return Array.from(new Set(months)).sort((a, b) => {
+      const monthA = String(a);
+      const monthB = String(b);
+      // Sort by date if possible, otherwise alphabetical
+      try {
+        return new Date(monthB).getTime() - new Date(monthA).getTime();
+      } catch {
+        return monthB.localeCompare(monthA);
+      }
+    });
+  }, [fees]);
 
   const filteredFees = useMemo(() => {
     return fees.filter(f => {
@@ -38,10 +54,11 @@ export default function FeeManagement() {
         student?.rollNumber?.toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchesSubject = !subjectFilter || student?.subject === subjectFilter;
+      const matchesMonth = !monthFilter || f.month === monthFilter;
       
-      return matchesSearch && matchesSubject;
+      return matchesSearch && matchesSubject && matchesMonth;
     }).slice().reverse();
-  }, [fees, students, searchTerm, subjectFilter]);
+  }, [fees, students, searchTerm, subjectFilter, monthFilter]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,7 +97,7 @@ export default function FeeManagement() {
       </div>
 
       {/* Search and Filter */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="md:col-span-2 relative">
           <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
           <input 
@@ -101,6 +118,19 @@ export default function FeeManagement() {
             <option value="" className="bg-slate-900">All Subjects / Courses</option>
             {subjects.map(subject => (
               <option key={subject} value={subject} className="bg-slate-900">{subject}</option>
+            ))}
+          </select>
+        </div>
+        <div className="relative">
+          <Calendar className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
+          <select 
+            value={monthFilter}
+            onChange={(e) => setMonthFilter(e.target.value)}
+            className="input-glass w-full py-4 pl-14 rounded-2xl border-white/5 appearance-none text-sm"
+          >
+            <option value="" className="bg-slate-900">All Billing Months</option>
+            {availableMonths.map(month => (
+              <option key={month} value={month} className="bg-slate-900">{month}</option>
             ))}
           </select>
         </div>

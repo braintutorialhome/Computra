@@ -8,6 +8,8 @@ export default function ExpenseManagement() {
   const [showAdd, setShowAdd] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
+  const [monthFilter, setMonthFilter] = useState('');
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   
   const [newExpense, setNewExpense] = useState({
     title: '',
@@ -19,6 +21,14 @@ export default function ExpenseManagement() {
 
   const categories = ['Electricity', 'Rent', 'Salary', 'Others'];
 
+  const availableMonths = useMemo(() => {
+    const months = expenses.map(e => {
+      // Extract YYYY-MM from YYYY-MM-DD
+      return e.date.substring(0, 7);
+    });
+    return Array.from(new Set(months)).sort((a, b) => String(b).localeCompare(String(a)));
+  }, [expenses]);
+
   const filteredExpenses = useMemo(() => {
     return expenses.filter(e => {
       const matchesSearch = 
@@ -27,10 +37,11 @@ export default function ExpenseManagement() {
         e.description?.toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchesCategory = !categoryFilter || e.category === categoryFilter;
+      const matchesMonth = !monthFilter || e.date.startsWith(monthFilter);
       
-      return matchesSearch && matchesCategory;
+      return matchesSearch && matchesCategory && matchesMonth;
     }).slice().reverse();
-  }, [expenses, searchTerm, categoryFilter]);
+  }, [expenses, searchTerm, categoryFilter, monthFilter]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,6 +57,16 @@ export default function ExpenseManagement() {
     
     setShowAdd(false);
     setNewExpense({ title: '', amount: '', category: 'Others', date: new Date().toISOString().split('T')[0], description: '' });
+  };
+
+  const handleDelete = (id: string) => {
+    if (confirmDeleteId === id) {
+      deleteExpense(id);
+      setConfirmDeleteId(null);
+    } else {
+      setConfirmDeleteId(id);
+      setTimeout(() => setConfirmDeleteId(null), 3000);
+    }
   };
 
   return (
@@ -69,7 +90,7 @@ export default function ExpenseManagement() {
       </div>
 
       {/* Search and Filter */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="md:col-span-2 relative">
           <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
           <input 
@@ -90,6 +111,19 @@ export default function ExpenseManagement() {
             <option value="" className="bg-slate-900">All Categories</option>
             {categories.map(c => (
               <option key={c} value={c} className="bg-slate-900">{c}</option>
+            ))}
+          </select>
+        </div>
+        <div className="relative">
+          <Calendar className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
+          <select 
+            value={monthFilter}
+            onChange={(e) => setMonthFilter(e.target.value)}
+            className="input-glass w-full py-4 pl-14 rounded-2xl border-white/5 appearance-none text-sm"
+          >
+            <option value="" className="bg-slate-900">All Months</option>
+            {availableMonths.map(month => (
+              <option key={month} value={month} className="bg-slate-900">{month}</option>
             ))}
           </select>
         </div>
@@ -184,10 +218,19 @@ export default function ExpenseManagement() {
             <div className="flex items-center gap-8">
               <span className="text-4xl font-black text-rose-400 tracking-tighter">₹{e.amount}</span>
               <button 
-                onClick={() => deleteExpense(e.id)}
-                className="p-4 text-slate-600 hover:text-rose-500 hover:bg-rose-500/10 rounded-2xl transition-all opacity-0 group-hover:opacity-100 border border-transparent hover:border-rose-500/20"
+                onClick={() => handleDelete(e.id)}
+                className={`p-4 flex items-center gap-2 rounded-2xl transition-all border ${
+                  confirmDeleteId === e.id 
+                    ? 'bg-rose-600 text-white border-rose-400 shadow-lg shadow-rose-600/30 opacity-100' 
+                    : 'text-slate-600 hover:text-rose-500 hover:bg-rose-500/10 opacity-0 group-hover:opacity-100 border-transparent hover:border-rose-500/20'
+                }`}
               >
                 <Trash2 size={24} />
+                {confirmDeleteId === e.id && (
+                  <span className="text-[10px] font-black uppercase tracking-widest animate-in fade-in slide-in-from-right-2">
+                    Confirm?
+                  </span>
+                )}
               </button>
             </div>
           </div>
