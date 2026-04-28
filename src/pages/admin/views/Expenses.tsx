@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useStorage } from '../../../hooks/useStorage';
-import { Wallet, Plus, Trash2, Calendar, X } from 'lucide-react';
+import { Wallet, Plus, Trash2, Calendar, X, Search, Filter } from 'lucide-react';
 import { safeFormat } from '../../../lib/utils';
 
 export default function ExpenseManagement() {
   const { expenses, addExpense, deleteExpense } = useStorage();
   const [showAdd, setShowAdd] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
   
   const [newExpense, setNewExpense] = useState({
     title: '',
@@ -16,6 +18,19 @@ export default function ExpenseManagement() {
   });
 
   const categories = ['Electricity', 'Rent', 'Salary', 'Others'];
+
+  const filteredExpenses = useMemo(() => {
+    return expenses.filter(e => {
+      const matchesSearch = 
+        !searchTerm || 
+        e.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        e.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesCategory = !categoryFilter || e.category === categoryFilter;
+      
+      return matchesSearch && matchesCategory;
+    }).slice().reverse();
+  }, [expenses, searchTerm, categoryFilter]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +66,33 @@ export default function ExpenseManagement() {
         >
           Add Expense
         </button>
+      </div>
+
+      {/* Search and Filter */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2 relative">
+          <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
+          <input 
+            type="text" 
+            placeholder="Search by title or description..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="input-glass w-full py-4 pl-14 rounded-2xl border-white/5 focus:border-indigo-500/50 transition-all text-sm"
+          />
+        </div>
+        <div className="relative">
+          <Filter className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
+          <select 
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="input-glass w-full py-4 pl-14 rounded-2xl border-white/5 appearance-none text-sm"
+          >
+            <option value="" className="bg-slate-900">All Categories</option>
+            {categories.map(c => (
+              <option key={c} value={c} className="bg-slate-900">{c}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {showAdd && (
@@ -121,7 +163,7 @@ export default function ExpenseManagement() {
 
       {/* History */}
       <div className="grid gap-6">
-        {expenses.slice().reverse().map(e => (
+        {filteredExpenses.map(e => (
           <div key={e.id} className="glass p-8 rounded-[40px] flex items-center justify-between group hover:bg-white/10 transition-all border border-white/5">
             <div className="flex items-center gap-8">
               <div className="w-16 h-16 bg-rose-500/10 text-rose-400 rounded-3xl flex items-center justify-center font-black border border-rose-500/20 group-hover:scale-110 transition-transform">
@@ -150,12 +192,14 @@ export default function ExpenseManagement() {
             </div>
           </div>
         ))}
-        {expenses.length === 0 && (
+        {filteredExpenses.length === 0 && (
           <div className="py-24 text-center glass rounded-[60px] border-2 border-dashed border-white/5">
              <div className="w-20 h-20 bg-white/5 rounded-3xl flex items-center justify-center mx-auto mb-6">
                <Wallet size={32} className="text-slate-700" />
              </div>
-             <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Expense records are currently empty.</p>
+             <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">
+               {expenses.length === 0 ? "Expense records are currently empty." : "No matching expenses found."}
+             </p>
           </div>
         )}
       </div>

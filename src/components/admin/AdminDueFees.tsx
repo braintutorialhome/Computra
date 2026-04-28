@@ -1,26 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useStorage } from '../../hooks/useStorage';
 import { Search, Plus, Trash2, Edit2, CheckCircle, AlertCircle, IndianRupee } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import SearchableSelect from '../ui/SearchableSelect';
 
 const AdminDueFees: React.FC = () => {
   const { students, dueFees, addDueFee, updateDueFee, deleteDueFee } = useStorage();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [listSearch, setListSearch] = useState('');
+  const [subjectFilter, setSubjectFilter] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   
+  const subjects = Array.from(new Set(students.map(s => s.subject).filter(Boolean)));
+
+  const approvedOptions = useMemo(() => 
+    students
+      .filter(s => s.status === 'approved')
+      .map(s => ({
+        id: s.id,
+        label: s.name,
+        subLabel: s.rollNumber || 'No ID'
+      })),
+    [students]
+  );
+
   const [formData, setFormData] = useState({
     studentId: '',
     amount: '',
     remarks: ''
   });
 
-  const filteredStudents = students.filter(s => 
-    s.status === 'approved' &&
-    (s.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-     s.rollNumber?.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredDueFees = dueFees.filter(fee => {
+    const student = students.find(s => s.id === fee.studentId);
+    const matchesSearch = 
+      (student?.name.toLowerCase().includes(listSearch.toLowerCase())) ||
+      (student?.rollNumber?.toLowerCase().includes(listSearch.toLowerCase())) ||
+      (fee.remarks.toLowerCase().includes(listSearch.toLowerCase()));
+    
+    const matchesSubject = subjectFilter === '' || student?.subject === subjectFilter;
+    
+    return matchesSearch && matchesSubject;
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,7 +103,7 @@ const AdminDueFees: React.FC = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 p-6"
+            className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6"
           >
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-gray-900">
@@ -101,42 +122,13 @@ const AdminDueFees: React.FC = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Select Student</label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search name or roll no..."
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-                <div className="mt-2 max-h-40 overflow-y-auto border border-gray-100 rounded-lg bg-gray-50">
-                  {filteredStudents.length > 0 ? (
-                    filteredStudents.map(student => (
-                      <button
-                        key={student.id}
-                        type="button"
-                        onClick={() => {
-                          setFormData({ ...formData, studentId: student.id });
-                          setSearchTerm(student.name);
-                        }}
-                        className={`w-full text-left px-4 py-2 hover:bg-indigo-50 transition-colors text-sm ${
-                          formData.studentId === student.id ? 'bg-indigo-100 text-indigo-700 font-medium' : 'text-gray-600'
-                        }`}
-                      >
-                        {student.name} ({student.rollNumber})
-                      </button>
-                    ))
-                  ) : (
-                    <div className="px-4 py-2 text-sm text-gray-500 italic text-center">
-                      No approved students found
-                    </div>
-                  )}
-                </div>
-              </div>
+              <SearchableSelect 
+                options={approvedOptions}
+                value={formData.studentId}
+                onChange={(val) => setFormData({...formData, studentId: val})}
+                label="Select Student"
+                placeholder="Search approved student..."
+              />
 
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">Amount (₹)</label>
@@ -179,6 +171,33 @@ const AdminDueFees: React.FC = () => {
         )}
       </AnimatePresence>
 
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by student name, roll number, or remarks..."
+              className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+              value={listSearch}
+              onChange={(e) => setListSearch(e.target.value)}
+            />
+          </div>
+          <div className="w-full md:w-64">
+            <select
+              className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+              value={subjectFilter}
+              onChange={(e) => setSubjectFilter(e.target.value)}
+            >
+              <option value="">All Subjects / Courses</option>
+              {subjects.map(subject => (
+                <option key={subject} value={subject}>{subject}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
@@ -192,8 +211,8 @@ const AdminDueFees: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {dueFees.length > 0 ? (
-                dueFees.map((fee) => {
+              {filteredDueFees.length > 0 ? (
+                filteredDueFees.map((fee) => {
                   const student = students.find(s => s.id === fee.studentId);
                   return (
                     <motion.tr 
@@ -206,7 +225,12 @@ const AdminDueFees: React.FC = () => {
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
                           <span className="font-medium text-gray-900">{student?.name || 'Unknown Student'}</span>
-                          <span className="text-xs text-gray-500">{student?.rollNumber || 'N/A'}</span>
+                          <div className="flex items-center gap-2">
+                             <span className="text-xs text-gray-500">{student?.rollNumber || 'N/A'}</span>
+                             {student?.subject && (
+                               <span className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-md font-bold uppercase tracking-tight">{student.subject}</span>
+                             )}
+                          </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 font-semibold text-orange-600">
@@ -268,9 +292,19 @@ const AdminDueFees: React.FC = () => {
                 <tr>
                   <td colSpan={5} className="px-6 py-12 text-center">
                     <div className="flex flex-col items-center">
-                      <CheckCircle className="w-12 h-12 text-green-100 mb-4" />
-                      <p className="text-gray-500 font-medium">No pending due fees found</p>
-                      <p className="text-sm text-gray-400">All students are up to date with their payments</p>
+                      {dueFees.length === 0 ? (
+                        <>
+                          <CheckCircle className="w-12 h-12 text-green-100 mb-4" />
+                          <p className="text-gray-500 font-medium">No pending due fees found</p>
+                          <p className="text-sm text-gray-400">All students are up to date with their payments</p>
+                        </>
+                      ) : (
+                        <>
+                          <Search className="w-12 h-12 text-slate-100 mb-4" />
+                          <p className="text-gray-500 font-medium">No matching records</p>
+                          <p className="text-sm text-gray-400">Try adjusting your filters or search query</p>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>

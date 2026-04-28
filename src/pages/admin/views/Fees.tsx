@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useStorage } from '../../../hooks/useStorage';
-import { CreditCard, Plus, X, Trash2 } from 'lucide-react';
+import { CreditCard, Plus, X, Trash2, Search, Filter } from 'lucide-react';
 import { safeFormat } from '../../../lib/utils';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export default function FeeManagement() {
   const { students, fees, addFee, deleteFee } = useStorage();
   const [showAdd, setShowAdd] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [subjectFilter, setSubjectFilter] = useState('');
 
   const [newFee, setNewFee] = useState({
     studentId: '',
@@ -14,7 +17,31 @@ export default function FeeManagement() {
     date: new Date().toISOString().split('T')[0]
   });
 
-  const approved = students.filter(s => s.status === 'approved');
+  const approvedOptions = useMemo(() => 
+    students
+      .filter(s => s.status === 'approved')
+      .map(s => ({
+        id: s.id,
+        label: s.name,
+        subLabel: s.rollNumber || 'No ID'
+      })),
+    [students]
+  );
+  const subjects = useMemo(() => Array.from(new Set(students.map(s => s.subject).filter(Boolean))), [students]);
+
+  const filteredFees = useMemo(() => {
+    return fees.filter(f => {
+      const student = students.find(s => s.id === f.studentId);
+      const matchesSearch = 
+        !searchTerm || 
+        student?.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        student?.rollNumber?.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesSubject = !subjectFilter || student?.subject === subjectFilter;
+      
+      return matchesSearch && matchesSubject;
+    }).slice().reverse();
+  }, [fees, students, searchTerm, subjectFilter]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,6 +79,33 @@ export default function FeeManagement() {
         </button>
       </div>
 
+      {/* Search and Filter */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2 relative">
+          <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
+          <input 
+            type="text" 
+            placeholder="Search by student name or ID..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="input-glass w-full py-4 pl-14 rounded-2xl border-white/5 focus:border-indigo-500/50 transition-all text-sm"
+          />
+        </div>
+        <div className="relative">
+          <Filter className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
+          <select 
+            value={subjectFilter}
+            onChange={(e) => setSubjectFilter(e.target.value)}
+            className="input-glass w-full py-4 pl-14 rounded-2xl border-white/5 appearance-none text-sm"
+          >
+            <option value="" className="bg-slate-900">All Subjects / Courses</option>
+            {subjects.map(subject => (
+              <option key={subject} value={subject} className="bg-slate-900">{subject}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       {showAdd && (
         <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-md z-[60] flex items-center justify-center p-4">
           <div className="glass rounded-[40px] shadow-2xl w-full max-w-xl overflow-hidden animate-in fade-in zoom-in duration-300">
@@ -62,20 +116,13 @@ export default function FeeManagement() {
               </button>
             </div>
             <form onSubmit={handleSubmit} className="p-10 space-y-8">
-              <div className="space-y-3">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Select Student</label>
-                <select 
-                  required
-                  value={newFee.studentId}
-                  onChange={(e) => setNewFee({...newFee, studentId: e.target.value})}
-                  className="input-glass w-full py-4 rounded-2xl appearance-none"
-                >
-                  <option value="" className="bg-slate-900">Choose Approved Student...</option>
-                  {approved.map(s => (
-                    <option key={s.id} value={s.id} className="bg-slate-900">{s.name} ({s.rollNumber})</option>
-                  ))}
-                </select>
-              </div>
+              <SearchableSelect 
+                options={approvedOptions}
+                value={newFee.studentId}
+                onChange={(val) => setNewFee({...newFee, studentId: val})}
+                label="Select Student"
+                placeholder="Search approved students..."
+              />
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Amount (₹)</label>
@@ -125,7 +172,7 @@ export default function FeeManagement() {
       <div className="glass rounded-[40px] overflow-hidden border border-white/5">
         <div className="p-8 border-b border-white/5 flex items-center justify-between">
           <h3 className="font-black text-white tracking-tight uppercase">Collection Stream</h3>
-          <span className="text-[10px] font-black text-indigo-400 bg-indigo-400/10 px-3 py-1 rounded-full uppercase tracking-widest border border-indigo-400/20">{fees.length} Total</span>
+          <span className="text-[10px] font-black text-indigo-400 bg-indigo-400/10 px-3 py-1 rounded-full uppercase tracking-widest border border-indigo-400/20">{filteredFees.length} Shown</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
@@ -140,7 +187,7 @@ export default function FeeManagement() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5 text-sm">
-              {fees.slice().reverse().map(f => {
+              {filteredFees.map(f => {
                 const student = students.find(s => s.id === f.studentId);
                 return (
                   <tr key={f.id} className="hover:bg-white/[0.03] transition-colors group">
@@ -151,7 +198,14 @@ export default function FeeManagement() {
                          </div>
                          <div>
                            <p className="font-bold text-white tracking-tight">{student?.name || 'Unknown'}</p>
-                           <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{student?.rollNumber}</p>
+                           <div className="flex items-center gap-2">
+                             <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">{student?.rollNumber}</p>
+                             {student?.subject && (
+                               <span className="text-[8px] font-black bg-white/5 text-slate-400 px-1 py-0.5 rounded uppercase tracking-tighter">
+                                 {student.subject}
+                               </span>
+                             )}
+                           </div>
                          </div>
                       </div>
                     </td>
@@ -179,10 +233,12 @@ export default function FeeManagement() {
                   </tr>
                 );
               })}
-              {fees.length === 0 && (
+              {filteredFees.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-10 py-24 text-center">
-                    <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Waiting for first collection...</p>
+                  <td colSpan={6} className="px-10 py-24 text-center">
+                    <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">
+                      {fees.length === 0 ? "Waiting for first collection..." : "No matching collections found"}
+                    </p>
                   </td>
                 </tr>
               )}
