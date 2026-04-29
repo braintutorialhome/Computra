@@ -49,7 +49,7 @@ export default function PublicHome() {
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-400 animate-gradient-x underline decoration-white/10 decoration-8 underline-offset-8 italic">Succeed.</span>
             </h1>
             <p className="text-xl text-slate-400 max-w-2xl mx-auto mb-12 font-medium leading-relaxed">
-              Premium tuition for Computer Applications and Computer Science in UTC Bhangar, South 24 Parganas.
+              Premium tuition for Computer Applications and Computer Science at UTC, Bhangar, South 24 Parganas.
             </p>
             <div className="flex flex-wrap justify-center gap-6">
               <Link to="/login" className="indigo-button px-10 py-5 font-black text-lg shadow-2xl shadow-indigo-600/40 hover:scale-105">
@@ -93,12 +93,42 @@ export default function PublicHome() {
       <section className="py-32 relative">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-20 items-center">
-            <div className="space-y-8">
-              <div className="space-y-4">
-                <h2 className="text-4xl md:text-5xl font-black tracking-tight leading-none mb-6">Learn with Excellence</h2>
-                <p className="text-lg text-slate-400 font-medium leading-relaxed">
-                  UTC Computra: Where modern digital skills meet personalized education.
-                </p>
+            <div className="space-y-12">
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-4xl md:text-5xl font-black tracking-tight leading-none mb-6">About Us</h2>
+                  <p className="text-lg text-slate-400 font-medium leading-relaxed">
+                    We specialize in teaching Computer Application and Computer Science for school students with a clear, practical, and theory-based approach. Our goal is to make concepts simple, logical, and easy to understand so that students can perform confidently in exams and apply knowledge in real-life situations.
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="text-xl font-bold text-indigo-400 uppercase tracking-widest mb-4">Our Mission</h3>
+                  <p className="text-lg text-slate-400 font-medium leading-relaxed">
+                    To build strong technical foundations in students and guide them towards academic excellence with confidence.
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="text-xl font-bold text-indigo-400 uppercase tracking-widest mb-4">Why Choose Us</h3>
+                  <ul className="grid sm:grid-cols-2 gap-4">
+                    {[
+                      "Small batches for personalized attention",
+                      "Easy explanation of coding and concepts",
+                      "Regular tests with performance tracking",
+                      "Focus on exam-oriented preparation",
+                      "Dedicated doubt-solving sessions",
+                      "Friendly and motivating environment",
+                      "Proper guidance with study materials",
+                      "Practical + theory-based learning approach"
+                    ].map((item, idx) => (
+                      <li key={idx} className="flex items-center gap-3 text-slate-300 font-medium">
+                        <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full flex-shrink-0" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
               
               <div className="grid sm:grid-cols-2 gap-6 pt-4">
@@ -153,7 +183,8 @@ export default function PublicHome() {
             <span className="font-black text-2xl tracking-tighter text-white uppercase">UTC <span className="text-indigo-400">Computra</span></span>
           </div>
           <p className="text-slate-500 font-medium mb-10 max-w-2xl mx-auto text-sm leading-relaxed">
-            Powered by Unique Training Centre. The premier institution for digital learning and academic excellence in Bhangar, South 24 Parganas, West Bengal, Pin - 743502
+            Powered by Unique Training Centre<br />
+            A premier institute for computer training, digital learning, and academic excellence in Bhangar, South 24 Parganas, West Bengal – 743502.
           </p>
           <div className="flex justify-center gap-4 mb-20">
             <a href="https://wa.me/919647046334" className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-green-500 text-white transition-all hover:-translate-y-1">
