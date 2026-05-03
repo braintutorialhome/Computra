@@ -33,10 +33,12 @@ const AdminTestMaster: React.FC = () => {
     setIsAdding(false);
   };
 
-  const filteredTests = externalTests.filter(t => 
-    t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    t.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredTests = externalTests.filter(t => {
+    const sTitle = String(t.title || '').toLowerCase();
+    const sDesc = String(t.description || '').toLowerCase();
+    const search = searchTerm.toLowerCase();
+    return sTitle.includes(search) || sDesc.includes(search);
+  });
 
   return (
     <div className="space-y-6">

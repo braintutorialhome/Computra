@@ -33,10 +33,15 @@ const AdminDueFees: React.FC = () => {
 
   const filteredDueFees = dueFees.filter(fee => {
     const student = students.find(s => s.id === fee.studentId);
+    const sName = String(student?.name || '').toLowerCase();
+    const sRoll = String(student?.rollNumber || '').toLowerCase();
+    const sRemarks = String(fee.remarks || '').toLowerCase();
+    const search = listSearch.toLowerCase();
+
     const matchesSearch = 
-      (student?.name.toLowerCase().includes(listSearch.toLowerCase())) ||
-      (student?.rollNumber?.toLowerCase().includes(listSearch.toLowerCase())) ||
-      (fee.remarks.toLowerCase().includes(listSearch.toLowerCase()));
+      sName.includes(search) ||
+      sRoll.includes(search) ||
+      sRemarks.includes(search);
     
     const matchesSubject = subjectFilter === '' || student?.subject === subjectFilter;
     

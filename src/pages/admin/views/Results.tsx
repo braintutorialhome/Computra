@@ -33,10 +33,12 @@ const AdminResults: React.FC = () => {
     setIsAdding(false);
   };
 
-  const filteredResults = resultLinks.filter(r => 
-    r.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    r.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredResults = resultLinks.filter(r => {
+    const sTitle = String(r.title || '').toLowerCase();
+    const sDesc = String(r.description || '').toLowerCase();
+    const search = searchTerm.toLowerCase();
+    return sTitle.includes(search) || sDesc.includes(search);
+  });
 
   return (
     <div className="space-y-6">

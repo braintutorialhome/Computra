@@ -39,10 +39,12 @@ export default function SearchableSelect({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const filteredOptions = options.filter(opt => 
-    opt.label.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    opt.subLabel?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredOptions = options.filter(opt => {
+    const sLabel = String(opt.label || '').toLowerCase();
+    const sSub = String(opt.subLabel || '').toLowerCase();
+    const search = searchTerm.toLowerCase();
+    return sLabel.includes(search) || sSub.includes(search);
+  });
 
   return (
     <div className="relative space-y-3" ref={containerRef}>

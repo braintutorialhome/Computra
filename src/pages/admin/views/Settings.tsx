@@ -15,8 +15,12 @@ export default function SystemSettings() {
 
   const filteredUsers = users.filter(user => {
     const isCorrectRole = user.role === activeCategory;
-    const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          user.username.toLowerCase().includes(searchQuery.toLowerCase());
+    const sName = String(user.name || '').toLowerCase();
+    const sUser = String(user.username || '').toLowerCase();
+    const search = searchQuery.toLowerCase();
+
+    const matchesSearch = sName.includes(search) || 
+                          sUser.includes(search);
     
     // Ensure current admin always shows up in directory if role matches
     if (user.id === currentUser?.id && isCorrectRole) return true;

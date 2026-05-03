@@ -19,9 +19,14 @@ export default function StudentManagement() {
   const classes = ['All', ...Array.from(new Set(approved.map(s => s.class)))];
 
   const filtered = displayList.filter(s => {
-    const matchesSearch = s.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          s.rollNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          s.id.toLowerCase().includes(searchTerm.toLowerCase());
+    const sName = String(s.name || '').toLowerCase();
+    const sRoll = String(s.rollNumber || '').toLowerCase();
+    const sId = String(s.id || '').toLowerCase();
+    const search = searchTerm.toLowerCase();
+
+    const matchesSearch = sName.includes(search) || 
+                          sRoll.includes(search) ||
+                          sId.includes(search);
     const matchesClass = filterClass === 'All' || s.class === filterClass;
     return matchesSearch && matchesClass;
   });

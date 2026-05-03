@@ -8,10 +8,12 @@ export default function AttendanceManagement() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const approved = students.filter(s => s.status === 'approved');
-  const filtered = approved.filter(s => 
-    s.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    s.rollNumber?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filtered = approved.filter(s => {
+    const sName = String(s.name || '').toLowerCase();
+    const sRoll = String(s.rollNumber || '').toLowerCase();
+    const search = searchTerm.toLowerCase();
+    return sName.includes(search) || sRoll.includes(search);
+  });
 
   const getAttendanceStatus = (studentId: string) => {
     return attendance.find(a => a.studentId === studentId && a.date === selectedDate)?.status;

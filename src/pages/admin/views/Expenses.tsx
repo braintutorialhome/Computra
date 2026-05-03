@@ -31,10 +31,14 @@ export default function ExpenseManagement() {
 
   const filteredExpenses = useMemo(() => {
     return expenses.filter(e => {
+      const sTitle = String(e.title || '').toLowerCase();
+      const sDesc = String(e.description || '').toLowerCase();
+      const search = searchTerm.toLowerCase();
+
       const matchesSearch = 
         !searchTerm || 
-        e.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        e.description?.toLowerCase().includes(searchTerm.toLowerCase());
+        sTitle.includes(search) || 
+        sDesc.includes(search);
       
       const matchesCategory = !categoryFilter || e.category === categoryFilter;
       const matchesMonth = !monthFilter || e.date.startsWith(monthFilter);

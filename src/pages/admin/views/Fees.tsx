@@ -48,10 +48,14 @@ export default function FeeManagement() {
   const filteredFees = useMemo(() => {
     return fees.filter(f => {
       const student = students.find(s => s.id === f.studentId);
+      const sName = String(student?.name || '').toLowerCase();
+      const sRoll = String(student?.rollNumber || '').toLowerCase();
+      const search = searchTerm.toLowerCase();
+
       const matchesSearch = 
         !searchTerm || 
-        student?.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        student?.rollNumber?.toLowerCase().includes(searchTerm.toLowerCase());
+        sName.includes(search) || 
+        sRoll.includes(search);
       
       const matchesSubject = !subjectFilter || student?.subject === subjectFilter;
       const matchesMonth = !monthFilter || f.month === monthFilter;
