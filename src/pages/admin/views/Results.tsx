@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useStorage } from '../../../hooks/useStorage';
-import { Plus, Trash2, Link as LinkIcon, ExternalLink, Search, FileText } from 'lucide-react';
+import { Plus, Trash2, Link as LinkIcon, ExternalLink, Search, FileText, Pencil } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { ResultLink } from '../../../types';
 
 const AdminResults: React.FC = () => {
-  const { resultLinks, addResultLink, deleteResultLink } = useStorage();
+  const { resultLinks, addResultLink, updateResultLink, deleteResultLink } = useStorage();
   const [isAdding, setIsAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({
     title: '',
@@ -23,14 +25,38 @@ const AdminResults: React.FC = () => {
       finalUrl = 'https://' + finalUrl;
     }
 
-    addResultLink({
-      title: formData.title,
-      description: formData.description,
-      url: finalUrl
-    });
+    if (editingId) {
+      const original = resultLinks.find(r => r.id === editingId);
+      if (original) {
+        updateResultLink({
+          ...original,
+          title: formData.title,
+          description: formData.description,
+          url: finalUrl
+        });
+      }
+    } else {
+      addResultLink({
+        title: formData.title,
+        description: formData.description,
+        url: finalUrl
+      });
+    }
     
     setFormData({ title: '', description: '', url: '' });
     setIsAdding(false);
+    setEditingId(null);
+  };
+
+  const handleEdit = (result: ResultLink) => {
+    setFormData({
+      title: result.title,
+      description: result.description || '',
+      url: result.url
+    });
+    setEditingId(result.id);
+    setIsAdding(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const filteredResults = resultLinks.filter(r => {
@@ -48,7 +74,11 @@ const AdminResults: React.FC = () => {
           <p className="text-gray-500">Post and manage result links for students</p>
         </div>
         <button
-          onClick={() => setIsAdding(true)}
+          onClick={() => {
+            setEditingId(null);
+            setFormData({ title: '', description: '', url: '' });
+            setIsAdding(true);
+          }}
           className="flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
         >
           <Plus className="w-5 h-5 mr-2" />
@@ -66,9 +96,14 @@ const AdminResults: React.FC = () => {
           >
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">Add New Result Link</h3>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {editingId ? 'Edit Result Link' : 'Add New Result Link'}
+                </h3>
                 <button 
-                  onClick={() => setIsAdding(false)}
+                  onClick={() => {
+                    setIsAdding(false);
+                    setEditingId(null);
+                  }}
                   className="text-gray-400 hover:text-gray-600"
                 >
                   Cancel
@@ -119,7 +154,7 @@ const AdminResults: React.FC = () => {
                     type="submit"
                     className="w-full md:w-auto px-8 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
                   >
-                    Publish Result
+                    {editingId ? 'Update Result' : 'Publish Result'}
                   </button>
                 </div>
               </form>
@@ -184,16 +219,26 @@ const AdminResults: React.FC = () => {
                       {new Date(result.date).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button 
-                        onClick={() => {
-                          if(confirm('Are you sure you want to delete this result link?')) {
-                            deleteResultLink(result.id);
-                          }
-                        }}
-                        className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button 
+                          onClick={() => handleEdit(result)}
+                          className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                          title="Edit"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => {
+                            if(confirm('Are you sure you want to delete this result link?')) {
+                              deleteResultLink(result.id);
+                            }
+                          }}
+                          className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
                   </motion.tr>
                 ))
