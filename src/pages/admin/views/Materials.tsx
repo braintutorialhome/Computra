@@ -1,19 +1,51 @@
 import React, { useState } from 'react';
 import { useStorage } from '../../../hooks/useStorage';
-import { Plus, BookOpen, Trash2, FileText, Video, ExternalLink, X } from 'lucide-react';
+import { Plus, BookOpen, Trash2, FileText, Video, ExternalLink, X, Pencil } from 'lucide-react';
 import { safeFormat } from '../../../lib/utils';
+import { StudyMaterial } from '../../../types';
 
 export default function StudyMaterialManagement() {
-  const { materials, addMaterial, deleteMaterial } = useStorage();
+  const { materials, addMaterial, updateMaterial, deleteMaterial } = useStorage();
   const [showAdd, setShowAdd] = useState(false);
-  const [newMat, setNewMat] = useState({ title: '', type: 'pdf', url: '', description: '' });
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [formData, setFormData] = useState({ title: '', type: 'pdf', url: '', description: '' });
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMat.title || !newMat.url) return;
-    addMaterial(newMat as any);
+    if (!formData.title || !formData.url) return;
+    
+    if (editingId) {
+      const original = materials.find(m => m.id === editingId);
+      if (original) {
+        updateMaterial({
+          ...original,
+          ...formData as any
+        });
+      }
+    } else {
+      addMaterial(formData as any);
+    }
+    
     setShowAdd(false);
-    setNewMat({ title: '', type: 'pdf', url: '', description: '' });
+    setEditingId(null);
+    setFormData({ title: '', type: 'pdf', url: '', description: '' });
+  };
+
+  const handleEdit = (m: StudyMaterial) => {
+    setEditingId(m.id);
+    setFormData({ 
+      title: m.title, 
+      type: m.type, 
+      url: m.url, 
+      description: m.description || '' 
+    });
+    setShowAdd(true);
+  };
+
+  const handleOpenAdd = () => {
+    setEditingId(null);
+    setFormData({ title: '', type: 'pdf', url: '', description: '' });
+    setShowAdd(true);
   };
 
   return (
@@ -29,7 +61,7 @@ export default function StudyMaterialManagement() {
            </div>
         </div>
         <button 
-          onClick={() => setShowAdd(true)}
+          onClick={handleOpenAdd}
           className="px-10 py-4 glass-button text-xs font-black uppercase tracking-widest border-emerald-500/30 text-emerald-400 hover:bg-emerald-500 hover:text-white"
         >
           Add New Asset
@@ -40,8 +72,14 @@ export default function StudyMaterialManagement() {
         <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-xl z-[60] flex items-center justify-center p-6">
           <div className="glass rounded-[50px] shadow-2xl w-full max-w-xl animate-in zoom-in duration-300 overflow-hidden">
             <div className="p-10 bg-emerald-600 text-white flex justify-between items-center">
-              <h2 className="text-3xl font-black tracking-tighter uppercase">Add Asset</h2>
-              <button onClick={() => setShowAdd(false)} className="p-3 hover:bg-white/20 rounded-2xl transition-all">
+              <h2 className="text-3xl font-black tracking-tighter uppercase">{editingId ? 'Edit Asset' : 'Add Asset'}</h2>
+              <button 
+                onClick={() => {
+                  setShowAdd(false);
+                  setEditingId(null);
+                }} 
+                className="p-3 hover:bg-white/20 rounded-2xl transition-all"
+              >
                 <X size={24} />
               </button>
             </div>
@@ -51,8 +89,8 @@ export default function StudyMaterialManagement() {
                 <input 
                   required
                   type="text" 
-                  value={newMat.title}
-                  onChange={(e) => setNewMat({...newMat, title: e.target.value})}
+                  value={formData.title}
+                  onChange={(e) => setFormData({...formData, title: e.target.value})}
                   className="input-glass w-full py-4 rounded-2xl font-bold"
                   placeholder="e.g. Advanced JavaScript Handbook"
                 />
@@ -62,8 +100,8 @@ export default function StudyMaterialManagement() {
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Resource Type</label>
                   <select 
-                    value={newMat.type}
-                    onChange={(e) => setNewMat({...newMat, type: e.target.value as any})}
+                    value={formData.type}
+                    onChange={(e) => setFormData({...formData, type: e.target.value as any})}
                     className="input-glass w-full py-4 px-6 rounded-2xl font-bold appearance-none cursor-pointer"
                   >
                     <option value="pdf">📄 PDF Document</option>
@@ -76,8 +114,8 @@ export default function StudyMaterialManagement() {
                    <input 
                     required
                     type="url" 
-                    value={newMat.url}
-                    onChange={(e) => setNewMat({...newMat, url: e.target.value})}
+                    value={formData.url}
+                    onChange={(e) => setFormData({...formData, url: e.target.value})}
                     className="input-glass w-full py-4 rounded-2xl text-sm"
                     placeholder="https://..."
                   />
@@ -85,7 +123,7 @@ export default function StudyMaterialManagement() {
               </div>
 
               <button type="submit" className="w-full py-5 bg-emerald-600 text-white rounded-3xl font-black uppercase tracking-widest hover:bg-emerald-500 transition-all shadow-xl shadow-emerald-900/20">
-                Confirm & Upload
+                {editingId ? 'Update Asset' : 'Confirm & Upload'}
               </button>
             </form>
           </div>
@@ -104,16 +142,24 @@ export default function StudyMaterialManagement() {
                   }`}>
                     {m.type === 'pdf' ? <FileText size={28}/> : m.type === 'video' ? <Video size={28}/> : <BookOpen size={28}/>}
                   </div>
-                  <button 
-                    onClick={() => {
-                      if (confirm('Are you sure you want to delete this study material asset?')) {
-                        deleteMaterial(m.id);
-                      }
-                    }}
-                    className="p-3 text-slate-500 hover:text-rose-500 hover:bg-white/5 rounded-xl transition-all"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={() => handleEdit(m)}
+                      className="p-3 text-slate-500 hover:text-emerald-500 hover:bg-white/5 rounded-xl transition-all"
+                    >
+                      <Pencil size={18} />
+                    </button>
+                    <button 
+                      onClick={() => {
+                        if (confirm('Are you sure you want to delete this study material asset?')) {
+                          deleteMaterial(m.id);
+                        }
+                      }}
+                      className="p-3 text-slate-500 hover:text-rose-500 hover:bg-white/5 rounded-xl transition-all"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
                 </div>
                 <h3 className="text-xl font-black text-white tracking-tight leading-tight mb-2">{m.title}</h3>
                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">

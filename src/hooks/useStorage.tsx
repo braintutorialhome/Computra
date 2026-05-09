@@ -55,6 +55,7 @@ interface StorageContextType {
   submitTestResult: (result: Omit<TestResult, 'id'>) => void;
   
   addMaterial: (material: Omit<StudyMaterial, 'id' | 'uploadDate'>) => void;
+  updateMaterial: (material: StudyMaterial) => void;
   deleteMaterial: (id: string) => void;
   addNotice: (notice: Omit<Notice, 'id' | 'date'>) => void;
   deleteNotice: (id: string) => void;
@@ -515,10 +516,20 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const addMaterial = (m: Omit<StudyMaterial, 'id' | 'uploadDate'>) => {
     const newItem = { ...m, id: uuid(), uploadDate: new Date().toISOString() };
     setMaterials([...materials, newItem]);
+    addLog('MATERIAL_ADD', `Added study material: ${m.title}`);
+  };
+
+  const updateMaterial = (m: StudyMaterial) => {
+    setMaterials(prev => prev.map(item => item.id === m.id ? m : item));
+    addLog('MATERIAL_UPDATE', `Updated study material: ${m.title}`);
   };
 
   const deleteMaterial = (id: string) => {
+    const material = materials.find(m => m.id === id);
     setMaterials(prev => prev.filter(m => m.id !== id));
+    if (material) {
+      addLog('MATERIAL_DELETE', `Deleted study material: ${material.title}`);
+    }
   };
 
   const deleteNotice = (id: string) => {
@@ -580,7 +591,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
       scriptUrl, syncError, isInitialSyncing,
       addStudent, updateStudent, deleteStudent, removeStudentPermanently, approveStudent, rejectStudent,
       addFee, updateFee, deleteFee, addExpense, updateExpense, deleteExpense, markAttendance,
-      addTest, deleteTest, submitTestResult, addMaterial, deleteMaterial, addNotice, deleteNotice, 
+      addTest, deleteTest, submitTestResult, addMaterial, updateMaterial, deleteMaterial, addNotice, deleteNotice, 
       addDueFee, updateDueFee, deleteDueFee, addExternalTest, deleteExternalTest, addResultLink, deleteResultLink, clearAllData, addLog
     }}>
       {children}
