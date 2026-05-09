@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useStorage } from '../../../hooks/useStorage';
-import { Plus, Trash2, Link as LinkIcon, ExternalLink, Search } from 'lucide-react';
+import { Plus, Trash2, Link as LinkIcon, ExternalLink, Search, Pencil } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { ExternalTest } from '../../../types';
 
 const AdminTestMaster: React.FC = () => {
-  const { externalTests, addExternalTest, deleteExternalTest } = useStorage();
+  const { externalTests, addExternalTest, updateExternalTest, deleteExternalTest } = useStorage();
   const [isAdding, setIsAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({
     title: '',
@@ -23,14 +25,38 @@ const AdminTestMaster: React.FC = () => {
       finalUrl = 'https://' + finalUrl;
     }
 
-    addExternalTest({
-      title: formData.title,
-      description: formData.description,
-      url: finalUrl
-    });
+    if (editingId) {
+      const original = externalTests.find(t => t.id === editingId);
+      if (original) {
+        updateExternalTest({
+          ...original,
+          title: formData.title,
+          description: formData.description,
+          url: finalUrl
+        });
+      }
+    } else {
+      addExternalTest({
+        title: formData.title,
+        description: formData.description,
+        url: finalUrl
+      });
+    }
     
     setFormData({ title: '', description: '', url: '' });
     setIsAdding(false);
+    setEditingId(null);
+  };
+
+  const handleEdit = (test: ExternalTest) => {
+    setFormData({
+      title: test.title,
+      description: test.description || '',
+      url: test.url
+    });
+    setEditingId(test.id);
+    setIsAdding(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const filteredTests = externalTests.filter(t => {
@@ -48,7 +74,11 @@ const AdminTestMaster: React.FC = () => {
           <p className="text-gray-500">Post external test links for students</p>
         </div>
         <button
-          onClick={() => setIsAdding(true)}
+          onClick={() => {
+            setEditingId(null);
+            setFormData({ title: '', description: '', url: '' });
+            setIsAdding(true);
+          }}
           className="flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
         >
           <Plus className="w-5 h-5 mr-2" />
@@ -66,9 +96,14 @@ const AdminTestMaster: React.FC = () => {
           >
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">Add New External Test Link</h3>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {editingId ? 'Edit External Test Link' : 'Add New External Test Link'}
+                </h3>
                 <button 
-                  onClick={() => setIsAdding(false)}
+                  onClick={() => {
+                    setIsAdding(false);
+                    setEditingId(null);
+                  }}
                   className="text-gray-400 hover:text-gray-600"
                 >
                   Cancel
@@ -119,7 +154,7 @@ const AdminTestMaster: React.FC = () => {
                     type="submit"
                     className="w-full md:w-auto px-8 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
                   >
-                    Save Test Link
+                    {editingId ? 'Update Test Link' : 'Save Test Link'}
                   </button>
                 </div>
               </form>
@@ -184,16 +219,26 @@ const AdminTestMaster: React.FC = () => {
                       {new Date(test.date).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button 
-                        onClick={() => {
-                          if(confirm('Are you sure you want to delete this test link?')) {
-                            deleteExternalTest(test.id);
-                          }
-                        }}
-                        className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button 
+                          onClick={() => handleEdit(test)}
+                          className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                          title="Edit"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => {
+                            if(confirm('Are you sure you want to delete this test link?')) {
+                              deleteExternalTest(test.id);
+                            }
+                          }}
+                          className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
                   </motion.tr>
                 ))

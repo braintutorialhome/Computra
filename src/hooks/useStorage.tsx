@@ -63,8 +63,10 @@ interface StorageContextType {
   updateDueFee: (dueFee: DueFee) => void;
   deleteDueFee: (id: string) => void;
   addExternalTest: (test: Omit<ExternalTest, 'id' | 'date'>) => void;
+  updateExternalTest: (test: ExternalTest) => void;
   deleteExternalTest: (id: string) => void;
   addResultLink: (result: Omit<ResultLink, 'id' | 'date'>) => void;
+  updateResultLink: (result: ResultLink) => void;
   deleteResultLink: (id: string) => void;
   deleteTest: (id: string) => void;
   deleteFee: (id: string) => void;
@@ -568,6 +570,11 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     addLog('EXTERNAL_TEST_ADDED', `Added new external test link: ${t.title}`);
   };
 
+  const updateExternalTest = (t: ExternalTest) => {
+    setExternalTests(prev => prev.map(item => item.id === t.id ? t : item));
+    addLog('EXTERNAL_TEST_UPDATE', `Updated external test link: ${t.title}`);
+  };
+
   const deleteExternalTest = (id: string) => {
     setExternalTests(prev => prev.filter(item => item.id !== id));
     addLog('EXTERNAL_TEST_DELETED', `Deleted external test link ${id}`);
@@ -577,6 +584,11 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const newResult = { ...t, id: uuid(), date: new Date().toISOString() };
     setResultLinks([...resultLinks, newResult]);
     addLog('RESULT_ADDED', `Added new result link: ${t.title}`);
+  };
+
+  const updateResultLink = (t: ResultLink) => {
+    setResultLinks(prev => prev.map(item => item.id === t.id ? t : item));
+    addLog('RESULT_UPDATE', `Updated result link: ${t.title}`);
   };
 
   const deleteResultLink = (id: string) => {
@@ -592,7 +604,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
       addStudent, updateStudent, deleteStudent, removeStudentPermanently, approveStudent, rejectStudent,
       addFee, updateFee, deleteFee, addExpense, updateExpense, deleteExpense, markAttendance,
       addTest, deleteTest, submitTestResult, addMaterial, updateMaterial, deleteMaterial, addNotice, deleteNotice, 
-      addDueFee, updateDueFee, deleteDueFee, addExternalTest, deleteExternalTest, addResultLink, deleteResultLink, clearAllData, addLog
+      addDueFee, updateDueFee, deleteDueFee, addExternalTest, updateExternalTest, deleteExternalTest, addResultLink, updateResultLink, deleteResultLink, clearAllData, addLog
     }}>
       {children}
     </StorageContext.Provider>
