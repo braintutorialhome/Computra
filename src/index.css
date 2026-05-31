@@ -1,35 +1,74 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Outfit", "Inter", ui-sans-serif, system-ui, sans-serif;
+  
+  /* Overwrite indigo with Academia's premium deep teal-cyan */
+  --color-indigo-50: #f0fafb;
+  --color-indigo-100: #dbeef1;
+  --color-indigo-200: #b7dfdf;
+  --color-indigo-300: #81c6cb;
+  --color-indigo-400: #4ba7b1;
+  --color-indigo-500: #12828d;
+  --color-indigo-600: #125c64;
+  --color-indigo-700: #0d4e55;
+  --color-indigo-800: #0a3d42;
+  --color-indigo-900: #082d31;
+  --color-indigo-950: #041c1e;
+
+  /* Overwrite purple/violet with Academia's energetic light-sea-green / bright mint-turquoise */
+  --color-purple-50: #e0faf6;
+  --color-purple-100: #b1f2e9;
+  --color-purple-200: #7ee2db;
+  --color-purple-300: #4ecfd3;
+  --color-purple-400: #13c2c2;
+  --color-purple-500: #00bfa5;
+  --color-purple-600: #00a896;
+  --color-purple-700: #028074;
+  --color-purple-800: #05645d;
+  --color-purple-900: #064e4a;
+  --color-purple-950: #032f2e;
+
+  --color-violet-50: #e0faf6;
+  --color-violet-100: #b1f2e9;
+  --color-violet-200: #7ee2db;
+  --color-violet-300: #4ecfd3;
+  --color-violet-400: #13c2c2;
+  --color-violet-500: #00bfa5;
+  --color-violet-600: #00a896;
+  --color-violet-700: #028074;
+  --color-violet-800: #05645d;
+  --color-violet-900: #064e4a;
+  --color-violet-950: #032f2e;
 }
 
 @layer base {
   body {
-    @apply bg-[#0f172a] text-slate-100 antialiased font-sans;
-    background: radial-gradient(circle at top left, #1e293b, #0f172a), radial-gradient(circle at bottom right, #334155, #0f172a);
+    @apply bg-[#0d1f22] text-slate-100 antialiased font-sans;
+    background: radial-gradient(circle at top left, #122f33, #0d1f22), radial-gradient(circle at bottom right, #0a1c1d, #0d1f22);
     background-attachment: fixed;
     min-height: 100vh;
   }
 }
 
 .glass {
-  @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-xl shadow-black/20;
+  @apply bg-[#0d1f22]/60 backdrop-blur-xl border border-white/5 shadow-2xl shadow-black/40;
 }
 
 .glass-card {
-  @apply bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl shadow-lg;
+  @apply bg-[#102a2d]/60 backdrop-blur-lg border border-teal-500/10 rounded-3xl shadow-xl;
 }
 
 .glass-button {
-  @apply bg-white/10 border border-white/10 hover:bg-white/20 transition-all rounded-xl;
+  @apply bg-white/5 border border-white/10 hover:bg-white/15 transition-all rounded-xl text-white font-bold;
 }
 
 .indigo-button {
-  @apply bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow-lg shadow-indigo-600/30 transition-all active:scale-95;
+  @apply bg-[#00bfa5] hover:bg-[#13c2c2] text-[#041c1e] rounded-xl shadow-lg shadow-teal-500/20 hover:shadow-teal-500/30 transition-all active:scale-95 text-center font-black;
 }
 
 .input-glass {
-  @apply bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all placeholder:text-slate-500;
+  @apply bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-[#00bfa5]/60 outline-none transition-all placeholder:text-slate-500;
 }
+
