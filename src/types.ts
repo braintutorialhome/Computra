@@ -27,6 +27,7 @@ export interface Student {
 export interface Fee {
   id: string;
   studentId: string;
+  studentName?: string;
   amount: number;
   date: string;
   status: 'paid' | 'unpaid';

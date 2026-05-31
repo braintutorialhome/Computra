@@ -16,6 +16,42 @@ const shortId = () => {
   return Math.random().toString(36).substring(2, 6).toUpperCase();
 };
 
+const sanitizeFee = (f: any): Fee => {
+  if (!f) return f;
+  return {
+    id: String(f.id || ''),
+    studentId: String(f.studentId || ''),
+    studentName: f.studentName !== undefined ? String(f.studentName) : undefined,
+    amount: typeof f.amount === 'number' ? f.amount : (Number(f.amount) || 0),
+    date: String(f.date || ''),
+    status: f.status === 'unpaid' ? 'unpaid' : 'paid',
+    month: String(f.month || '')
+  };
+};
+
+const sanitizeExpense = (e: any): Expense => {
+  if (!e) return e;
+  return {
+    id: String(e.id || ''),
+    title: String(e.title || ''),
+    amount: typeof e.amount === 'number' ? e.amount : (Number(e.amount) || 0),
+    date: String(e.date || ''),
+    category: e.category || 'Others',
+    description: e.description !== undefined ? String(e.description) : undefined
+  };
+};
+
+const sanitizeDueFee = (df: any): DueFee => {
+  if (!df) return df;
+  return {
+    id: String(df.id || ''),
+    studentId: String(df.studentId || ''),
+    amount: typeof df.amount === 'number' ? df.amount : (Number(df.amount) || 0),
+    remarks: String(df.remarks || ''),
+    date: String(df.date || '')
+  };
+};
+
 interface StorageContextType {
   students: Student[];
   fees: Fee[];
@@ -118,18 +154,31 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setSyncError(null);
       
       const enrichedFees = fees.map(f => ({
-        ...f,
-        studentName: students.find(s => s.id === f.studentId)?.name || 'Unknown'
+        id: f.id,
+        studentId: f.studentId,
+        studentName: students.find(s => s.id === f.studentId)?.name || 'Unknown',
+        amount: Number(f.amount) || 0,
+        date: f.date,
+        status: f.status,
+        month: f.month
       }));
 
       const enrichedAttendance = attendance.map(a => ({
-        ...a,
-        studentName: students.find(s => s.id === a.studentId)?.name || 'Unknown'
+        id: a.id,
+        date: a.date,
+        studentId: a.studentId,
+        studentName: students.find(s => s.id === a.studentId)?.name || 'Unknown',
+        status: a.status
       }));
 
       const enrichedTestResults = testResults.map(tr => ({
-        ...tr,
-        studentName: students.find(s => s.id === tr.studentId)?.name || 'Unknown'
+        id: tr.id,
+        testId: tr.testId,
+        studentId: tr.studentId,
+        studentName: students.find(s => s.id === tr.studentId)?.name || 'Unknown',
+        score: Number(tr.score) || 0,
+        totalQuestions: Number(tr.totalQuestions) || 0,
+        date: tr.date
       }));
 
       const payload = {
@@ -228,11 +277,11 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
         const data = JSON.parse(text);
         if (data) {
           if (data.students) setStudents(data.students);
-          if (data.fees) setFees(data.fees);
-          if (data.expenses) setExpenses(data.expenses);
+          if (data.fees) setFees(Array.isArray(data.fees) ? data.fees.map(sanitizeFee) : []);
+          if (data.expenses) setExpenses(Array.isArray(data.expenses) ? data.expenses.map(sanitizeExpense) : []);
           if (data.users) setUsers(data.users);
           if (data.notices) setNotices(data.notices);
-          if (data.dueFees) setDueFees(data.dueFees);
+          if (data.dueFees) setDueFees(Array.isArray(data.dueFees) ? data.dueFees.map(sanitizeDueFee) : []);
           if (data.externalTests) setExternalTests(data.externalTests);
           if (data.resultLinks) setResultLinks(data.resultLinks);
           if (data.materials) setMaterials(data.materials);
@@ -366,20 +415,31 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   // Load from localStorage for initial offline access
   useEffect(() => {
-    const load = (key: string, setter: any) => {
+    const load = (key: string, setter: any, sanitizer?: (item: any) => any) => {
       const data = localStorage.getItem(key);
-      if (data) setter(JSON.parse(data));
+      if (data) {
+        try {
+          const parsed = JSON.parse(data);
+          if (Array.isArray(parsed) && sanitizer) {
+            setter(parsed.map(sanitizer));
+          } else {
+            setter(parsed);
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
     };
 
     load('utc_students', setStudents);
-    load('utc_fees', setFees);
-    load('utc_expenses', setExpenses);
+    load('utc_fees', setFees, sanitizeFee);
+    load('utc_expenses', setExpenses, sanitizeExpense);
     load('utc_attendance', setAttendance);
     load('utc_tests', setTests);
     load('utc_testResults', setTestResults);
     load('utc_materials', setMaterials);
     load('utc_notices', setNotices);
-    load('utc_due_fees', setDueFees);
+    load('utc_due_fees', setDueFees, sanitizeDueFee);
     load('utc_external_tests', setExternalTests);
     load('utc_result_links', setResultLinks);
     load('utc_users', setUsers);
@@ -467,14 +527,14 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const addFee = (f: Omit<Fee, 'id'>) => {
-    const newFee = { ...f, id: uuid() };
+    const newFee = sanitizeFee({ ...f, id: uuid() });
     setFees([...fees, newFee]);
-    const studentName = students.find(s => s.id === f.studentId)?.name || 'Unknown';
-    addLog('FEE_COLLECTION', `Collected ₹${f.amount} from ${studentName} for ${f.month}`);
+    const studentName = students.find(s => s.id === newFee.studentId)?.name || 'Unknown';
+    addLog('FEE_COLLECTION', `Collected ₹${newFee.amount} from ${studentName} for ${newFee.month}`);
   };
 
   const addExpense = (e: Omit<Expense, 'id'>) => {
-    const newExpense = { ...e, id: uuid() };
+    const newExpense = sanitizeExpense({ ...e, id: uuid() });
     setExpenses([...expenses, newExpense]);
   };
 
@@ -484,7 +544,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const updateFee = (f: Fee) => {
-    setFees(prev => prev.map(fe => fe.id === f.id ? f : fe));
+    setFees(prev => prev.map(fe => fe.id === f.id ? sanitizeFee(f) : fe));
   };
 
   const deleteExpense = (id: string) => {
@@ -493,7 +553,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const updateExpense = (e: Expense) => {
-    setExpenses(prev => prev.map(ex => ex.id === e.id ? e : ex));
+    setExpenses(prev => prev.map(ex => ex.id === e.id ? sanitizeExpense(e) : ex));
   };
 
   const markAttendance = (date: string, studentId: string, status: 'present' | 'absent') => {
@@ -550,14 +610,14 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const addDueFee = (df: Omit<DueFee, 'id' | 'date'>) => {
-    const newDueFee = { ...df, id: uuid(), date: new Date().toISOString() };
+    const newDueFee = sanitizeDueFee({ ...df, id: uuid(), date: new Date().toISOString() });
     setDueFees([...dueFees, newDueFee]);
-    const studentName = students.find(s => s.id === df.studentId)?.name || 'Unknown';
-    addLog('DUE_FEE_ADDED', `Added due amount of ₹${df.amount} for ${studentName}: ${df.remarks}`);
+    const studentName = students.find(s => s.id === newDueFee.studentId)?.name || 'Unknown';
+    addLog('DUE_FEE_ADDED', `Added due amount of ₹${newDueFee.amount} for ${studentName}: ${newDueFee.remarks}`);
   };
 
   const updateDueFee = (df: DueFee) => {
-    setDueFees(prev => prev.map(item => item.id === df.id ? df : item));
+    setDueFees(prev => prev.map(item => item.id === df.id ? sanitizeDueFee(df) : item));
     addLog('DUE_FEE_UPDATE', `Updated due amount for student ${df.id}`);
   };
 
