@@ -296,7 +296,6 @@ function getSheetData(name, keys) {
       return obj;
     });
   } catch (e) {
-    console.error("Error reading sheet " + name + ": " + e.toString());
-    throw new Error("Cloud database block read error under sheet '" + name + "': " + e.toString());
+    return [];
   }
 }

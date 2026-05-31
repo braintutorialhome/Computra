@@ -87,40 +87,19 @@ const SCRIPT_URL: string = 'https://script.google.com/macros/s/AKfycbz6hmunZWBRw
 
 const StorageContext = createContext<StorageContextType | undefined>(undefined);
 
-const getLocal = <T,>(key: string, fallback: T): T => {
-  const saved = localStorage.getItem(key);
-  if (!saved) return fallback;
-  try {
-    return JSON.parse(saved);
-  } catch {
-    return fallback;
-  }
-};
-
-const localCount = (key: string): number => {
-  try {
-    const saved = localStorage.getItem(key);
-    if (!saved) return 0;
-    const parsed = JSON.parse(saved);
-    return Array.isArray(parsed) ? parsed.length : 0;
-  } catch {
-    return 0;
-  }
-};
-
 export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [students, setStudents] = useState<Student[]>(() => getLocal('utc_students', []));
-  const [fees, setFees] = useState<Fee[]>(() => getLocal('utc_fees', []));
-  const [expenses, setExpenses] = useState<Expense[]>(() => getLocal('utc_expenses', []));
-  const [attendance, setAttendance] = useState<Attendance[]>(() => getLocal('utc_attendance', []));
-  const [tests, setTests] = useState<Test[]>(() => getLocal('utc_tests', []));
-  const [testResults, setTestResults] = useState<TestResult[]>(() => getLocal('utc_testResults', []));
-  const [materials, setMaterials] = useState<StudyMaterial[]>(() => getLocal('utc_materials', []));
-  const [notices, setNotices] = useState<Notice[]>(() => getLocal('utc_notices', []));
-  const [dueFees, setDueFees] = useState<DueFee[]>(() => getLocal('utc_due_fees', []));
-  const [externalTests, setExternalTests] = useState<ExternalTest[]>(() => getLocal('utc_external_tests', []));
-  const [resultLinks, setResultLinks] = useState<ResultLink[]>(() => getLocal('utc_result_links', []));
-  const [users, setUsers] = useState<User[]>(() => getLocal('utc_users', []));
+  const [students, setStudents] = useState<Student[]>([]);
+  const [fees, setFees] = useState<Fee[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [attendance, setAttendance] = useState<Attendance[]>([]);
+  const [tests, setTests] = useState<Test[]>([]);
+  const [testResults, setTestResults] = useState<TestResult[]>([]);
+  const [materials, setMaterials] = useState<StudyMaterial[]>([]);
+  const [notices, setNotices] = useState<Notice[]>([]);
+  const [dueFees, setDueFees] = useState<DueFee[]>([]);
+  const [externalTests, setExternalTests] = useState<ExternalTest[]>([]);
+  const [resultLinks, setResultLinks] = useState<ResultLink[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
     const saved = localStorage.getItem('utc_current_user');
     return saved ? JSON.parse(saved) : null;
@@ -248,77 +227,18 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
       try {
         const data = JSON.parse(text);
         if (data) {
-          // SAFEGUARD: If cloud returns empty arrays for collections but local storage already has items,
-          // DO NOT overwrite our local hard-earned cache with empty state. This protects against
-          // Google Sheet API read failures, empty cells, or transient script errors returning empty sheets.
-          if (data.students) {
-            if (data.students.length > 0 || localCount('utc_students') === 0) {
-              setStudents(data.students);
-            } else {
-              console.warn('Safeguard: Cloud returned 0 students, but local storage has items. Retaining local data to prevent accidental erasure.');
-            }
-          }
-          if (data.fees) {
-            if (data.fees.length > 0 || localCount('utc_fees') === 0) {
-              setFees(data.fees);
-            } else {
-              console.warn('Safeguard: Cloud returned 0 fees, but local storage has items. Retaining local data.');
-            }
-          }
-          if (data.expenses) {
-            if (data.expenses.length > 0 || localCount('utc_expenses') === 0) {
-              setExpenses(data.expenses);
-            } else {
-              console.warn('Safeguard: Cloud returned 0 expenses, but local storage has items. Retaining local data.');
-            }
-          }
-          if (data.users) {
-            if (data.users.length > 0 || localCount('utc_users') === 0) {
-              setUsers(data.users);
-            } else {
-              console.warn('Safeguard: Cloud returned 0 users, but local storage has items. Retaining local data.');
-            }
-          }
-          if (data.notices) {
-            if (data.notices.length > 0 || localCount('utc_notices') === 0) {
-              setNotices(data.notices);
-            }
-          }
-          if (data.dueFees) {
-            if (data.dueFees.length > 0 || localCount('utc_due_fees') === 0) {
-              setDueFees(data.dueFees);
-            }
-          }
-          if (data.externalTests) {
-            if (data.externalTests.length > 0 || localCount('utc_external_tests') === 0) {
-              setExternalTests(data.externalTests);
-            }
-          }
-          if (data.resultLinks) {
-            if (data.resultLinks.length > 0 || localCount('utc_result_links') === 0) {
-              setResultLinks(data.resultLinks);
-            }
-          }
-          if (data.materials) {
-            if (data.materials.length > 0 || localCount('utc_materials') === 0) {
-              setMaterials(data.materials);
-            }
-          }
-          if (data.tests) {
-            if (data.tests.length > 0 || localCount('utc_tests') === 0) {
-              setTests(data.tests);
-            }
-          }
-          if (data.testResults) {
-            if (data.testResults.length > 0 || localCount('utc_test_results') === 0) {
-              setTestResults(data.testResults);
-            }
-          }
-          if (data.attendance) {
-            if (data.attendance.length > 0 || localCount('utc_attendance') === 0) {
-              setAttendance(data.attendance);
-            }
-          }
+          if (data.students) setStudents(data.students);
+          if (data.fees) setFees(data.fees);
+          if (data.expenses) setExpenses(data.expenses);
+          if (data.users) setUsers(data.users);
+          if (data.notices) setNotices(data.notices);
+          if (data.dueFees) setDueFees(data.dueFees);
+          if (data.externalTests) setExternalTests(data.externalTests);
+          if (data.resultLinks) setResultLinks(data.resultLinks);
+          if (data.materials) setMaterials(data.materials);
+          if (data.tests) setTests(data.tests);
+          if (data.testResults) setTestResults(data.testResults);
+          if (data.attendance) setAttendance(data.attendance);
           
           if (data.logs) {
             localStorage.setItem('utc_activity_logs', JSON.stringify(data.logs.slice(0, 100)));
@@ -444,7 +364,26 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     localStorage.setItem('utc_activity_logs', JSON.stringify(updatedLogs));
   };
 
-  // Initial syncer state setup (already handled via lazy initialization)
+  // Load from localStorage for initial offline access
+  useEffect(() => {
+    const load = (key: string, setter: any) => {
+      const data = localStorage.getItem(key);
+      if (data) setter(JSON.parse(data));
+    };
+
+    load('utc_students', setStudents);
+    load('utc_fees', setFees);
+    load('utc_expenses', setExpenses);
+    load('utc_attendance', setAttendance);
+    load('utc_tests', setTests);
+    load('utc_testResults', setTestResults);
+    load('utc_materials', setMaterials);
+    load('utc_notices', setNotices);
+    load('utc_due_fees', setDueFees);
+    load('utc_external_tests', setExternalTests);
+    load('utc_result_links', setResultLinks);
+    load('utc_users', setUsers);
+  }, []);
 
   // Persistence
   useEffect(() => { localStorage.setItem('utc_students', JSON.stringify(students)); }, [students]);
