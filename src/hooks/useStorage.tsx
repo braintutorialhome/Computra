@@ -229,7 +229,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   useEffect(() => {
     const timer = setTimeout(() => {
       // Only sync if we have successfully connected/loaded from the cloud and we're not in the middle of an initial load
-      if (!isInitialSyncing && isFetchSuccessful && (students.length > 0 || users.length > 0)) {
+      if (!isInitialSyncing && isFetchSuccessful) {
         syncToCloud();
       }
     }, 2000); // 2 second debounce
@@ -484,14 +484,17 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const deleteStudent = (id: string) => {
     setStudents(prev => prev.map(st => st.id === id ? { ...st, status: 'deleted' } : st));
-    setUsers(prev => prev.filter(u => u.id !== id));
-    addLog('STUDENT_TRASH', `Moved student record ${id} to trash and revoked system access`);
+    addLog('STUDENT_TRASH', `Moved student record ${id} to trash and suspended system access`);
   };
 
   const removeStudentPermanently = (id: string) => {
     setStudents(prev => prev.filter(st => st.id !== id));
     setUsers(prev => prev.filter(u => u.id !== id));
-    addLog('STUDENT_DELETE', `Permanently deleted student record ${id}`);
+    setFees(prev => prev.filter(f => f.studentId !== id));
+    setAttendance(prev => prev.filter(a => a.studentId !== id));
+    setTestResults(prev => prev.filter(tr => tr.studentId !== id));
+    setDueFees(prev => prev.filter(df => df.studentId !== id));
+    addLog('STUDENT_DELETE', `Permanently deleted student ${id} and all their credentials, fees, attendance, results, and due fee history`);
   };
   
   const approveStudent = (id: string) => {
@@ -602,6 +605,8 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const deleteTest = (id: string) => {
     setTests(prev => prev.filter(t => t.id !== id));
+    setTestResults(prev => prev.filter(tr => tr.testId !== id));
+    addLog('TEST_DELETE', `Deleted test ${id} and all related student test results`);
   };
 
   const addNotice = (n: Omit<Notice, 'id' | 'date'>) => {
