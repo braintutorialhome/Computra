@@ -45,7 +45,7 @@ export default function PublicHome() {
               Learn. Practice. Succeed.
             </span>
             <h1 className="text-[7.2vw] sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tighter leading-none mb-8 whitespace-nowrap">
-              Welcome to <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-400 animate-gradient-x underline decoration-white/10 decoration-8 underline-offset-8 italic">UTC Computra</span>
+              Welcome to <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-400 animate-gradient-x underline decoration-white/10 decoration-8 underline-offset-8">UTC Computra</span>
             </h1>
             <p className="text-xl text-slate-400 max-w-2xl mx-auto mb-12 font-medium leading-relaxed">
               Premium tuition for Computer Applications and Computer Science at UTC, Bhangar, South 24 Parganas.
