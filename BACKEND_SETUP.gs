@@ -41,26 +41,31 @@ function doGet(e) {
     
     // Helper to get sheet data as array of objects
     const getSheetData = (sheetName) => {
-      const sheet = ss.getSheetByName(sheetName);
-      if (!sheet) return [];
-      const values = sheet.getDataRange().getValues();
-      if (values.length < 2) return [];
-      
-      const headers = values[0];
-      return values.slice(1).map(row => {
-        const obj = {};
-        headers.forEach((header, i) => {
-          let val = row[i];
-          // Handle dates
-          if (val instanceof Date) val = val.toISOString();
-          // Handle potential JSON strings
-          if (typeof val === 'string' && (val.startsWith('{') || val.startsWith('['))) {
-             try { val = JSON.parse(val); } catch(e) {}
-          }
-          obj[header] = val;
+      try {
+        const sheet = ss.getSheetByName(sheetName);
+        if (!sheet) return [];
+        const values = sheet.getDataRange().getValues();
+        if (values.length < 2) return [];
+        
+        const headers = values[0];
+        return values.slice(1).map(row => {
+          const obj = {};
+          headers.forEach((header, i) => {
+            let val = row[i];
+            // Handle dates
+            if (val instanceof Date) val = val.toISOString();
+            // Handle potential JSON strings
+            if (typeof val === 'string' && (val.startsWith('{') || val.startsWith('['))) {
+               try { val = JSON.parse(val); } catch(e) {}
+            }
+            obj[header] = val;
+          });
+          return obj;
         });
-        return obj;
-      });
+      } catch (e) {
+        console.error("Error reading sheet " + sheetName + ": " + e.toString());
+        throw new Error("Cloud database block read error under sheet '" + sheetName + "': " + e.toString());
+      }
     };
 
     // Construct the response object
