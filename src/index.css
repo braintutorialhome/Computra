@@ -1,74 +1,74 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Outfit", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Space Grotesk", "Outfit", "Inter", ui-sans-serif, system-ui, sans-serif;
   
-  /* Overwrite indigo with GrowKit's premium electric blue */
-  --color-indigo-50: #f0f7ff;
-  --color-indigo-100: #e0f2fe;
-  --color-indigo-200: #bae6fd;
-  --color-indigo-300: #7dd3fc;
-  --color-indigo-400: #2982ff;
-  --color-indigo-500: #1a72f2;
-  --color-indigo-600: #0f5ee0;
-  --color-indigo-700: #0a4fbe;
-  --color-indigo-800: #0d429a;
-  --color-indigo-900: #10397c;
-  --color-indigo-950: #0b1c3e;
+  /* Overwrite indigo with GrowKit's premium Cyber Teal/Cyan */
+  --color-indigo-50: #f0fdfa;
+  --color-indigo-100: #ccfbf1;
+  --color-indigo-200: #99f6e4;
+  --color-indigo-300: #5eead4;
+  --color-indigo-400: #2dd4bf;
+  --color-indigo-500: #14b8a6; /* Premium Teal */
+  --color-indigo-600: #0d9488;
+  --color-indigo-700: #0f766e;
+  --color-indigo-800: #115e59;
+  --color-indigo-900: #134e4a;
+  --color-indigo-950: #042f2e;
 
-  /* Overwrite purple/violet with GrowKit's premium warm coral-orange */
-  --color-purple-50: #fff7ed;
-  --color-purple-100: #ffedd5;
-  --color-purple-200: #fed7aa;
-  --color-purple-300: #fdbb74;
-  --color-purple-400: #fb923c;
-  --color-purple-500: #f97316;
-  --color-purple-600: #ea580c;
-  --color-purple-700: #c2410c;
-  --color-purple-800: #9a3412;
-  --color-purple-900: #7c2d12;
-  --color-purple-950: #431407;
+  /* Overwrite purple/violet with Cyber Cyan accents for premium gradients */
+  --color-purple-50: #ecfeff;
+  --color-purple-100: #cffafe;
+  --color-purple-200: #a5f3fc;
+  --color-purple-300: #67e8f9;
+  --color-purple-400: #22d3ee;
+  --color-purple-500: #06b6d4; /* Premium Cyan */
+  --color-purple-600: #0891b2;
+  --color-purple-700: #0e7490;
+  --color-purple-800: #155e75;
+  --color-purple-900: #164e63;
+  --color-purple-950: #083344;
 
-  --color-violet-50: #fff7ed;
-  --color-violet-100: #ffedd5;
-  --color-violet-200: #fed7aa;
-  --color-violet-300: #fdbb74;
-  --color-violet-400: #fb923c;
-  --color-violet-500: #f97316;
-  --color-violet-600: #ea580c;
-  --color-violet-700: #c2410c;
-  --color-violet-800: #9a3412;
-  --color-violet-900: #7c2d12;
-  --color-violet-950: #431407;
+  --color-violet-50: #ecfeff;
+  --color-violet-100: #cffafe;
+  --color-violet-200: #a5f3fc;
+  --color-violet-300: #67e8f9;
+  --color-violet-400: #22d3ee;
+  --color-violet-500: #06b6d4;
+  --color-violet-600: #0891b2;
+  --color-violet-700: #0e7490;
+  --color-violet-800: #155e75;
+  --color-violet-900: #164e63;
+  --color-violet-950: #083344;
 }
 
 @layer base {
   body {
-    @apply bg-[#131b2d] text-slate-100 antialiased font-sans;
-    background: radial-gradient(circle at top left, #1c2539, #131b2d), radial-gradient(circle at bottom right, #1d2232, #131b2d);
+    @apply bg-[#080d16] text-slate-100 antialiased font-sans;
+    background: radial-gradient(circle at top left, #0e1726, #060912), radial-gradient(circle at bottom right, #090f1a, #060912);
     background-attachment: fixed;
     min-height: 100vh;
   }
 }
 
 .glass {
-  @apply bg-white/[0.03] backdrop-blur-xl border border-white/5 shadow-2xl shadow-black/40;
+  @apply bg-black/40 backdrop-blur-xl border border-white/[0.04] shadow-2xl shadow-black/60;
 }
 
 .glass-card {
-  @apply bg-[#1a2335]/60 backdrop-blur-lg border border-white/5 rounded-3xl shadow-xl;
+  @apply bg-[#0e1626]/80 backdrop-blur-lg border border-white/[0.04] rounded-3xl shadow-2xl;
 }
 
 .glass-button {
-  @apply bg-white/5 border border-white/10 hover:bg-white/15 transition-all rounded-xl text-white font-bold;
+  @apply bg-white/5 border border-white/10 hover:bg-white/10 transition-all rounded-xl text-white font-bold;
 }
 
 .indigo-button {
-  @apply bg-[#1a72f2] hover:bg-[#2982ff] text-white rounded-xl shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30 transition-all active:scale-95 text-center font-bold;
+  @apply bg-[#14b8a6] hover:bg-[#2dd4bf] text-white rounded-xl shadow-lg shadow-teal-500/20 hover:shadow-teal-500/35 transition-all active:scale-95 text-center font-bold;
 }
 
 .input-glass {
-  @apply bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-[#1a72f2]/60 outline-none transition-all placeholder:text-slate-500;
+  @apply bg-white/[0.03] border border-white/5 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-[#14b8a6]/60 outline-none transition-all placeholder:text-slate-600;
 }
 
