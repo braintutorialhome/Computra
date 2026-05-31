@@ -106,7 +106,6 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   });
   const [syncError, setSyncError] = useState<string | null>(null);
   const [isInitialSyncing, setIsInitialSyncing] = useState(true);
-  const [isFetchSuccessful, setIsFetchSuccessful] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState<string | null>(() => localStorage.getItem('utc_last_sync'));
   
   const scriptUrl = SCRIPT_URL;
@@ -179,13 +178,13 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Sync to cloud when data changes (debounced)
   useEffect(() => {
     const timer = setTimeout(() => {
-      // Only sync if we have successfully connected/loaded from the cloud and we're not in the middle of an initial load
-      if (!isInitialSyncing && isFetchSuccessful && (students.length > 0 || users.length > 0)) {
+      // Only sync if we have data and we're not in the middle of an initial load
+      if (!isInitialSyncing && (students.length > 0 || users.length > 0)) {
         syncToCloud();
       }
     }, 2000); // 2 second debounce
     return () => clearTimeout(timer);
-  }, [students, fees, expenses, attendance, tests, testResults, materials, notices, dueFees, externalTests, resultLinks, users, isInitialSyncing, isFetchSuccessful]);
+  }, [students, fees, expenses, attendance, tests, testResults, materials, notices, dueFees, externalTests, resultLinks, users]);
 
   const refreshCloudData = useCallback(async () => {
     const cleanUrl = scriptUrl.trim();
@@ -246,7 +245,6 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
           
           setLastSyncTime(new Date().toISOString());
           localStorage.setItem('utc_last_sync', new Date().toISOString());
-          setIsFetchSuccessful(true);
           console.log('✓ Cloud Data Synchronized');
         }
       } catch (parseError) {
