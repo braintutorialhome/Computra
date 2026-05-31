@@ -336,11 +336,33 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
       if (!cleanUsername || !cleanPassword) return false;
 
-      // 1. Try matching a registered account first
+      // 1. Default Administrator Bypass (Always allow admin with admin123 or 123)
+      if (role === 'admin' && cleanUsername.toLowerCase() === 'admin' && (cleanPassword === 'admin123' || cleanPassword === '123')) {
+        const adminUser: User = { 
+          id: 'sys-admin', 
+          username: 'admin', 
+          password: cleanPassword, 
+          name: 'System Administrator', 
+          role: 'admin' 
+        };
+        
+        setUsers(prev => {
+          if (!prev.some(u => u.username.toLowerCase() === 'admin' && u.role === 'admin')) {
+            return [...prev, adminUser];
+          }
+          return prev;
+        });
+
+        setCurrentUser(adminUser);
+        localStorage.setItem('utc_current_user', JSON.stringify(adminUser));
+        return true;
+      }
+
+      // 2. Try matching a registered account in users list (case-insensitive username)
       const user = users.find(u => 
         u && 
         u.username && 
-        u.username.trim() === cleanUsername && 
+        u.username.trim().toLowerCase() === cleanUsername.toLowerCase() && 
         u.password === cleanPassword && 
         u.role === role
       );
@@ -351,19 +373,49 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
         return true;
       }
 
-      // 2. Emergency Fallback: Only allow if NO admins exist in the registered users list
-      const hasRegisteredAdmin = users.some(u => u.role === 'admin');
-      if (!hasRegisteredAdmin && role === 'admin' && cleanUsername === 'admin' && (cleanPassword === 'admin123' || cleanPassword === '123')) {
-        const fallbackAdmin: User = { 
-          id: 'sys-admin', 
-          username: 'admin', 
-          password: cleanPassword,
-          name: 'System Administrator', 
-          role: 'admin' 
-        };
-        setCurrentUser(fallbackAdmin);
-        localStorage.setItem('utc_current_user', JSON.stringify(fallbackAdmin));
-        return true;
+      // 3. Robust Student Direct Login (Allow approved students to login with Roll No or Mobile and multiple password matches)
+      if (role === 'student') {
+        const student = students.find(s => 
+          s && 
+          s.status === 'approved' && 
+          ((s.rollNumber && s.rollNumber.trim().toLowerCase() === cleanUsername.toLowerCase()) || 
+           (s.mobile && s.mobile.trim() === cleanUsername))
+        );
+
+        if (student) {
+          const rollLower = student.rollNumber ? student.rollNumber.trim().toLowerCase() : '';
+          const mob = student.mobile.trim();
+          const birth = student.dob.trim(); // "YYYY-MM-DD"
+          const birthNoDash = birth.replace(/-/g, ''); // "YYYYMMDD"
+
+          const isPasswordValid = 
+            (rollLower && cleanPassword.toLowerCase() === rollLower) ||
+            (mob && cleanPassword === mob) ||
+            (birth && cleanPassword === birth) ||
+            (birthNoDash && cleanPassword === birthNoDash);
+
+          if (isPasswordValid) {
+            const virtualStudentUser: User = {
+              id: student.id,
+              username: student.rollNumber || student.id,
+              password: cleanPassword,
+              name: student.name,
+              role: 'student'
+            };
+            
+            // Register them in users list for completeness too
+            setUsers(prev => {
+              if (!prev.some(u => u.username.toLowerCase() === (student.rollNumber || '').toLowerCase() && u.role === 'student')) {
+                return [...prev, virtualStudentUser];
+              }
+              return prev;
+            });
+
+            setCurrentUser(virtualStudentUser);
+            localStorage.setItem('utc_current_user', JSON.stringify(virtualStudentUser));
+            return true;
+          }
+        }
       }
 
       return false;
@@ -375,7 +427,38 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const signup = async (u: Omit<User, 'id'>) => {
     const newUser: User = { ...u, id: uuid() };
-    setUsers([...users, newUser]);
+    
+    if (u.role === 'student') {
+      // Auto-create Student entry if it doesn't exist to prevent "Admission Pending/Not Registered" limbo
+      const alreadyExists = students.some(s => 
+        (s.rollNumber && s.rollNumber.toLowerCase() === u.username.toLowerCase()) || 
+        s.name.toLowerCase() === u.name.toLowerCase()
+      );
+
+      if (!alreadyExists) {
+        const cleanRoll = u.username.startsWith('UTC-') ? u.username : `UTC-${Math.floor(1000 + Math.random() * 9000)}`;
+        const newStudent: Student = {
+          id: newUser.id,
+          name: u.name,
+          fatherName: 'Not Provided',
+          dob: new Date().toISOString().split('T')[0],
+          gender: 'Male',
+          subject: 'Computer Application',
+          class: 'XI',
+          semester: 'Semester-I',
+          mobile: '9999999999',
+          address: 'Not Provided',
+          admissionDate: new Date().toISOString(),
+          status: 'approved',
+          rollNumber: cleanRoll
+        };
+        // Set username to the Roll Number so login as student is completely aligned
+        newUser.username = cleanRoll;
+        setStudents(prev => [...prev, newStudent]);
+      }
+    }
+
+    setUsers(prev => [...prev, newUser]);
     // syncToCloud is triggered by useEffect on users change
     return true;
   };

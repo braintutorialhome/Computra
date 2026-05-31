@@ -143,6 +143,16 @@ export default function Login() {
               />
             </div>
 
+            {isLogin && (
+              <div className="text-slate-400 text-[10px] leading-relaxed font-bold tracking-wider px-3 space-y-1 select-none">
+                {role === 'admin' ? (
+                  <p className="text-indigo-400">💡 Default Root Admin: Use <code className="bg-white/5 px-2.5 py-1 rounded-lg text-white font-mono">admin</code> as Username and <code className="bg-white/5 px-2.5 py-1 rounded-lg text-white font-mono">admin123</code> or <code className="bg-white/5 px-2.5 py-1 rounded-lg text-white font-mono">123</code> as Password.</p>
+                ) : (
+                  <p className="text-indigo-400">💡 Students: Log in using your Roll Number (e.g. <code className="bg-white/5 px-2 py-0.5 rounded text-white font-mono">UTC-1234</code>) or Mobile. Password is your Roll Number, Mobile, or Date of Birth.</p>
+                )}
+              </div>
+            )}
+
             {error && (
               <motion.div 
                 initial={{ opacity: 0, scale: 0.9 }}
