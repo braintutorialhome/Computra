@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useStorage } from '../../../hooks/useStorage';
-import { Plus, Trash2, Link as LinkIcon, ExternalLink, Search, Pencil } from 'lucide-react';
+import { Plus, Trash2, Link as LinkIcon, ExternalLink, Search, Pencil, X, ClipboardList } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ExternalTest } from '../../../types';
 
@@ -67,11 +67,16 @@ const AdminTestMaster: React.FC = () => {
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Exam Portal</h2>
-          <p className="text-gray-500">Post external test links for students</p>
+    <div className="space-y-10">
+      <div className="flex justify-between items-center bg-white/5 p-6 rounded-[32px] border border-white/5">
+        <div className="flex items-center gap-4">
+           <div className="p-3 bg-amber-500/20 text-amber-400 rounded-xl">
+             <ClipboardList size={24} />
+           </div>
+           <div>
+             <h3 className="font-black text-xl text-white tracking-tight">Exam Portal Linker</h3>
+             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Post and manage external test links for students</p>
+           </div>
         </div>
         <button
           onClick={() => {
@@ -79,10 +84,9 @@ const AdminTestMaster: React.FC = () => {
             setFormData({ title: '', description: '', url: '' });
             setIsAdding(true);
           }}
-          className="flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
+          className="indigo-button px-8 py-3.5 text-xs font-black uppercase tracking-widest"
         >
-          <Plus className="w-5 h-5 mr-2" />
-          Add External Test
+          Add External Test &nbsp;📝
         </button>
       </div>
 
@@ -94,9 +98,9 @@ const AdminTestMaster: React.FC = () => {
             exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden"
           >
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">
+            <div className="glass rounded-[40px] border border-white/5 p-10 mb-6 shadow-2xl">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="text-xl font-black text-white uppercase tracking-tight">
                   {editingId ? 'Edit External Test Link' : 'Add New External Test Link'}
                 </h3>
                 <button 
@@ -104,55 +108,58 @@ const AdminTestMaster: React.FC = () => {
                     setIsAdding(false);
                     setEditingId(null);
                   }}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="p-2 hover:bg-white/10 rounded-xl text-slate-400 hover:text-white transition-colors"
+                  type="button"
                 >
-                  Cancel
+                  <X size={20} />
                 </button>
               </div>
 
-              <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Test Title</label>
-                  <input
-                    type="text"
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-                    placeholder="e.g. Weekly Physics Quiz"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">External URL</label>
-                  <div className="relative">
-                    <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <form onSubmit={handleSubmit} className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Test Title</label>
                     <input
                       type="text"
                       required
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-                      placeholder="e.g. docs.google.com/forms/..."
-                      value={formData.url}
-                      onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+                      className="input-glass w-full py-4 rounded-2xl"
+                      placeholder="e.g. Weekly Physics Quiz"
+                      value={formData.title}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     />
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">External URL</label>
+                    <div className="relative">
+                      <LinkIcon className="absolute left-6 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-500" />
+                      <input
+                        type="text"
+                        required
+                        className="input-glass w-full py-4 pl-14 rounded-2xl"
+                        placeholder="e.g. docs.google.com/forms/..."
+                        value={formData.url}
+                        onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+                      />
+                    </div>
                   </div>
                 </div>
 
-                <div className="md:col-span-2 space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Description (Optional)</label>
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Description (Optional)</label>
                   <textarea
                     rows={2}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none"
+                    className="input-glass w-full py-4 rounded-2xl resize-none"
                     placeholder="Short description or instructions for students..."
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   />
                 </div>
 
-                <div className="md:col-span-2">
+                <div className="flex justify-end pt-4">
                   <button
                     type="submit"
-                    className="w-full md:w-auto px-8 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
+                    className="indigo-button w-full md:w-auto px-10 py-4 text-xs font-black uppercase tracking-widest"
                   >
                     {editingId ? 'Update Test Link' : 'Save Test Link'}
                   </button>
@@ -163,69 +170,72 @@ const AdminTestMaster: React.FC = () => {
         )}
       </AnimatePresence>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-4 border-b border-gray-100">
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search tests..."
-              className="w-full pl-10 pr-4 py-2 bg-gray-50 border-none rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-        </div>
+      <div className="relative max-w-xl">
+        <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
+        <input
+          type="text"
+          placeholder="Search tests..."
+          className="input-glass w-full py-4 pl-14 rounded-2xl border-white/5 focus:border-indigo-500/50 transition-all text-sm"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
 
+      <div className="glass rounded-[40px] overflow-hidden border border-white/5 shadow-2xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-100">
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Test Details</th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">URL</th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date Posted</th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+              <tr className="bg-white/[0.02] border-b border-white/5 text-slate-500 text-[10px] font-black uppercase tracking-widest">
+                <th className="px-10 py-6">Test Details</th>
+                <th className="px-10 py-6">URL Link</th>
+                <th className="px-10 py-6">Date Posted</th>
+                <th className="px-10 py-6 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-white/5 text-sm text-slate-300">
               {filteredTests.length > 0 ? (
                 filteredTests.map((test) => (
                   <motion.tr 
                     key={test.id}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="hover:bg-gray-50/50 transition-colors"
+                    className="hover:bg-white/[0.03] transition-colors group"
                   >
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <span className="font-medium text-gray-900">{test.title}</span>
-                        {test.description && (
-                          <span className="text-xs text-gray-500 line-clamp-1">{test.description}</span>
-                        )}
+                    <td className="px-10 py-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-black text-sm border border-amber-500/20 group-hover:scale-110 transition-transform">
+                          T
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="font-bold text-white tracking-tight leading-none mb-1.5">{test.title}</span>
+                          {test.description && (
+                            <span className="text-xs text-slate-500 line-clamp-1">{test.description}</span>
+                          )}
+                        </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-10 py-6">
                       <a 
                         href={test.url} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-800"
+                        className="inline-flex items-center text-xs font-black uppercase tracking-widest text-amber-400 hover:text-amber-300 transition-colors bg-amber-500/10 px-3.5 py-2 rounded-xl border border-amber-500/20 shadow-lg shadow-amber-500/5"
                       >
-                        <ExternalLink className="w-4 h-4 mr-1.5" />
+                        <ExternalLink className="w-3.5 h-3.5 mr-1.5" />
                         Visit Link
                       </a>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
+                    <td className="px-10 py-6 text-slate-400 font-bold tracking-tighter">
                       {new Date(test.date).toLocaleDateString()}
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-10 py-6">
                       <div className="flex items-center justify-end gap-2">
                         <button 
                           onClick={() => handleEdit(test)}
-                          className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                          className="p-2.5 text-indigo-400 hover:bg-white/5 rounded-xl transition-all"
                           title="Edit"
                         >
-                          <Pencil className="w-4 h-4" />
+                          <Pencil className="w-4.5 h-4.5" />
                         </button>
                         <button 
                           onClick={() => {
@@ -233,10 +243,10 @@ const AdminTestMaster: React.FC = () => {
                               deleteExternalTest(test.id);
                             }
                           }}
-                          className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          className="p-2.5 text-slate-500 hover:text-rose-500 hover:bg-white/5 rounded-xl transition-all"
                           title="Delete"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-4.5 h-4.5" />
                         </button>
                       </div>
                     </td>
@@ -244,8 +254,11 @@ const AdminTestMaster: React.FC = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-gray-500 italic">
-                    No external tests found.
+                  <td colSpan={4} className="px-10 py-24 text-center">
+                    <div className="flex flex-col items-center justify-center opacity-40">
+                      <ClipboardList size={48} className="mb-4 text-slate-600 animate-bounce" />
+                      <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">No external tests found.</p>
+                    </div>
                   </td>
                 </tr>
               )}

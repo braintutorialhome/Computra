@@ -202,7 +202,7 @@ export default function StudentDashboard() {
                   <Route path="dashboard" element={<StudentHome student={currentStudent} />} />
                   <Route path="profile" element={<StudentProfile student={currentStudent} />} />
                   <Route path="fees" element={<StudentFees student={currentStudent} />} />
-                  <Route path="due-fees" element={<StudentDueFees />} />
+                  <Route path="due-fees" element={<StudentDueFees student={currentStudent} />} />
                   <Route path="test-master" element={<StudentTestMaster />} />
                   <Route path="results" element={<StudentResults />} />
                   <Route path="materials" element={<StudentMaterials />} />
