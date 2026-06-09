@@ -210,7 +210,7 @@ export default function StudentManagement() {
       {/* Edit Modal */}
       {editingStudent && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-xl bg-slate-950/80">
-          <div className="glass max-w-xl w-full p-10 rounded-[40px] border border-white/10 overflow-y-auto max-h-[90vh] custom-scrollbar">
+          <div className="glass max-w-2xl w-full p-10 rounded-[40px] border border-white/10 overflow-y-auto max-h-[90vh] custom-scrollbar">
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-indigo-500/10 text-indigo-400 rounded-2xl">
@@ -246,11 +246,31 @@ export default function StudentManagement() {
               </div>
 
               <div>
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block ml-1">Class</label>
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block ml-1">Guardian's Name</label>
+                <input 
+                  type="text"
+                  value={editingStudent.fatherName || ''}
+                  onChange={(e) => setEditingStudent({...editingStudent, fatherName: e.target.value})}
+                  className="input-glass w-full px-6 py-4 rounded-2xl"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block ml-1">Class/Level</label>
                 <input 
                   type="text"
                   value={editingStudent.class}
                   onChange={(e) => setEditingStudent({...editingStudent, class: e.target.value})}
+                  className="input-glass w-full px-6 py-4 rounded-2xl"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block ml-1">Subject</label>
+                <input 
+                  type="text"
+                  value={editingStudent.subject}
+                  onChange={(e) => setEditingStudent({...editingStudent, subject: e.target.value})}
                   className="input-glass w-full px-6 py-4 rounded-2xl"
                 />
               </div>
@@ -266,12 +286,60 @@ export default function StudentManagement() {
               </div>
 
               <div>
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block ml-1">Subject</label>
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block ml-1">Date of Birth</label>
                 <input 
-                  type="text"
-                  value={editingStudent.subject}
-                  onChange={(e) => setEditingStudent({...editingStudent, subject: e.target.value})}
-                  className="input-glass w-full px-6 py-4 rounded-2xl"
+                  type="date"
+                  value={editingStudent.dob || ''}
+                  onChange={(e) => setEditingStudent({...editingStudent, dob: e.target.value})}
+                  className="input-glass w-full px-6 py-4 rounded-2xl text-white"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block ml-1">Gender</label>
+                <select 
+                  value={editingStudent.gender || 'Male'}
+                  onChange={(e) => setEditingStudent({...editingStudent, gender: e.target.value})}
+                  className="input-glass w-full px-6 py-4 rounded-2xl appearance-none bg-slate-950 font-bold"
+                >
+                  <option value="Male" className="bg-slate-900">Male</option>
+                  <option value="Female" className="bg-slate-900">Female</option>
+                  <option value="Other" className="bg-slate-900">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block ml-1">Semester</label>
+                <select 
+                  value={editingStudent.semester || ''}
+                  onChange={(e) => setEditingStudent({...editingStudent, semester: e.target.value})}
+                  className="input-glass w-full px-6 py-4 rounded-2xl appearance-none bg-slate-950 font-bold"
+                >
+                  <option value="" className="bg-slate-900">No Semester</option>
+                  <option value="Semester-I" className="bg-slate-900">Semester-I</option>
+                  <option value="Semester-II" className="bg-slate-900">Semester-II</option>
+                  <option value="Semester-III" className="bg-slate-900">Semester-III</option>
+                  <option value="Semester-IV" className="bg-slate-900">Semester-IV</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block ml-1">Date of Joining</label>
+                <input 
+                  type="date"
+                  value={editingStudent.dateOfJoining || ''}
+                  onChange={(e) => setEditingStudent({...editingStudent, dateOfJoining: e.target.value})}
+                  className="input-glass w-full px-6 py-4 rounded-2xl text-white"
+                />
+              </div>
+
+              <div className="col-span-full">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block ml-1">Residential Address</label>
+                <textarea 
+                  rows={2}
+                  value={editingStudent.address || ''}
+                  onChange={(e) => setEditingStudent({...editingStudent, address: e.target.value})}
+                  className="input-glass w-full p-6 rounded-2xl resize-none"
                 />
               </div>
 

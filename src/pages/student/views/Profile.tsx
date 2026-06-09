@@ -18,6 +18,26 @@ export default function StudentProfile({ student }: { student: Student }) {
     { label: 'Subjects', value: student.subject, icon: Book, color: 'emerald' },
     { label: 'Present Class', value: student.class, icon: Layers, color: 'orange' },
     { label: 'Semester', value: student.semester || 'N/A', icon: Layers, color: 'rose' },
+    { label: 'Date of Joining', value: (() => {
+      if (!student.dateOfJoining) return 'N/A';
+      const date = new Date(student.dateOfJoining);
+      if (isNaN(date.getTime())) return student.dateOfJoining;
+      const day = date.getDate();
+      const monthNames = ["January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+      ];
+      return `${day} ${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+    })(), icon: Calendar, color: 'teal' },
+    { label: 'Admission Date', value: (() => {
+      if (!student.admissionDate) return 'N/A';
+      const date = new Date(student.admissionDate);
+      if (isNaN(date.getTime())) return student.admissionDate;
+      const day = date.getDate();
+      const monthNames = ["January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+      ];
+      return `${day} ${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+    })(), icon: Calendar, color: 'indigo' },
     { label: 'Mobile Number', value: student.mobile, icon: Phone, color: 'sky' },
     { label: 'Address', value: student.address, icon: MapPin, color: 'amber' },
   ];
