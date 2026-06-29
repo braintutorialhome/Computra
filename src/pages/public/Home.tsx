@@ -55,7 +55,7 @@ export default function PublicHome() {
                 Portal Login
               </Link>
               <Link to="/admission" className="glass bg-white/10 px-10 py-5 rounded-2xl font-black text-lg hover:bg-white/20 transition-all">
-                Join Now
+                Apply for Admission
               </Link>
             </div>
           </motion.div>
