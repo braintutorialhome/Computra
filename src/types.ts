@@ -18,11 +18,13 @@ export interface Student {
   class: string;
   semester: string;
   mobile: string;
+  whatsapp?: string;
   address: string;
   admissionDate: string;
   status: 'pending' | 'approved' | 'rejected' | 'deleted';
   rollNumber?: string;
   dateOfJoining?: string;
+  photoUrl?: string;
 }
 
 export interface Fee {
@@ -82,6 +84,9 @@ export interface StudyMaterial {
   url: string;
   uploadDate: string;
   description?: string;
+  subject?: string;
+  class?: string;
+  semester?: string;
 }
 
 export interface Notice {

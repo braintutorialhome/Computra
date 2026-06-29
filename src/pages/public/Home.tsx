@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Phone, MessageSquare, BookOpen, GraduationCap, ArrowRight, MapPin, PhoneCall } from 'lucide-react';
+import { Phone, MessageSquare, BookOpen, GraduationCap, ArrowRight, MapPin, PhoneCall, Monitor, Cpu, Brain } from 'lucide-react';
 
 export default function PublicHome() {
   return (
@@ -42,13 +42,13 @@ export default function PublicHome() {
             transition={{ duration: 0.8, ease: "easeOut" }}
           >
             <span className="inline-block px-4 py-1.5 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full text-xs font-black uppercase tracking-widest mb-8">
-              Learn. Practice. Succeed.
+              Unique Training Centre
             </span>
             <h1 className="text-[7.2vw] sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tighter leading-none mb-8 whitespace-nowrap">
               Welcome to <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-400 animate-gradient-x underline decoration-white/10 decoration-8 underline-offset-8">UTC Computra</span>
             </h1>
             <p className="text-xl text-slate-400 max-w-2xl mx-auto mb-12 font-medium leading-relaxed">
-              Premium tuition for Computer Applications and Computer Science at UTC, Bhangar, South 24 Parganas.
+              Premium tuition for Computer Applications (COMA), Computer Science (COMS) and Artificial Intelligence (APAI) at UTC, Bhangar, South 24 Parganas.
             </p>
             <div className="flex flex-wrap justify-center gap-6">
               <Link to="/login" className="indigo-button px-10 py-5 font-black text-lg shadow-2xl shadow-indigo-600/40 hover:scale-105">
@@ -66,9 +66,9 @@ export default function PublicHome() {
       <section className="py-32 bg-white/[0.02] border-y border-white/5">
         <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-3 gap-8">
           {[
-            { icon: BookOpen, title: "Modern Computer Application", desc: "Focused teaching for top results.", color: "blue" },
-            { icon: GraduationCap, title: "Computer Science", desc: "Helping students get the best grades.", color: "indigo" },
-            { icon: MessageSquare, title: "Smart Learning", desc: "Digital study material, test portals and full dedicated support.", color: "purple" }
+            { icon: Monitor, title: "Modern Computer Application", desc: "Smart Learning: Focused teaching for top results.", color: "blue" },
+            { icon: Cpu, title: "Computer Science", desc: "Helping students get the best grades.", color: "indigo" },
+            { icon: Brain, title: "Artificial Intelligence", desc: "Digital study material, test portals and full dedicated support.", color: "purple" }
           ].map((f, i) => (
             <motion.div 
               key={i}

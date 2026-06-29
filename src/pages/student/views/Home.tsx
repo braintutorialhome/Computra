@@ -1,7 +1,7 @@
 import React from 'react';
 import { useStorage } from '../../../hooks/useStorage';
 import { Student } from '../../../types';
-import { CreditCard, Brain, Calendar, Bell, ArrowRight, BookMarked, Trophy, AlertCircle, ExternalLink, FileCheck } from 'lucide-react';
+import { CreditCard, Brain, Calendar, Bell, ArrowRight, BookMarked, Trophy, AlertCircle, ExternalLink, FileCheck, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 
@@ -99,13 +99,13 @@ export default function StudentHome({ student }: { student: Student }) {
         <div className="glass p-10 rounded-[40px] bg-gradient-to-br from-purple-500/10 to-transparent flex flex-col justify-between group">
           <div>
             <div className="w-14 h-14 bg-purple-500/20 text-purple-400 rounded-2xl flex items-center justify-center mb-10 border border-purple-500/20 group-hover:bg-purple-600 group-hover:text-white transition-all duration-500">
-               <FileCheck size={28} />
+               <User size={28} />
             </div>
-            <p className="text-xs font-black uppercase tracking-widest text-slate-500 mb-2">Academic Performance</p>
-            <h3 className="text-4xl font-black text-white tracking-tighter">Reports <span className="text-slate-700 text-lg">Live</span></h3>
+            <p className="text-xs font-black uppercase tracking-widest text-slate-500 mb-2">Student Profile</p>
+            <h3 className="text-4xl font-black text-white tracking-tighter">My Profile <span className="text-slate-700 text-lg">Active</span></h3>
           </div>
-          <Link to="/student/results" className="mt-10 text-xs font-black uppercase tracking-widest text-purple-400 flex items-center gap-2 hover:gap-4 transition-all">
-            Access My Results <ArrowRight size={14} />
+          <Link to="/student/profile" className="mt-10 text-xs font-black uppercase tracking-widest text-purple-400 flex items-center gap-2 hover:gap-4 transition-all">
+            Access My Profile <ArrowRight size={14} />
           </Link>
         </div>
 
@@ -121,12 +121,6 @@ export default function StudentHome({ student }: { student: Student }) {
             <h3 className={`text-4xl font-black tracking-tighter uppercase ${isPresentToday ? 'text-emerald-400' : 'text-rose-400'}`}>
               {isPresentToday ? 'Verified' : 'Absent'}
             </h3>
-          </div>
-          <div className="mt-10 flex items-center gap-2">
-             <div className="w-8 h-1 bg-white/5 rounded-full overflow-hidden">
-                <div className="h-full bg-emerald-500" style={{ width: '85%' }}></div>
-             </div>
-             <span className="text-xs font-black text-slate-600 uppercase tracking-widest">85% RATIO</span>
           </div>
         </div>
       </div>
@@ -150,7 +144,7 @@ export default function StudentHome({ student }: { student: Student }) {
               </Link>
             </div>
           ) : (
-            <p className="text-slate-600 font-bold uppercase tracking-widest text-xs">No active notices.</p>
+            <p className="text-slate-600 font-bold uppercase tracking-widest text-xs">No active notices</p>
           )}
         </div>
 
@@ -178,7 +172,7 @@ export default function StudentHome({ student }: { student: Student }) {
                 <BookMarked size={24} />
               </div>
               <div className="mt-8">
-                <p className="text-xs font-black uppercase tracking-widest text-slate-500 group-hover:text-white/60">Repository</p>
+                <p className="text-xs font-black uppercase tracking-widest text-slate-500 group-hover:text-white/60">Study Materials</p>
                 <h4 className="text-xl font-black text-white tracking-tight">Documents</h4>
               </div>
            </Link>

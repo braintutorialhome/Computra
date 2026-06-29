@@ -75,7 +75,7 @@ export default function StudentNotices({ student }: { student: Student }) {
               <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-8 text-slate-800">
                  <Megaphone size={48} />
               </div>
-              <p className="text-slate-600 font-black uppercase tracking-widest text-xs">Frequency silence • No notices active</p>
+              <p className="text-slate-600 font-black uppercase tracking-widest text-xs">No active notices</p>
             </div>
           )}
         </motion.div>

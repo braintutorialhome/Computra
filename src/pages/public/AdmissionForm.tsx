@@ -18,7 +18,9 @@ export default function AdmissionForm() {
     semester: '',
     dateOfJoining: '',
     mobile: '',
-    address: ''
+    whatsapp: '',
+    address: '',
+    photoUrl: ''
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -94,6 +96,50 @@ export default function AdmissionForm() {
                  <User size={20} />
               </div>
               <h3 className="font-black text-white uppercase tracking-widest text-xs">Student Identity</h3>
+            </div>
+
+            <div className="flex flex-col items-center justify-center p-8 bg-white/5 rounded-[40px] border border-white/5 gap-4">
+              <div className="w-28 h-28 rounded-full bg-slate-900 border-2 border-dashed border-indigo-500/30 flex items-center justify-center font-black text-slate-500 text-3xl shadow-xl relative overflow-hidden group/form-avatar">
+                {formData.photoUrl ? (
+                  <img src={formData.photoUrl} alt="Uploaded student" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                ) : (
+                  <User size={32} className="text-slate-700" />
+                )}
+                <label className="absolute inset-0 bg-indigo-600/90 opacity-0 group-hover/form-avatar:opacity-100 transition-opacity flex flex-col items-center justify-center text-[10px] font-black uppercase tracking-widest cursor-pointer text-white">
+                  Upload Photo
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setFormData({
+                            ...formData,
+                            photoUrl: reader.result as string
+                          });
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    className="hidden" 
+                  />
+                </label>
+              </div>
+              <div className="text-center">
+                <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400 block">Student Profile Photo</span>
+                <span className="text-[9px] text-slate-500 block mt-1">Accepts PNG, JPG, or WEBP formats</span>
+              </div>
+              {formData.photoUrl && (
+                <button 
+                  type="button"
+                  onClick={() => setFormData({ ...formData, photoUrl: '' })}
+                  className="text-[9px] font-black uppercase tracking-widest text-rose-400 hover:text-rose-300 transition-colors"
+                >
+                  Remove Picture
+                </button>
+              )}
             </div>
             
             <div className="grid md:grid-cols-2 gap-10">
@@ -225,6 +271,16 @@ export default function AdmissionForm() {
                   type="tel" 
                   value={formData.mobile}
                   onChange={(e) => setFormData({...formData, mobile: e.target.value})}
+                  className="input-glass w-full py-5 rounded-3xl font-bold"
+                  placeholder="+91..."
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">WhatsApp Number</label>
+                <input 
+                  type="tel" 
+                  value={formData.whatsapp}
+                  onChange={(e) => setFormData({...formData, whatsapp: e.target.value})}
                   className="input-glass w-full py-5 rounded-3xl font-bold"
                   placeholder="+91..."
                 />

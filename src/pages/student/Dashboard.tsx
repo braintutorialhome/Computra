@@ -126,7 +126,7 @@ export default function StudentDashboard() {
               </div>
               <div className="flex flex-col">
                 <span className="text-lg font-black leading-tight uppercase tracking-widest text-white">UTC Computra</span>
-                <span className="text-xs text-slate-500 font-black uppercase tracking-widest mt-0.5">Student Node</span>
+                <span className="text-xs text-slate-500 font-black uppercase tracking-widest mt-0.5">Student</span>
               </div>
             </div>
             <button className="lg:hidden p-2 text-slate-500 hover:text-white transition-colors" onClick={() => setIsSidebarOpen(false)}>
@@ -135,8 +135,12 @@ export default function StudentDashboard() {
           </div>
 
           <div className="mb-10 p-6 glass rounded-3xl border border-white/5 flex items-center gap-4 group">
-             <div className="w-14 h-14 bg-gradient-to-tr from-indigo-600 to-purple-600 text-white rounded-2xl flex items-center justify-center font-black text-xl shadow-xl group-hover:-rotate-6 transition-transform">
-               {currentStudent.name.charAt(0)}
+             <div className="w-14 h-14 bg-gradient-to-tr from-indigo-600 to-purple-600 text-white rounded-2xl flex items-center justify-center font-black text-xl shadow-xl group-hover:-rotate-6 transition-transform overflow-hidden">
+               {currentStudent.photoUrl ? (
+                 <img src={currentStudent.photoUrl} alt={currentStudent.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+               ) : (
+                 currentStudent.name.charAt(0)
+               )}
              </div>
              <div className="truncate">
                <p className="font-black text-white truncate group-hover:text-indigo-400 transition-colors uppercase tracking-tight">{currentStudent.name}</p>
@@ -184,8 +188,12 @@ export default function StudentDashboard() {
             <Compass className="text-indigo-500" size={24} />
             <span className="font-black text-white uppercase tracking-widest text-xl">UTC Computra</span>
           </div>
-          <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center font-black">
-            {currentStudent.name.charAt(0)}
+          <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center font-black overflow-hidden">
+            {currentStudent.photoUrl ? (
+              <img src={currentStudent.photoUrl} alt={currentStudent.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+            ) : (
+              currentStudent.name.charAt(0)
+            )}
           </div>
         </header>
 
@@ -205,7 +213,7 @@ export default function StudentDashboard() {
                   <Route path="due-fees" element={<StudentDueFees student={currentStudent} />} />
                   <Route path="test-master" element={<StudentTestMaster />} />
                   <Route path="results" element={<StudentResults />} />
-                  <Route path="materials" element={<StudentMaterials />} />
+                  <Route path="materials" element={<StudentMaterials student={currentStudent} />} />
                   <Route path="notices" element={<StudentNotices student={currentStudent} />} />
                   <Route path="/" element={<StudentHome student={currentStudent} />} />
                 </Routes>

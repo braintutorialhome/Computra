@@ -35,7 +35,7 @@ const StudentDueFees: React.FC<StudentDueFeesProps> = ({ student }) => {
             <AlertCircle size={140} />
           </div>
           <div>
-            <h4 className="text-lg font-black text-white uppercase tracking-tight">Ledger Warning</h4>
+            <h4 className="text-lg font-black text-white uppercase tracking-tight">Warning</h4>
             <p className="text-xs font-bold text-slate-500 mt-2 max-w-lg leading-relaxed">
               Please settle outstanding dues promptly. Delays in system clearance can interrupt your student credentials and active classes access.
             </p>
@@ -113,7 +113,7 @@ const StudentDueFees: React.FC<StudentDueFeesProps> = ({ student }) => {
               </svg>
             </div>
             <h3 className="text-xl font-black text-white uppercase tracking-tighter mb-2">No Outstanding Dues</h3>
-            <p className="text-emerald-500 text-xs font-black uppercase tracking-widest">You have zero outstanding ledger entries. Excellent standing.</p>
+            <p className="text-emerald-500 text-xs font-black uppercase tracking-widest">You have zero outstanding. Excellent standing.</p>
           </div>
         )}
       </div>

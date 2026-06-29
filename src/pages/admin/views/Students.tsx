@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useStorage } from '../../../hooks/useStorage';
-import { Search, User, Trash2, Edit2, Filter, Phone, MapPin, X, Save, Hash, RotateCcw, AlertTriangle } from 'lucide-react';
+import { Search, User, Trash2, Edit2, Filter, Phone, MapPin, X, Save, Hash, RotateCcw, AlertTriangle, MessageSquare } from 'lucide-react';
 import { Student } from '../../../types';
 
 export default function StudentManagement() {
@@ -16,7 +16,7 @@ export default function StudentManagement() {
   
   const displayList = activeTab === 'active' ? approved : deleted;
 
-  const classes = ['All', ...Array.from(new Set(approved.map(s => s.class)))];
+  const classes = ['All', ...Array.from(new Set(approved.map(s => s.class).filter(Boolean)))];
 
   const filtered = displayList.filter(s => {
     const sName = String(s.name || '').toLowerCase();
@@ -94,8 +94,12 @@ export default function StudentManagement() {
           <div key={s.id} className={`glass rounded-[32px] overflow-hidden group hover:bg-white/10 transition-all flex flex-col ${activeTab === 'deleted' ? 'opacity-80 border-rose-500/20' : ''}`}>
             <div className="p-8 flex-1 space-y-6">
               <div className="flex justify-between items-start">
-                <div className={`w-16 h-16 ${activeTab === 'deleted' ? 'bg-rose-600/50' : 'bg-indigo-600'} text-white rounded-2xl flex items-center justify-center font-black text-2xl shadow-lg shadow-indigo-600/20 group-hover:scale-110 transition-transform`}>
-                  {s.name.charAt(0)}
+                <div className={`w-16 h-16 ${activeTab === 'deleted' ? 'bg-rose-600/50' : 'bg-indigo-600'} text-white rounded-2xl flex items-center justify-center font-black text-2xl shadow-lg shadow-indigo-600/20 group-hover:scale-110 transition-transform overflow-hidden`}>
+                  {s.photoUrl ? (
+                    <img src={s.photoUrl} alt={s.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  ) : (
+                    s.name.charAt(0)
+                  )}
                 </div>
                 <div className="flex flex-col items-end gap-1">
                   <span className={`px-3 py-1 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest ${activeTab === 'deleted' ? 'text-rose-400' : 'text-indigo-400'}`}>
@@ -117,6 +121,11 @@ export default function StudentManagement() {
                 <div className="flex items-center gap-3 text-xs font-bold text-slate-400">
                   <Phone size={14} className={activeTab === 'deleted' ? 'text-rose-500' : 'text-indigo-500'} /> {s.mobile}
                 </div>
+                {s.whatsapp && (
+                  <div className="flex items-center gap-3 text-xs font-bold text-slate-400">
+                    <MessageSquare size={14} className={activeTab === 'deleted' ? 'text-rose-500' : 'text-emerald-500'} /> {s.whatsapp}
+                  </div>
+                )}
                 <div className="flex items-center gap-3 text-xs font-bold text-slate-400">
                   <MapPin size={14} className={activeTab === 'deleted' ? 'text-rose-500' : 'text-indigo-500'} /> {s.address}
                 </div>
@@ -222,6 +231,46 @@ export default function StudentManagement() {
             </div>
 
             <form onSubmit={handleUpdate} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="col-span-full flex flex-col items-center justify-center py-4 bg-white/5 rounded-3xl border border-white/5 mb-4">
+                <div className="w-24 h-24 rounded-full bg-slate-900 border-2 border-indigo-500/30 flex items-center justify-center font-black text-white text-3xl shadow-lg relative overflow-hidden group/form-avatar">
+                  {editingStudent.photoUrl ? (
+                    <img src={editingStudent.photoUrl} alt={editingStudent.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  ) : (
+                    editingStudent.name ? editingStudent.name.charAt(0) : 'U'
+                  )}
+                  <label className="absolute inset-0 bg-indigo-600/90 opacity-0 group-hover/form-avatar:opacity-100 transition-opacity flex flex-col items-center justify-center text-[10px] font-black uppercase tracking-widest cursor-pointer">
+                    Upload
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setEditingStudent({
+                              ...editingStudent,
+                              photoUrl: reader.result as string
+                            });
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                      className="hidden" 
+                    />
+                  </label>
+                </div>
+                {editingStudent.photoUrl && (
+                  <button 
+                    type="button"
+                    onClick={() => setEditingStudent({ ...editingStudent, photoUrl: undefined })}
+                    className="mt-3 text-[9px] font-black uppercase tracking-widest text-rose-400 hover:text-rose-300 transition-colors"
+                  >
+                    Remove Picture
+                  </button>
+                )}
+              </div>
+
               <div className="col-span-full">
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block ml-1">Assigned Roll Number</label>
                 <div className="relative">
@@ -256,7 +305,7 @@ export default function StudentManagement() {
               </div>
 
               <div>
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block ml-1">Class/Level</label>
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block ml-1">Class</label>
                 <input 
                   type="text"
                   value={editingStudent.class}
@@ -286,12 +335,23 @@ export default function StudentManagement() {
               </div>
 
               <div>
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block ml-1">WhatsApp Number</label>
+                <input 
+                  type="text"
+                  value={editingStudent.whatsapp || ''}
+                  onChange={(e) => setEditingStudent({...editingStudent, whatsapp: e.target.value})}
+                  className="input-glass w-full px-6 py-4 rounded-2xl"
+                  placeholder="WhatsApp number"
+                />
+              </div>
+
+              <div>
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block ml-1">Date of Birth</label>
                 <input 
                   type="date"
                   value={editingStudent.dob || ''}
                   onChange={(e) => setEditingStudent({...editingStudent, dob: e.target.value})}
-                  className="input-glass w-full px-6 py-4 rounded-2xl text-white"
+                  className="input-glass w-full px-6 py-4 rounded-2xl text-white animate-none"
                 />
               </div>
 
@@ -300,7 +360,7 @@ export default function StudentManagement() {
                 <select 
                   value={editingStudent.gender || 'Male'}
                   onChange={(e) => setEditingStudent({...editingStudent, gender: e.target.value})}
-                  className="input-glass w-full px-6 py-4 rounded-2xl appearance-none bg-slate-950 font-bold"
+                  className="input-glass w-full px-6 p-4 rounded-2xl bg-slate-950 font-bold"
                 >
                   <option value="Male" className="bg-slate-900">Male</option>
                   <option value="Female" className="bg-slate-900">Female</option>
@@ -313,7 +373,7 @@ export default function StudentManagement() {
                 <select 
                   value={editingStudent.semester || ''}
                   onChange={(e) => setEditingStudent({...editingStudent, semester: e.target.value})}
-                  className="input-glass w-full px-6 py-4 rounded-2xl appearance-none bg-slate-950 font-bold"
+                  className="input-glass w-full px-6 p-4 rounded-2xl bg-slate-950 font-bold"
                 >
                   <option value="" className="bg-slate-900">No Semester</option>
                   <option value="Semester-I" className="bg-slate-900">Semester-I</option>
@@ -329,7 +389,7 @@ export default function StudentManagement() {
                   type="date"
                   value={editingStudent.dateOfJoining || ''}
                   onChange={(e) => setEditingStudent({...editingStudent, dateOfJoining: e.target.value})}
-                  className="input-glass w-full px-6 py-4 rounded-2xl text-white"
+                  className="input-glass w-full px-6 py-4 rounded-2xl text-white animate-none"
                 />
               </div>
 

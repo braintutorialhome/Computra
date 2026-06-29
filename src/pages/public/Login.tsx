@@ -36,7 +36,7 @@ export default function Login() {
           role
         });
         setIsLogin(true);
-        setError('Account created. Please log in.');
+        setError('Account created successfully. Please log in.');
       }
     } catch (err: any) {
       setError(err.message || 'System communication failure');
@@ -46,155 +46,183 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-[#060c18] flex flex-col items-center justify-center p-6 relative overflow-hidden selection:bg-indigo-500/30 selection:text-indigo-200">
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-600/10 rounded-full blur-[120px]" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-600/10 rounded-full blur-[120px]" />
+    <div className="min-h-screen bg-[#030712] text-slate-100 font-sans selection:bg-indigo-500/30 flex flex-col items-center justify-center p-4 relative overflow-hidden select-none">
+      {/* Background Decorative Blurs */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-600/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-600/10 rounded-full blur-[140px] pointer-events-none" />
 
-      <Link to="/" className="mb-12 glass px-6 py-3 rounded-2xl flex items-center gap-3 border-white/5 text-slate-500 hover:text-white transition-all group relative z-10">
-        <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" /> 
-        <span className="text-xs font-black uppercase tracking-widest leading-none">Abort & Return</span>
-      </Link>
-      
-      <motion.div 
-        layout
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="w-full max-w-lg glass rounded-[60px] shadow-2xl border border-white/10 overflow-hidden relative z-10"
-      >
-        <div className="p-12 text-center relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-white/[0.03] to-transparent pointer-events-none"></div>
-          
-          <div className="inline-flex w-24 h-24 bg-white/5 rounded-[30px] items-center justify-center mb-10 border border-white/5 shadow-inner group relative">
-            <div className="absolute inset-0 bg-indigo-600 opacity-20 blur-2xl group-hover:opacity-40 transition-opacity"></div>
-            <Shield className="text-white relative z-10" size={40} />
+      {/* Styled Top Bar Navigation */}
+      <div className="w-full max-w-md flex items-center justify-between mb-8 px-2">
+        <Link 
+          to="/" 
+          id="btn-login-abort"
+          className="px-5 py-2.5 rounded-2xl flex items-center gap-2 transition-all group font-bold text-xs uppercase tracking-wider border bg-[#090d16]/80 border-white/5 text-slate-400 hover:text-white hover:border-indigo-500/20 shadow-lg"
+        >
+          <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> 
+          <span>Return</span>
+        </Link>
+        <span className="text-xs font-black uppercase text-slate-600 tracking-widest">Portal Login</span>
+      </div>
+
+      {/* Clean Glassmorphic Main Container */}
+      <div className="w-full max-w-md relative z-10">
+        <motion.div 
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="glass p-8 sm:p-10 rounded-[40px] border border-white/5 shadow-2xl bg-white/[0.02]"
+        >
+          {/* Form Header */}
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-black uppercase tracking-widest text-indigo-400">
+              {isLogin ? 'Sign In' : 'Register'}
+            </h1>
+            <p className="text-sm font-medium text-slate-500 mt-2">
+              {isLogin ? 'Access your automated learning account' : 'Setup administrative permissions'}
+            </p>
           </div>
-          
-          <h1 className="text-3xl font-black text-white tracking-tighter uppercase leading-none mb-3">
-            Portal <span className="text-indigo-500">{isLogin ? 'Access' : 'Registry'}</span>
-          </h1>
-          <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">
-            {isLogin ? 'Encrypted UTC educational servers' : 'Register new administrative or student node'}
-          </p>
-        </div>
 
-        <div className="px-12 pb-16 space-y-10">
-          <div className="flex glass p-2 rounded-[30px] border-white/5 relative overflow-hidden">
-             <button 
+          <form onSubmit={handleSubmit} className="space-y-6">
+            
+            {/* Role Tab Selector */}
+            <div className="p-1 rounded-2xl flex bg-[#0a0f1c] border border-white/5">
+              <button 
+                type="button"
                 onClick={() => setRole('student')}
-                className={`flex-1 py-4 rounded-[22px] text-xs font-black uppercase tracking-widest transition-all relative z-10 ${
-                  role === 'student' ? 'bg-indigo-600 text-white shadow-xl' : 'text-slate-600 hover:text-slate-400'
+                className={`flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+                  role === 'student'
+                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20'
+                    : 'text-slate-500 hover:text-slate-400'
                 }`}
               >
                 Student
               </button>
               <button 
+                type="button"
                 onClick={() => setRole('admin')}
-                className={`flex-1 py-4 rounded-[22px] text-xs font-black uppercase tracking-widest transition-all relative z-10 ${
-                  role === 'admin' ? 'bg-indigo-600 text-white shadow-xl' : 'text-slate-600 hover:text-slate-400'
+                className={`flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+                  role === 'admin'
+                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20'
+                    : 'text-slate-500 hover:text-slate-400'
                 }`}
               >
-                Root
+                Root/Admin
               </button>
-          </div>
+            </div>
 
-          <form onSubmit={handleSubmit} className="space-y-8">
-            <AnimatePresence mode="wait">
-              {!isLogin && (
-                <motion.div 
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="space-y-4"
-                >
-                  <label className="text-xs font-black uppercase tracking-widest text-slate-500 ml-2">Full Identity Name</label>
+            {/* Inputs Container */}
+            <div className="space-y-4">
+              
+              {/* Full Name (Sign Up only) */}
+              <AnimatePresence mode="popLayout">
+                {!isLogin && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="space-y-2"
+                  >
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block ml-1">Full Name</label>
+                    <div className="relative">
+                      <User size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500" />
+                      <input 
+                        required
+                        type="text" 
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="input-glass w-full pl-14 py-4 rounded-2xl text-sm"
+                        placeholder="e.g. Rahul Sen"
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Username Input */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block ml-1">Username</label>
+                <div className="relative">
+                  <Shield size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500" />
                   <input 
                     required
                     type="text" 
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="input-glass w-full py-5 rounded-3xl font-bold tracking-tight text-lg"
-                    placeholder="ENTER FULL NAME"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="input-glass w-full pl-14 py-4 rounded-2xl text-sm"
+                    placeholder="Enter system identifiers"
                   />
-                </motion.div>
-              )}
-            </AnimatePresence>
+                </div>
+              </div>
 
-            <div className="space-y-4">
-              <label className="text-xs font-black uppercase tracking-widest text-slate-500 ml-2">System UID / Username</label>
-              <input 
-                required
-                type="text" 
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="input-glass w-full py-5 rounded-3xl font-bold tracking-tight text-lg"
-                placeholder="USERNAME"
-              />
+              {/* Password Input */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block ml-1">Password</label>
+                <div className="relative">
+                  <Lock size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <input 
+                    required
+                    type="password" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="input-glass w-full pl-14 py-4 rounded-2xl text-sm"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+
             </div>
-            
-            <div className="space-y-4">
-              <label className="text-xs font-black uppercase tracking-widest text-slate-500 ml-2">Encryption Key / Password</label>
-              <input 
-                required
-                type="password" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="input-glass w-full py-5 rounded-3xl font-bold text-lg"
-                placeholder="••••••••"
-              />
-            </div>
+
+            {/* Error logs */}
             {error && (
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="p-5 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center gap-3"
-              >
-                <p className="text-rose-400 text-[9px] font-black uppercase tracking-widest">{error}</p>
-              </motion.div>
+              <div className="p-4 rounded-2xl bg-rose-500/5 border border-rose-500/10 text-center">
+                <p className="text-rose-400 text-xs font-bold leading-relaxed">{error}</p>
+              </div>
             )}
 
+            {/* Syncing loader indicator */}
             {isInitialSyncing && (
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="p-5 bg-indigo-500/5 border border-white/5 rounded-2xl flex items-center justify-center gap-3"
-              >
-                <Loader2 className="animate-spin text-indigo-500" size={14} />
-                <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest">Initial cloud sync in progress...</p>
-              </motion.div>
+              <div className="flex items-center justify-center gap-2 text-slate-500 py-1">
+                <Loader2 className="animate-spin text-indigo-400 animate-infinite" size={14} />
+                <span className="text-[10px] font-black uppercase tracking-widest">Initial Sync Ongoing...</span>
+              </div>
             )}
 
-            {syncError && !isInitialSyncing && (
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="p-5 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex flex-col gap-2"
-              >
-                <p className="text-amber-500 text-[9px] font-black uppercase tracking-widest flex items-center gap-2"> Cloud connectivity warning </p>
-                <p className="text-slate-400 text-[8px] font-bold uppercase tracking-wider">{syncError}</p>
-              </motion.div>
-            )}
-
+            {/* Submit Control Button */}
             <button 
               type="submit" 
               disabled={loading || isInitialSyncing}
-              className="w-full py-6 text-xs font-black uppercase tracking-widest indigo-button shadow-2xl flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-3 shadow-xl shadow-indigo-600/20 active:scale-98"
             >
-              {loading ? <Loader2 className="animate-spin" size={18} /> : isLogin ? <LogIn size={18} /> : <UserPlus size={18} />}
-              <span>{isInitialSyncing ? 'Synchronizing...' : isLogin ? 'Login' : 'Sign Up'}</span>
+              {loading ? <Loader2 className="animate-spin" size={14} /> : isLogin ? <LogIn size={14} /> : <UserPlus size={14} />}
+              <span>{isInitialSyncing ? 'Synchronizing...' : isLogin ? 'Sign In' : 'Sign Up'}</span>
             </button>
+
           </form>
-          
-          <div className="text-center">
-            <button 
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-xs font-black uppercase tracking-widest text-slate-500 hover:text-white transition-all underline decoration-white/0 hover:decoration-white/10 underline-offset-8"
-            >
-              {isLogin ? "Terminate session? Create new registry" : "Already registered? Restore session"}
-            </button>
+        </motion.div>
+
+        {/* Sync Error Log */}
+        {syncError && !isInitialSyncing && (
+          <div className="mt-6 p-4 rounded-[24px] bg-amber-500/5 border border-amber-500/10 text-center">
+            <p className="text-amber-500 text-[10px] font-black uppercase tracking-widest mb-1">Central Sync Log</p>
+            <p className="text-slate-500 text-[9px] font-bold uppercase tracking-wide leading-relaxed">{syncError}</p>
           </div>
+        )}
+
+        {/* Mode Switch Button */}
+        <div className="text-center mt-8">
+          <button 
+            type="button"
+            id="btn-mode-toggle"
+            onClick={() => {
+              setIsLogin(!isLogin);
+              setError('');
+            }}
+            className="text-xs font-black uppercase tracking-widest transition-all text-slate-500 hover:text-white underline decoration-white/0 hover:decoration-white/20 underline-offset-8"
+          >
+            {isLogin ? "Create administrative account" : "Authorized sign-in terminal"}
+          </button>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }
-
