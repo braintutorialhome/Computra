@@ -124,13 +124,12 @@ export default function Login() {
                   >
                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block ml-1">Full Name</label>
                     <div className="relative">
-                      <User size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500" />
                       <input 
                         required
                         type="text" 
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="input-glass w-full pl-14 py-4 rounded-2xl text-sm"
+                        className="input-glass w-full px-6 py-4 rounded-2xl text-sm"
                         placeholder="e.g. Rahul Sen"
                       />
                     </div>
@@ -142,14 +141,13 @@ export default function Login() {
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block ml-1">Username</label>
                 <div className="relative">
-                  <Shield size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500" />
                   <input 
                     required
                     type="text" 
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="input-glass w-full pl-14 py-4 rounded-2xl text-sm"
-                    placeholder="Enter system identifiers"
+                    className="input-glass w-full px-6 py-4 rounded-2xl text-sm"
+                    placeholder=""
                   />
                 </div>
               </div>
@@ -158,14 +156,13 @@ export default function Login() {
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block ml-1">Password</label>
                 <div className="relative">
-                  <Lock size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500" />
                   <input 
                     required
                     type="password" 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="input-glass w-full pl-14 py-4 rounded-2xl text-sm"
-                    placeholder="••••••••"
+                    className="input-glass w-full px-6 py-4 rounded-2xl text-sm"
+                    placeholder=""
                   />
                 </div>
               </div>
