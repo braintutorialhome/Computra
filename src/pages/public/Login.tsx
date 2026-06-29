@@ -214,12 +214,11 @@ export default function Login() {
             type="button"
             id="btn-mode-toggle"
             onClick={() => {
-              setIsLogin(!isLogin);
-              setError('');
+              navigate('/admission');
             }}
             className="text-xs font-black uppercase tracking-widest transition-all text-slate-500 hover:text-white underline decoration-white/0 hover:decoration-white/20 underline-offset-8"
           >
-            {isLogin ? "Create administrative account" : "Authorized sign-in terminal"}
+            Create Student Account
           </button>
         </div>
       </div>
