@@ -1,9 +1,23 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Phone, MessageSquare, BookOpen, GraduationCap, ArrowRight, MapPin, PhoneCall, Monitor, Cpu, Brain } from 'lucide-react';
+import { useStorage } from '../../hooks/useStorage';
 
 export default function PublicHome() {
+  const { currentUser } = useStorage();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (currentUser) {
+      if (currentUser.role === 'admin') {
+        navigate('/admin/dashboard', { replace: true });
+      } else if (currentUser.role === 'student') {
+        navigate('/student/dashboard', { replace: true });
+      }
+    }
+  }, [currentUser, navigate]);
+
   return (
     <div className="min-h-screen text-slate-100 font-sans selection:bg-indigo-500/30">
       {/* Header */}

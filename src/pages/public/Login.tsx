@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Shield, User, Lock, ArrowLeft, KeyRound, UserPlus, LogIn, Loader2 } from 'lucide-react';
@@ -6,7 +6,18 @@ import { useStorage } from '../../hooks/useStorage';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login, signup, isInitialSyncing, syncError } = useStorage();
+  const { login, signup, isInitialSyncing, syncError, currentUser } = useStorage();
+
+  useEffect(() => {
+    if (currentUser) {
+      if (currentUser.role === 'admin') {
+        navigate('/admin/dashboard', { replace: true });
+      } else if (currentUser.role === 'student') {
+        navigate('/student/dashboard', { replace: true });
+      }
+    }
+  }, [currentUser, navigate]);
+
   const [isLogin, setIsLogin] = useState(true);
   const [role, setRole] = useState<'admin' | 'student'>('student');
   const [username, setUsername] = useState('');
