@@ -44,12 +44,12 @@ export default function AdmissionForm() {
           <div className="w-24 h-24 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-10 border border-emerald-500/20 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
             <CheckCircle size={48} />
           </div>
-          <h2 className="text-4xl font-black text-white tracking-tighter mb-4 uppercase">Success Protocol</h2>
+          <h2 className="text-4xl font-black text-white tracking-tighter mb-4 uppercase">Success!</h2>
           <p className="text-slate-400 mb-10 leading-relaxed font-bold italic">
-            Transmission received. Our operations team will initiate contact via established uplink shortly.
+            Your profile is now under academic review, and our team will contact you shortly. Thank You.
           </p>
           <Link to="/" className="indigo-button w-full py-5 text-xs font-black uppercase tracking-widest inline-block">
-            Home Terminal
+            Home
           </Link>
         </motion.div>
       </div>
