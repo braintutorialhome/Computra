@@ -4,21 +4,6 @@ import { useStorage } from '../../../hooks/useStorage';
 import { User, Mail, Phone, MapPin, Calendar, Book, Layers, ShieldCheck, Mail as MailIcon, MessageSquare } from 'lucide-react';
 
 export default function StudentProfile({ student }: { student: Student }) {
-  const { updateStudent } = useStorage();
-
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        updateStudent({
-          ...student,
-          photoUrl: reader.result as string,
-        });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
   const infoItems = [
     { label: "Guardian's Name", value: student.fatherName, icon: ShieldCheck, color: 'indigo' },
     { label: 'Date of Birth', value: (() => {
@@ -67,16 +52,12 @@ export default function StudentProfile({ student }: { student: Student }) {
         <div className="px-12 pb-16 relative z-10">
           <div className="flex flex-col md:flex-row justify-between items-end gap-8 -mt-20 mb-16">
             <div className="flex flex-col md:flex-row items-end gap-8">
-              <div className="w-48 h-48 rounded-[40px] border-[10px] border-[#0f172a] bg-slate-900 flex items-center justify-center text-7xl font-black text-white shadow-2xl relative group/avatar overflow-hidden">
+              <div className="w-48 h-48 rounded-[40px] border-[10px] border-[#0f172a] bg-slate-900 flex items-center justify-center text-7xl font-black text-white shadow-2xl relative overflow-hidden">
                 {student.photoUrl ? (
                   <img src={student.photoUrl} alt={student.name} className="w-full h-full object-cover rounded-[30px]" referrerPolicy="no-referrer" />
                 ) : (
                   student.name.charAt(0)
                 )}
-                <label className="absolute inset-0 bg-indigo-600 opacity-0 group-hover/avatar:opacity-100 transition-opacity rounded-[30px] flex items-center justify-center text-white text-base font-black uppercase tracking-widest cursor-pointer">
-                  Update
-                  <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
-                </label>
               </div>
               <div className="pb-4">
                 <div className="flex items-center gap-3 mb-1">
