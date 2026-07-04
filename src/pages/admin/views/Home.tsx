@@ -63,7 +63,7 @@ export default function AdminHome() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 glass p-10 rounded-[40px]">
           <div className="flex items-center justify-between mb-10">
-            <h3 className="text-xl font-black text-white uppercase tracking-tight">Financial Stream</h3>
+            <h3 className="text-xl font-black text-white uppercase tracking-tight">Fees Collection and Expenses</h3>
             <div className="flex gap-2">
               <div className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-lg border border-white/5">
                 <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
@@ -108,25 +108,6 @@ export default function AdminHome() {
               <div className="bg-indigo-500 h-full shadow-[0_0_15px_rgba(99,102,241,0.5)]" style={{ width: `${attendancePercent}%` }}></div>
             </div>
             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Institutional Average</p>
-          </div>
-
-          <div className="bg-gradient-to-br from-indigo-600 to-purple-700 p-10 rounded-[40px] shadow-2xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-8 opacity-20 scale-150 group-hover:scale-[1.7] transition-transform">
-               <TrendingUp size={120} />
-            </div>
-            <div className="relative z-10">
-              <h3 className="text-white font-black uppercase tracking-tight text-xl mb-8">Performance Summary</h3>
-              <div className="space-y-6">
-                <div className="flex justify-between items-center pb-4 border-b border-white/10">
-                  <span className="text-indigo-100/60 text-xs font-bold uppercase">Profit Margin</span>
-                  <span className="text-xl font-black text-white">{(netBalance / (totalFees || 1) * 100).toFixed(1)}%</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-indigo-100/60 text-xs font-bold uppercase">Active Tests</span>
-                  <span className="text-xl font-black text-white">03</span>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
