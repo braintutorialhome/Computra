@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
-  BarChart2, Users, FileCheck, CreditCard, Wallet, Calendar, BookMarked, Bell, LogOut, Menu, X, Plus, Trash2, Edit2, TrendingUp, TrendingDown, DollarSign, Settings, AlertCircle, ExternalLink
+  BarChart2, Users, FileCheck, CreditCard, Wallet, Calendar, BookMarked, Bell, LogOut, Menu, X, Plus, Trash2, Edit2, TrendingUp, TrendingDown, DollarSign, Settings, AlertCircle, ExternalLink, UserCheck
 } from 'lucide-react';
 import { useStorage } from '../../hooks/useStorage';
 import AdminHome from './views/Home';
@@ -17,6 +17,7 @@ import AdminResults from './views/Results';
 import StudyMaterialManagement from './views/Materials';
 import NoticeManagement from './views/Notices';
 import AdminDueFees from '../../components/admin/AdminDueFees';
+import StudentFeeTracker from './views/StudentFeeTracker';
 
 const NavItem = ({ to, icon: Icon, label, active, onClick }: any) => (
   <Link 
@@ -67,7 +68,9 @@ export default function AdminDashboard() {
     { to: '/admin/dashboard', icon: BarChart2, label: 'Dashboard' },
     { to: '/admin/admissions', icon: FileCheck, label: 'Admissions' },
     { to: '/admin/students', icon: Users, label: 'Students' },
+    { to: '/admin/student-fee-tracker', icon: UserCheck, label: 'Student Fee Tracker' },
     { to: '/admin/fees', icon: CreditCard, label: 'Fees' },
+    { to: '/admin/due-fees', icon: AlertCircle, label: 'Due Fees' },
     { to: '/admin/expenses', icon: Wallet, label: 'Expenses' },
     { to: '/admin/accounts', icon: DollarSign, label: 'Account Statement' },
     { to: '/admin/attendance', icon: Calendar, label: 'Attendance' },
@@ -75,7 +78,6 @@ export default function AdminDashboard() {
     { to: '/admin/test-master', icon: ExternalLink, label: 'Exam Portal' },
     { to: '/admin/results', icon: FileCheck, label: 'Results' },
     { to: '/admin/materials', icon: BookMarked, label: 'Study Materials' },
-    { to: '/admin/due-fees', icon: AlertCircle, label: 'Due Fees' },
     { to: '/admin/notices', icon: Bell, label: 'Notices' },
   ];
 
@@ -83,7 +85,9 @@ export default function AdminDashboard() {
     '/admin/dashboard': 'System Dashboard',
     '/admin/admissions': 'Admission Panel',
     '/admin/students': 'Student Records',
+    '/admin/student-fee-tracker': 'Student Fee Tracker',
     '/admin/fees': 'Fees & Collections',
+    '/admin/due-fees': 'Due Fees Management',
     '/admin/expenses': 'Expense Tracker',
     '/admin/accounts': 'Account Statement',
     '/admin/attendance': 'Attendance System',
@@ -91,7 +95,6 @@ export default function AdminDashboard() {
     '/admin/test-master': 'Exam Portal (External)',
     '/admin/results': 'Result Management',
     '/admin/materials': 'Study Materials',
-    '/admin/due-fees': 'Due Fees Management',
     '/admin/notices': 'Notice Board',
   };
 
@@ -220,6 +223,7 @@ export default function AdminDashboard() {
           <Routes>
             <Route path="dashboard" element={<AdminHome />} />
             <Route path="students" element={<StudentManagement />} />
+            <Route path="student-fee-tracker" element={<StudentFeeTracker />} />
             <Route path="admissions" element={<AdmissionManagement />} />
             <Route path="fees" element={<FeeManagement />} />
             <Route path="expenses" element={<ExpenseManagement />} />
