@@ -28,7 +28,7 @@ export default function StudentFees({ student }: { student: Student }) {
             </div>
           </div>
         </div>
-        
+
         <div className="glass p-10 rounded-[50px] flex flex-col justify-center gap-8 border-white/5">
            <div className="flex items-center gap-6">
               <div className="w-16 h-16 bg-white/5 rounded-3xl flex items-center justify-center border border-white/10 group-hover:rotate-6 transition-transform">
