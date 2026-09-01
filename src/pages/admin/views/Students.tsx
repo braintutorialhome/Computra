@@ -52,6 +52,7 @@ export default function StudentManagement() {
   const { students, deleteStudent, removeStudentPermanently, updateStudent } = useStorage();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterClass, setFilterClass] = useState('All');
+  const [filterSemester, setFilterSemester] = useState('All');
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'active' | 'deleted'>('active');
@@ -63,6 +64,10 @@ export default function StudentManagement() {
 
   const classes = ['All', ...Array.from(new Set(approved.map(s => s.class).filter(Boolean)))];
 
+  const defaultSemesters = ['Semester-I', 'Semester-II', 'Semester-III', 'Semester-IV'];
+  const studentSemesters = Array.from(new Set(approved.map(s => s.semester).filter(Boolean)));
+  const semesters = ['All', ...Array.from(new Set([...defaultSemesters, ...studentSemesters]))];
+
   const filtered = displayList.filter(s => {
     const sName = String(s.name || '').toLowerCase();
     const sRoll = String(s.rollNumber || '').toLowerCase();
@@ -73,7 +78,8 @@ export default function StudentManagement() {
                           sRoll.includes(search) ||
                           sId.includes(search);
     const matchesClass = filterClass === 'All' || s.class === filterClass;
-    return matchesSearch && matchesClass;
+    const matchesSemester = filterSemester === 'All' || s.semester === filterSemester;
+    return matchesSearch && matchesClass && matchesSemester;
   });
 
   const handleUpdate = (e: React.FormEvent) => {
@@ -110,7 +116,7 @@ export default function StudentManagement() {
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-col md:flex-row gap-6">
+      <div className="flex flex-col lg:flex-row gap-4">
         <div className="flex-1 relative">
           <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500" size={20} />
           <input 
@@ -121,15 +127,27 @@ export default function StudentManagement() {
             className="input-glass w-full pl-14 py-4 rounded-2xl"
           />
         </div>
-        <div className="md:w-64 relative">
-          <Filter className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500" size={20} />
-          <select 
-            value={filterClass}
-            onChange={(e) => setFilterClass(e.target.value)}
-            className="input-glass w-full pl-14 py-4 rounded-2xl appearance-none"
-          >
-            {classes.map(c => <option key={c} value={c} className="bg-slate-900">{c}</option>)}
-          </select>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="w-full sm:w-56 relative">
+            <Filter className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+            <select 
+              value={filterClass}
+              onChange={(e) => setFilterClass(e.target.value)}
+              className="input-glass w-full pl-12 pr-6 py-4 rounded-2xl appearance-none"
+            >
+              {classes.map(c => <option key={c} value={c} className="bg-slate-900">{c === 'All' ? 'All Classes' : `Class ${c}`}</option>)}
+            </select>
+          </div>
+          <div className="w-full sm:w-56 relative">
+            <Filter className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+            <select 
+              value={filterSemester}
+              onChange={(e) => setFilterSemester(e.target.value)}
+              className="input-glass w-full pl-12 pr-6 py-4 rounded-2xl appearance-none"
+            >
+              {semesters.map(sem => <option key={sem} value={sem} className="bg-slate-900">{sem === 'All' ? 'All Semesters' : sem}</option>)}
+            </select>
+          </div>
         </div>
       </div>
 
@@ -159,7 +177,9 @@ export default function StudentManagement() {
                   {s.name}
                   {activeTab === 'deleted' && <span className="ml-3 text-[8px] bg-rose-500/20 text-rose-500 px-2 py-1 rounded-lg">DELETED</span>}
                 </h3>
-                <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">{s.subject} • Class {s.class}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  {s.subject} • Class {s.class} {s.semester ? `• ${s.semester}` : ''}
+                </p>
               </div>
 
               <div className="space-y-3 pt-6 border-t border-white/5">

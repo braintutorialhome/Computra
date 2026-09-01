@@ -22,6 +22,7 @@ export default function StudentFeeTracker() {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterClass, setFilterClass] = useState('All');
+  const [filterSemester, setFilterSemester] = useState('All');
   
   // Selected student modal
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
@@ -36,6 +37,7 @@ export default function StudentFeeTracker() {
     fatherName: '',
     mobile: '',
     class: '',
+    semester: '',
     subject: '',
     address: '',
     rollNumber: ''
@@ -102,6 +104,10 @@ export default function StudentFeeTracker() {
     new Set(activeStudents.map(s => s.class || s.subject).filter(Boolean))
   );
 
+  const defaultSemesters = ['Semester-I', 'Semester-II', 'Semester-III', 'Semester-IV'];
+  const studentSemesters = Array.from(new Set(activeStudents.map(s => s.semester).filter(Boolean)));
+  const availableSemesters = ['All', ...Array.from(new Set([...defaultSemesters, ...studentSemesters]))];
+
   // Filtered students list
   const filteredData = studentFeeData.filter(item => {
     const term = searchTerm.toLowerCase();
@@ -110,19 +116,24 @@ export default function StudentFeeTracker() {
     const mobileStr = item.student.mobile ? String(item.student.mobile) : '';
     const classStr = item.student.class ? String(item.student.class).toLowerCase() : '';
     const subjectStr = item.student.subject ? String(item.student.subject).toLowerCase() : '';
+    const semesterStr = item.student.semester ? String(item.student.semester).toLowerCase() : '';
 
     const matchesSearch = 
       nameStr.includes(term) ||
       rollStr.includes(term) ||
       mobileStr.includes(searchTerm) ||
       classStr.includes(term) ||
-      subjectStr.includes(term);
+      subjectStr.includes(term) ||
+      semesterStr.includes(term);
 
     const matchesClass = filterClass === 'All' || 
       item.student.class === filterClass || 
       item.student.subject === filterClass;
 
-    return matchesSearch && matchesClass;
+    const matchesSemester = filterSemester === 'All' || 
+      item.student.semester === filterSemester;
+
+    return matchesSearch && matchesClass && matchesSemester;
   });
 
   // Global Summary Stats
@@ -139,6 +150,7 @@ export default function StudentFeeTracker() {
       fatherName: String(student.fatherName || ''),
       mobile: String(student.mobile || ''),
       class: String(student.class || ''),
+      semester: String(student.semester || ''),
       subject: String(student.subject || ''),
       address: String(student.address || ''),
       rollNumber: String(student.rollNumber || '')
@@ -170,6 +182,7 @@ export default function StudentFeeTracker() {
       fatherName: profileForm.fatherName.trim(),
       mobile: profileForm.mobile.trim(),
       class: profileForm.class.trim(),
+      semester: profileForm.semester.trim(),
       subject: profileForm.subject.trim(),
       address: profileForm.address.trim(),
       rollNumber: profileForm.rollNumber.trim()
@@ -292,7 +305,7 @@ export default function StudentFeeTracker() {
       </div>
 
       {/* Search & Filter Controls */}
-      <div className="glass p-6 rounded-3xl border border-white/5 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+      <div className="glass p-6 rounded-3xl border border-white/5 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
         {/* Search Input */}
         <div className="relative flex-1">
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -305,18 +318,34 @@ export default function StudentFeeTracker() {
           />
         </div>
 
-        {/* Batch / Class Filter */}
-        <div className="flex items-center gap-3">
-          <select 
-            value={filterClass}
-            onChange={(e) => setFilterClass(e.target.value)}
-            className="px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-xs font-bold text-slate-300 focus:outline-none focus:border-indigo-500"
-          >
-            <option value="All" className="bg-slate-900 text-white">All Batches / Classes</option>
-            {availableClasses.map(c => (
-              <option key={c} value={c} className="bg-slate-900 text-white">{c}</option>
-            ))}
-          </select>
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          {/* Batch / Class Filter */}
+          <div className="relative flex-1 sm:flex-initial sm:w-48">
+            <select 
+              value={filterClass}
+              onChange={(e) => setFilterClass(e.target.value)}
+              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-xs font-bold text-slate-300 focus:outline-none focus:border-indigo-500 appearance-none"
+            >
+              <option value="All" className="bg-slate-900 text-white">All Batches / Classes</option>
+              {availableClasses.map(c => (
+                <option key={c} value={c} className="bg-slate-900 text-white">{c}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Semester Filter */}
+          <div className="relative flex-1 sm:flex-initial sm:w-48">
+            <select 
+              value={filterSemester}
+              onChange={(e) => setFilterSemester(e.target.value)}
+              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-xs font-bold text-slate-300 focus:outline-none focus:border-indigo-500 appearance-none"
+            >
+              {availableSemesters.map(sem => (
+                <option key={sem} value={sem} className="bg-slate-900 text-white">{sem === 'All' ? 'All Semesters' : sem}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
@@ -374,9 +403,14 @@ export default function StudentFeeTracker() {
                     </td>
 
                     <td className="p-4">
-                      <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-xl text-[11px] font-bold text-slate-300 uppercase">
-                        {student.class || student.subject || 'General Batch'}
-                      </span>
+                      <div className="space-y-1">
+                        <span className="inline-block px-3 py-1 bg-white/5 border border-white/10 rounded-xl text-[11px] font-bold text-slate-300 uppercase">
+                          {student.class || student.subject || 'General Batch'}
+                        </span>
+                        {student.semester && (
+                          <p className="text-[10px] font-semibold text-indigo-400 pl-1">{student.semester}</p>
+                        )}
+                      </div>
                     </td>
 
                     <td className="p-4">
@@ -683,6 +717,21 @@ export default function StudentFeeTracker() {
                         </div>
 
                         <div>
+                          <label className="block text-[10px] font-black uppercase text-slate-400 mb-1">Semester</label>
+                          <select 
+                            value={profileForm.semester} 
+                            onChange={(e) => setProfileForm({ ...profileForm, semester: e.target.value })}
+                            className="w-full px-4 py-2.5 bg-slate-900 border border-white/10 rounded-xl text-xs text-white font-bold focus:outline-none focus:border-indigo-500"
+                          >
+                            <option value="">No Semester</option>
+                            <option value="Semester-I">Semester-I</option>
+                            <option value="Semester-II">Semester-II</option>
+                            <option value="Semester-III">Semester-III</option>
+                            <option value="Semester-IV">Semester-IV</option>
+                          </select>
+                        </div>
+
+                        <div>
                           <label className="block text-[10px] font-black uppercase text-slate-400 mb-1">Batch / Subject</label>
                           <input 
                             type="text" 
@@ -745,6 +794,13 @@ export default function StudentFeeTracker() {
                         <p className="text-[10px] font-black uppercase text-slate-500">Batch / Subject / Class</p>
                         <p className="text-sm font-black text-white mt-1 uppercase">
                           {selectedStudent.class || 'N/A'} {selectedStudent.subject ? `(${selectedStudent.subject})` : ''}
+                        </p>
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                        <p className="text-[10px] font-black uppercase text-slate-500">Semester</p>
+                        <p className="text-sm font-black text-indigo-400 mt-1 uppercase">
+                          {selectedStudent.semester || 'N/A'}
                         </p>
                       </div>
 

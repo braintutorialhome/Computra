@@ -41,7 +41,7 @@ export default function AdminHome() {
     : 0;
 
   const data = [
-    { name: 'Income', amount: totalFees, color: '#10B981' },
+    { name: 'Fees', amount: totalFees, color: '#10B981' },
     { name: 'Expenses', amount: totalExpenses, color: '#EF4444' },
     { name: 'Balance', amount: netBalance, color: '#6366F1' },
   ];
@@ -67,7 +67,7 @@ export default function AdminHome() {
             <div className="flex gap-2">
               <div className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-lg border border-white/5">
                 <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                <span className="text-[10px] font-black text-slate-400 uppercase">Income</span>
+                <span className="text-[10px] font-black text-slate-400 uppercase">Fees</span>
               </div>
               <div className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-lg border border-white/5">
                 <div className="w-2 h-2 rounded-full bg-rose-500"></div>
