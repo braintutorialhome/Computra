@@ -3,11 +3,12 @@ import {
   Users, Search, Filter, Eye, ShieldCheck, Download, Printer, 
   CreditCard, AlertCircle, CheckCircle2, XCircle, Calendar, 
   Phone, MapPin, BookOpen, GraduationCap, Clock, Award, 
-  Layers, ChevronRight, X, FileSpreadsheet, User, UserX
+  Layers, ChevronRight, X, FileSpreadsheet, User, UserX, FileText
 } from 'lucide-react';
 import { useStorage } from '../../../hooks/useStorage';
 import { Student } from '../../../types';
 import { format, parseISO } from 'date-fns';
+import { exportStudentDossierToPDF, StudentDossierData } from '../../../lib/studentDossierPdf';
 
 export default function StudentOverview() {
   const { students, fees, dueFees, attendance, testResults, currentUser } = useStorage();
@@ -231,6 +232,11 @@ export default function StudentOverview() {
     if (!selectedStudent) return null;
     return enrichedStudents.find(item => item.student.id === selectedStudent.id) || null;
   }, [selectedStudent, enrichedStudents]);
+
+  const handleExportStudentPDF = (dossierToExport: StudentDossierData | null) => {
+    if (!dossierToExport) return;
+    exportStudentDossierToPDF(dossierToExport);
+  };
 
   return (
     <div className="space-y-8 animate-fadeIn pb-16">
@@ -578,15 +584,28 @@ export default function StudentOverview() {
 
                     {/* Actions Column */}
                     <td className="py-4 pr-6 pl-4 text-right">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedStudent(student);
-                        }}
-                        className="px-3 py-1.5 bg-white/5 hover:bg-indigo-600/30 text-indigo-300 hover:text-indigo-200 border border-white/10 hover:border-indigo-500/30 rounded-xl text-xs font-bold transition-all inline-flex items-center gap-1.5"
-                      >
-                        <Eye size={13} /> View Dossier
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedStudent(student);
+                          }}
+                          className="px-3 py-1.5 bg-white/5 hover:bg-indigo-600/30 text-indigo-300 hover:text-indigo-200 border border-white/10 hover:border-indigo-500/30 rounded-xl text-xs font-bold transition-all inline-flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <Eye size={13} /> View Dossier
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const dossier = enrichedStudents.find(item => item.student.id === student.id);
+                            if (dossier) handleExportStudentPDF(dossier);
+                          }}
+                          className="px-2.5 py-1.5 bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 rounded-xl text-xs font-bold transition-all inline-flex items-center gap-1.5 cursor-pointer"
+                          title="Export PDF Dossier"
+                        >
+                          <Download size={13} /> Export PDF
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -680,12 +699,25 @@ export default function StudentOverview() {
                   </div>
                 </div>
 
-                <button 
-                  onClick={() => setSelectedStudent(student)}
-                  className="w-full py-2.5 bg-white/5 hover:bg-indigo-600 border border-white/10 hover:border-indigo-500 text-xs font-black uppercase tracking-wider text-slate-200 hover:text-white rounded-xl transition-all flex items-center justify-center gap-2"
-                >
-                  <Eye size={14} /> Full Read-Only Dossier
-                </button>
+                <div className="grid grid-cols-2 gap-2">
+                  <button 
+                    onClick={() => setSelectedStudent(student)}
+                    className="py-2.5 bg-white/5 hover:bg-indigo-600 border border-white/10 hover:border-indigo-500 text-xs font-black uppercase tracking-wider text-slate-200 hover:text-white rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <Eye size={14} /> View Dossier
+                  </button>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const dossier = enrichedStudents.find(item => item.student.id === student.id);
+                      if (dossier) handleExportStudentPDF(dossier);
+                    }}
+                    className="py-2.5 bg-indigo-600/20 hover:bg-indigo-600 border border-indigo-500/30 text-xs font-black uppercase tracking-wider text-indigo-300 hover:text-white rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    title="Export PDF Dossier"
+                  >
+                    <Download size={14} /> Export PDF
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -720,18 +752,28 @@ export default function StudentOverview() {
                 </div>
               </div>
 
-              <button
-                onClick={() => setSelectedStudent(null)}
-                className="w-10 h-10 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all"
-              >
-                <X size={18} />
-              </button>
+              <div className="flex items-center gap-2.5">
+                <button
+                  onClick={() => handleExportStudentPDF(selectedDossier)}
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all shadow-lg shadow-indigo-600/30 hover:scale-105 active:scale-95 cursor-pointer"
+                  title="Export Student Dossier as PDF"
+                >
+                  <Download size={14} /> Export PDF
+                </button>
+                <button
+                  onClick={() => setSelectedStudent(null)}
+                  className="w-10 h-10 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all cursor-pointer"
+                  title="Close Dossier"
+                >
+                  <X size={18} />
+                </button>
+              </div>
             </div>
 
             {/* Modal Body - Read Only Dossier */}
             <div className="p-6 sm:p-8 overflow-y-auto custom-scrollbar space-y-8 flex-1">
               {/* Financial Snapshot */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="p-5 rounded-3xl bg-emerald-500/10 border border-emerald-500/20">
                   <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400">Total Fees Paid</span>
                   <p className="text-2xl font-black text-emerald-300 mt-1">₹{selectedDossier.totalPaid.toLocaleString('en-IN')}</p>
@@ -742,14 +784,6 @@ export default function StudentOverview() {
                   <span className="text-[10px] font-black uppercase tracking-wider text-rose-400">Assessed Due Fees</span>
                   <p className="text-2xl font-black text-rose-300 mt-1">₹{selectedDossier.totalDue.toLocaleString('en-IN')}</p>
                   <p className="text-[11px] text-rose-400/80 font-semibold mt-0.5">{selectedDossier.dueCount} unpaid assessment(s)</p>
-                </div>
-
-                <div className="p-5 rounded-3xl bg-indigo-500/10 border border-indigo-500/20">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-indigo-400">Attendance & Tests</span>
-                  <p className="text-2xl font-black text-indigo-300 mt-1">
-                    {selectedDossier.attendanceRate !== null ? `${selectedDossier.attendanceRate}%` : 'N/A'}
-                  </p>
-                  <p className="text-[11px] text-indigo-400/80 font-semibold mt-0.5">{selectedDossier.testCount} exam result(s)</p>
                 </div>
               </div>
 
@@ -888,13 +922,24 @@ export default function StudentOverview() {
             </div>
 
             {/* Modal Footer */}
-            <div className="p-6 bg-white/5 border-t border-white/10 flex justify-end">
-              <button
-                onClick={() => setSelectedStudent(null)}
-                className="px-6 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all"
-              >
-                Close Dossier
-              </button>
+            <div className="p-6 bg-white/5 border-t border-white/10 flex items-center justify-between gap-3">
+              <span className="text-[11px] text-slate-500 font-semibold hidden sm:inline-block">
+                Official Administrative Dossier • UTC Computra
+              </span>
+              <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+                <button
+                  onClick={() => handleExportStudentPDF(selectedDossier)}
+                  className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all shadow-lg shadow-indigo-600/30 hover:scale-105 active:scale-95 cursor-pointer"
+                >
+                  <Download size={14} /> Export PDF
+                </button>
+                <button
+                  onClick={() => setSelectedStudent(null)}
+                  className="px-6 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer"
+                >
+                  Close Dossier
+                </button>
+              </div>
             </div>
           </div>
         </div>
