@@ -29,10 +29,10 @@ export default function FeeManagement() {
     [students]
   );
   
-  const subjects = useMemo(() => Array.from(new Set(students.map(s => s.subject).filter(Boolean))), [students]);
+  const subjects = useMemo(() => Array.from(new Set(students.map(s => String(s.subject || '').trim()).filter(Boolean))), [students]);
   
   const availableMonths = useMemo(() => {
-    const months = fees.map(f => f.month);
+    const months = fees.map(f => String(f.month || '').trim()).filter(Boolean);
     return Array.from(new Set(months)).sort((a, b) => {
       const monthA = String(a);
       const monthB = String(b);
@@ -121,7 +121,7 @@ export default function FeeManagement() {
           >
             <option value="" className="bg-slate-900">All Subjects / Courses</option>
             {subjects.map(subject => (
-              <option key={subject} value={subject} className="bg-slate-900">{subject}</option>
+              <option key={`subject-${subject}`} value={subject} className="bg-slate-900">{subject}</option>
             ))}
           </select>
         </div>
@@ -134,7 +134,7 @@ export default function FeeManagement() {
           >
             <option value="" className="bg-slate-900">All Billing Months</option>
             {availableMonths.map(month => (
-              <option key={month} value={month} className="bg-slate-900">{month}</option>
+              <option key={`month-${month}`} value={month} className="bg-slate-900">{month}</option>
             ))}
           </select>
         </div>
@@ -221,10 +221,10 @@ export default function FeeManagement() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5 text-sm">
-              {filteredFees.map(f => {
+              {filteredFees.map((f, idx) => {
                 const student = students.find(s => s.id === f.studentId);
                 return (
-                  <tr key={f.id} className="hover:bg-white/[0.03] transition-colors group">
+                  <tr key={f.id ? `fee-stream-${f.id}` : `fee-idx-${idx}`} className="hover:bg-white/[0.03] transition-colors group">
                     <td className="px-10 py-6">
                       <div className="flex items-center gap-4">
                          <div className="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-400 flex items-center justify-center font-black text-sm border border-orange-500/20 group-hover:scale-110 transition-transform">

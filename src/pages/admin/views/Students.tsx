@@ -53,6 +53,7 @@ export default function StudentManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterClass, setFilterClass] = useState('All');
   const [filterSemester, setFilterSemester] = useState('All');
+  const [filterSession, setFilterSession] = useState('All');
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'active' | 'deleted'>('active');
@@ -62,24 +63,31 @@ export default function StudentManagement() {
   
   const displayList = activeTab === 'active' ? approved : deleted;
 
-  const classes = ['All', ...Array.from(new Set(approved.map(s => s.class).filter(Boolean)))];
+  const classes = ['All', ...Array.from(new Set(approved.map(s => String(s.class || '').trim()).filter(Boolean)))];
 
   const defaultSemesters = ['Semester-I', 'Semester-II', 'Semester-III', 'Semester-IV'];
-  const studentSemesters = Array.from(new Set(approved.map(s => s.semester).filter(Boolean)));
+  const studentSemesters = Array.from(new Set(approved.map(s => String(s.semester || '').trim()).filter(Boolean)));
   const semesters = ['All', ...Array.from(new Set([...defaultSemesters, ...studentSemesters]))];
+
+  const defaultSessions = ['2024-2025', '2025-2026', '2026-2027'];
+  const studentSessions = Array.from(new Set(approved.map(s => String(s.session || '').trim()).filter(Boolean)));
+  const sessions = ['All', ...Array.from(new Set([...defaultSessions, ...studentSessions]))];
 
   const filtered = displayList.filter(s => {
     const sName = String(s.name || '').toLowerCase();
     const sRoll = String(s.rollNumber || '').toLowerCase();
     const sId = String(s.id || '').toLowerCase();
+    const sSession = String(s.session || '').toLowerCase();
     const search = searchTerm.toLowerCase();
 
     const matchesSearch = sName.includes(search) || 
                           sRoll.includes(search) ||
-                          sId.includes(search);
+                          sId.includes(search) ||
+                          sSession.includes(search);
     const matchesClass = filterClass === 'All' || s.class === filterClass;
     const matchesSemester = filterSemester === 'All' || s.semester === filterSemester;
-    return matchesSearch && matchesClass && matchesSemester;
+    const matchesSession = filterSession === 'All' || s.session === filterSession;
+    return matchesSearch && matchesClass && matchesSemester && matchesSession;
   });
 
   const handleUpdate = (e: React.FormEvent) => {
@@ -128,24 +136,34 @@ export default function StudentManagement() {
           />
         </div>
         <div className="flex flex-col sm:flex-row gap-4">
-          <div className="w-full sm:w-56 relative">
+          <div className="w-full sm:w-48 relative">
             <Filter className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
             <select 
               value={filterClass}
               onChange={(e) => setFilterClass(e.target.value)}
               className="input-glass w-full pl-12 pr-6 py-4 rounded-2xl appearance-none"
             >
-              {classes.map(c => <option key={c} value={c} className="bg-slate-900">{c === 'All' ? 'All Classes' : `Class ${c}`}</option>)}
+              {classes.map(c => <option key={`class-${c}`} value={c} className="bg-slate-900">{c === 'All' ? 'All Classes' : `Class ${c}`}</option>)}
             </select>
           </div>
-          <div className="w-full sm:w-56 relative">
+          <div className="w-full sm:w-48 relative">
             <Filter className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
             <select 
               value={filterSemester}
               onChange={(e) => setFilterSemester(e.target.value)}
               className="input-glass w-full pl-12 pr-6 py-4 rounded-2xl appearance-none"
             >
-              {semesters.map(sem => <option key={sem} value={sem} className="bg-slate-900">{sem === 'All' ? 'All Semesters' : sem}</option>)}
+              {semesters.map(sem => <option key={`sem-${sem}`} value={sem} className="bg-slate-900">{sem === 'All' ? 'All Semesters' : sem}</option>)}
+            </select>
+          </div>
+          <div className="w-full sm:w-48 relative">
+            <Filter className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+            <select 
+              value={filterSession}
+              onChange={(e) => setFilterSession(e.target.value)}
+              className="input-glass w-full pl-12 pr-6 py-4 rounded-2xl appearance-none"
+            >
+              {sessions.map(sess => <option key={`session-${sess}`} value={sess} className="bg-slate-900">{sess === 'All' ? 'All Sessions' : `Session: ${sess}`}</option>)}
             </select>
           </div>
         </div>
@@ -153,8 +171,8 @@ export default function StudentManagement() {
 
       {/* List */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-        {filtered.map(s => (
-          <div key={s.id} className={`glass rounded-[32px] overflow-hidden group hover:bg-white/10 transition-all flex flex-col ${activeTab === 'deleted' ? 'opacity-80 border-rose-500/20' : ''}`}>
+        {filtered.map((s, idx) => (
+          <div key={s.id ? `student-${s.id}` : `stud-idx-${idx}`} className={`glass rounded-[32px] overflow-hidden group hover:bg-white/10 transition-all flex flex-col ${activeTab === 'deleted' ? 'opacity-80 border-rose-500/20' : ''}`}>
             <div className="p-8 flex-1 space-y-6">
               <div className="flex justify-between items-start">
                 <div className={`w-16 h-16 ${activeTab === 'deleted' ? 'bg-rose-600/50' : 'bg-indigo-600'} text-white rounded-2xl flex items-center justify-center font-black text-2xl shadow-lg shadow-indigo-600/20 group-hover:scale-110 transition-transform overflow-hidden`}>
@@ -178,7 +196,7 @@ export default function StudentManagement() {
                   {activeTab === 'deleted' && <span className="ml-3 text-[8px] bg-rose-500/20 text-rose-500 px-2 py-1 rounded-lg">DELETED</span>}
                 </h3>
                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-                  {s.subject} • Class {s.class} {s.semester ? `• ${s.semester}` : ''}
+                  {s.subject} • Class {s.class} {s.semester ? `• ${s.semester}` : ''} {s.session ? `• ${s.session}` : ''}
                 </p>
               </div>
 
@@ -444,6 +462,17 @@ export default function StudentManagement() {
                   <option value="Semester-III" className="bg-slate-900">Semester-III</option>
                   <option value="Semester-IV" className="bg-slate-900">Semester-IV</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block ml-1">Session</label>
+                <input 
+                  type="text"
+                  value={editingStudent.session || ''}
+                  onChange={(e) => setEditingStudent({...editingStudent, session: e.target.value})}
+                  className="input-glass w-full px-6 py-4 rounded-2xl"
+                  placeholder="e.g. 2025-2026"
+                />
               </div>
 
               <div>

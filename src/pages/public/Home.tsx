@@ -62,7 +62,7 @@ export default function PublicHome() {
               Welcome to <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-400 animate-gradient-x underline decoration-white/10 decoration-8 underline-offset-8">UTC Computra</span>
             </h1>
             <p className="text-xl text-slate-400 max-w-2xl mx-auto mb-12 font-medium leading-relaxed">
-              Premium tuition for Computer Applications (COMA), Computer Science (COMS) and Artificial Intelligence (APAI) at UTC, Bhangar, South 24 Parganas.
+              Premium tuition for Computer Applications, Computer Science and Artificial Intelligence at UTC, Bhangar, South 24 Parganas.
             </p>
             <div className="flex flex-wrap justify-center gap-6">
               <Link to="/login" className="indigo-button px-10 py-5 font-black text-lg shadow-2xl shadow-indigo-600/40 hover:scale-105">

@@ -101,10 +101,10 @@ export default function AttendanceManagement() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {filtered.map(s => {
+              {filtered.map((s, idx) => {
                 const status = getAttendanceStatus(s.id);
                 return (
-                  <tr key={s.id} className="hover:bg-white/[0.02] transition-colors group">
+                  <tr key={s.id ? `att-stud-${s.id}` : `att-idx-${idx}`} className="hover:bg-white/[0.02] transition-colors group">
                     <td className="px-10 py-8">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-center font-black group-hover:bg-indigo-600 transition-colors">

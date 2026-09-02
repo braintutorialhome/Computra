@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
-  BarChart2, Users, FileCheck, CreditCard, Wallet, Calendar, BookMarked, Bell, LogOut, Menu, X, Plus, Trash2, Edit2, TrendingUp, TrendingDown, DollarSign, Settings, AlertCircle, ExternalLink, UserCheck
+  BarChart2, Users, FileCheck, CreditCard, Wallet, Calendar, BookMarked, Bell, LogOut, Menu, X, Plus, Trash2, Edit2, TrendingUp, TrendingDown, DollarSign, Settings, AlertCircle, ExternalLink, UserCheck, GraduationCap
 } from 'lucide-react';
 import { useStorage } from '../../hooks/useStorage';
 import AdminHome from './views/Home';
 import StudentManagement from './views/Students';
+import StudentOverview from './views/StudentOverview';
 import AdmissionManagement from './views/Admissions';
 import FeeManagement from './views/Fees';
 import ExpenseManagement from './views/Expenses';
@@ -68,6 +69,7 @@ export default function AdminDashboard() {
     { to: '/admin/dashboard', icon: BarChart2, label: 'Dashboard' },
     { to: '/admin/admissions', icon: FileCheck, label: 'Admissions' },
     { to: '/admin/students', icon: Users, label: 'Students' },
+    { to: '/admin/student-overview', icon: GraduationCap, label: 'Student Overview' },
     { to: '/admin/student-fee-tracker', icon: UserCheck, label: 'Student Fee Tracker' },
     { to: '/admin/fees', icon: CreditCard, label: 'Fees' },
     { to: '/admin/due-fees', icon: AlertCircle, label: 'Due Fees' },
@@ -85,6 +87,7 @@ export default function AdminDashboard() {
     '/admin/dashboard': 'System Dashboard',
     '/admin/admissions': 'Admission Panel',
     '/admin/students': 'Student Records',
+    '/admin/student-overview': 'Student Overview',
     '/admin/student-fee-tracker': 'Student Management & Fee Tracker',
     '/admin/fees': 'Fees & Collections',
     '/admin/due-fees': 'Due Fees Management',
@@ -201,8 +204,9 @@ export default function AdminDashboard() {
               <Link to="/admin/attendance" className="glass-button px-5 py-2.5 text-xs font-black uppercase tracking-widest text-slate-300">
                 Attendance
               </Link>
-              <Link to="/admin/expenses" className="indigo-button px-6 py-2.5 text-xs font-black uppercase tracking-widest">
-                Add Expense 💸
+              <Link to="/admin/settings" className="indigo-button px-6 py-2.5 text-xs font-black uppercase tracking-widest flex items-center gap-2">
+                <Settings size={14} />
+                Settings
               </Link>
            </div>
         </header>
@@ -223,6 +227,7 @@ export default function AdminDashboard() {
           <Routes>
             <Route path="dashboard" element={<AdminHome />} />
             <Route path="students" element={<StudentManagement />} />
+            <Route path="student-overview" element={<StudentOverview />} />
             <Route path="student-fee-tracker" element={<StudentFeeTracker />} />
             <Route path="admissions" element={<AdmissionManagement />} />
             <Route path="fees" element={<FeeManagement />} />

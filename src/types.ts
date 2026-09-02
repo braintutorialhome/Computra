@@ -17,6 +17,7 @@ export interface Student {
   subject: string;
   class: string;
   semester: string;
+  session?: string;
   mobile: string;
   whatsapp?: string;
   address: string;

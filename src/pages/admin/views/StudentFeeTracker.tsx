@@ -23,6 +23,7 @@ export default function StudentFeeTracker() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterClass, setFilterClass] = useState('All');
   const [filterSemester, setFilterSemester] = useState('All');
+  const [filterSession, setFilterSession] = useState('All');
   
   // Selected student modal
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
@@ -38,6 +39,7 @@ export default function StudentFeeTracker() {
     mobile: '',
     class: '',
     semester: '',
+    session: '',
     subject: '',
     address: '',
     rollNumber: ''
@@ -101,12 +103,16 @@ export default function StudentFeeTracker() {
 
   // Unique classes/subjects for filtering
   const availableClasses = Array.from(
-    new Set(activeStudents.map(s => s.class || s.subject).filter(Boolean))
+    new Set(activeStudents.map(s => String(s.class || s.subject || '').trim()).filter(Boolean))
   );
 
   const defaultSemesters = ['Semester-I', 'Semester-II', 'Semester-III', 'Semester-IV'];
-  const studentSemesters = Array.from(new Set(activeStudents.map(s => s.semester).filter(Boolean)));
+  const studentSemesters = Array.from(new Set(activeStudents.map(s => String(s.semester || '').trim()).filter(Boolean)));
   const availableSemesters = ['All', ...Array.from(new Set([...defaultSemesters, ...studentSemesters]))];
+
+  const defaultSessions = ['2024-2025', '2025-2026', '2026-2027'];
+  const studentSessions = Array.from(new Set(activeStudents.map(s => String(s.session || '').trim()).filter(Boolean)));
+  const availableSessions = ['All', ...Array.from(new Set([...defaultSessions, ...studentSessions]))];
 
   // Filtered students list
   const filteredData = studentFeeData.filter(item => {
@@ -117,6 +123,7 @@ export default function StudentFeeTracker() {
     const classStr = item.student.class ? String(item.student.class).toLowerCase() : '';
     const subjectStr = item.student.subject ? String(item.student.subject).toLowerCase() : '';
     const semesterStr = item.student.semester ? String(item.student.semester).toLowerCase() : '';
+    const sessionStr = item.student.session ? String(item.student.session).toLowerCase() : '';
 
     const matchesSearch = 
       nameStr.includes(term) ||
@@ -124,7 +131,8 @@ export default function StudentFeeTracker() {
       mobileStr.includes(searchTerm) ||
       classStr.includes(term) ||
       subjectStr.includes(term) ||
-      semesterStr.includes(term);
+      semesterStr.includes(term) ||
+      sessionStr.includes(term);
 
     const matchesClass = filterClass === 'All' || 
       item.student.class === filterClass || 
@@ -133,7 +141,10 @@ export default function StudentFeeTracker() {
     const matchesSemester = filterSemester === 'All' || 
       item.student.semester === filterSemester;
 
-    return matchesSearch && matchesClass && matchesSemester;
+    const matchesSession = filterSession === 'All' || 
+      item.student.session === filterSession;
+
+    return matchesSearch && matchesClass && matchesSemester && matchesSession;
   });
 
   // Global Summary Stats
@@ -151,6 +162,7 @@ export default function StudentFeeTracker() {
       mobile: String(student.mobile || ''),
       class: String(student.class || ''),
       semester: String(student.semester || ''),
+      session: String(student.session || ''),
       subject: String(student.subject || ''),
       address: String(student.address || ''),
       rollNumber: String(student.rollNumber || '')
@@ -183,6 +195,7 @@ export default function StudentFeeTracker() {
       mobile: profileForm.mobile.trim(),
       class: profileForm.class.trim(),
       semester: profileForm.semester.trim(),
+      session: profileForm.session.trim(),
       subject: profileForm.subject.trim(),
       address: profileForm.address.trim(),
       rollNumber: profileForm.rollNumber.trim()
@@ -321,7 +334,7 @@ export default function StudentFeeTracker() {
         {/* Filters */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           {/* Batch / Class Filter */}
-          <div className="relative flex-1 sm:flex-initial sm:w-48">
+          <div className="relative flex-1 sm:flex-initial sm:w-44">
             <select 
               value={filterClass}
               onChange={(e) => setFilterClass(e.target.value)}
@@ -329,20 +342,33 @@ export default function StudentFeeTracker() {
             >
               <option value="All" className="bg-slate-900 text-white">All Batches / Classes</option>
               {availableClasses.map(c => (
-                <option key={c} value={c} className="bg-slate-900 text-white">{c}</option>
+                <option key={`tracker-class-${c}`} value={c} className="bg-slate-900 text-white">{c}</option>
               ))}
             </select>
           </div>
 
           {/* Semester Filter */}
-          <div className="relative flex-1 sm:flex-initial sm:w-48">
+          <div className="relative flex-1 sm:flex-initial sm:w-44">
             <select 
               value={filterSemester}
               onChange={(e) => setFilterSemester(e.target.value)}
               className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-xs font-bold text-slate-300 focus:outline-none focus:border-indigo-500 appearance-none"
             >
               {availableSemesters.map(sem => (
-                <option key={sem} value={sem} className="bg-slate-900 text-white">{sem === 'All' ? 'All Semesters' : sem}</option>
+                <option key={`tracker-sem-${sem}`} value={sem} className="bg-slate-900 text-white">{sem === 'All' ? 'All Semesters' : sem}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Session Filter */}
+          <div className="relative flex-1 sm:flex-initial sm:w-44">
+            <select 
+              value={filterSession}
+              onChange={(e) => setFilterSession(e.target.value)}
+              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-xs font-bold text-slate-300 focus:outline-none focus:border-indigo-500 appearance-none"
+            >
+              {availableSessions.map(sess => (
+                <option key={`tracker-sess-${sess}`} value={sess} className="bg-slate-900 text-white">{sess === 'All' ? 'All Sessions' : `Session: ${sess}`}</option>
               ))}
             </select>
           </div>
@@ -380,9 +406,9 @@ export default function StudentFeeTracker() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5 text-xs font-bold text-slate-300">
-                {filteredData.map(({ student, totalPaid, totalAssessedDue }) => (
+                {filteredData.map(({ student, totalPaid, totalAssessedDue }, idx) => (
                   <tr 
-                    key={student.id} 
+                    key={student.id ? `fee-tracker-${student.id}` : `fee-tracker-idx-${idx}`} 
                     onClick={() => handleOpenStudentDetail(student)}
                     className="hover:bg-white/[0.03] transition-colors cursor-pointer group"
                   >
@@ -409,6 +435,9 @@ export default function StudentFeeTracker() {
                         </span>
                         {student.semester && (
                           <p className="text-[10px] font-semibold text-indigo-400 pl-1">{student.semester}</p>
+                        )}
+                        {student.session && (
+                          <p className="text-[10px] font-semibold text-emerald-400 pl-1">Session: {student.session}</p>
                         )}
                       </div>
                     </td>
@@ -575,8 +604,8 @@ export default function StudentFeeTracker() {
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-white/5 text-slate-300">
-                            {activeStudentFees.map(f => (
-                              <tr key={f.id} className="hover:bg-white/[0.02]">
+                            {activeStudentFees.map((f, idx) => (
+                              <tr key={f.id ? `fee-rec-${f.id}` : `fee-rec-idx-${idx}`} className="hover:bg-white/[0.02]">
                                 <td className="p-3 pl-4 font-bold text-white">
                                   {safeFormat(f.date, 'dd MMM yyyy')}
                                 </td>
@@ -617,8 +646,8 @@ export default function StudentFeeTracker() {
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-white/5 text-slate-300">
-                            {activeStudentDues.map(df => (
-                              <tr key={df.id} className="hover:bg-white/[0.02]">
+                            {activeStudentDues.map((df, idx) => (
+                              <tr key={df.id ? `due-rec-${df.id}` : `due-rec-idx-${idx}`} className="hover:bg-white/[0.02]">
                                 <td className="p-3 pl-4 font-bold text-white">
                                   {safeFormat(df.date, 'dd MMM yyyy')}
                                 </td>
@@ -732,6 +761,17 @@ export default function StudentFeeTracker() {
                         </div>
 
                         <div>
+                          <label className="block text-[10px] font-black uppercase text-slate-400 mb-1">Session</label>
+                          <input 
+                            type="text" 
+                            value={profileForm.session} 
+                            onChange={(e) => setProfileForm({ ...profileForm, session: e.target.value })}
+                            className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs text-white font-bold focus:outline-none focus:border-indigo-500"
+                            placeholder="e.g. 2025-2026"
+                          />
+                        </div>
+
+                        <div>
                           <label className="block text-[10px] font-black uppercase text-slate-400 mb-1">Batch / Subject</label>
                           <input 
                             type="text" 
@@ -801,6 +841,13 @@ export default function StudentFeeTracker() {
                         <p className="text-[10px] font-black uppercase text-slate-500">Semester</p>
                         <p className="text-sm font-black text-indigo-400 mt-1 uppercase">
                           {selectedStudent.semester || 'N/A'}
+                        </p>
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                        <p className="text-[10px] font-black uppercase text-slate-500">Session</p>
+                        <p className="text-sm font-black text-indigo-400 mt-1 uppercase">
+                          {selectedStudent.session || 'N/A'}
                         </p>
                       </div>
 

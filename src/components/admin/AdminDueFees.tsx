@@ -12,7 +12,7 @@ const AdminDueFees: React.FC = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   
-  const subjects = Array.from(new Set(students.map(s => s.subject).filter(Boolean)));
+  const subjects = useMemo(() => Array.from(new Set(students.map(s => String(s.subject || '').trim()).filter(Boolean))), [students]);
 
   const approvedOptions = useMemo(() => 
     students
@@ -199,7 +199,7 @@ const AdminDueFees: React.FC = () => {
           >
             <option value="" className="bg-slate-900 text-slate-300">All Subjects / Courses</option>
             {subjects.map(subject => (
-              <option key={subject} value={subject} className="bg-slate-900 text-slate-300">{subject}</option>
+              <option key={`due-subj-${subject}`} value={subject} className="bg-slate-900 text-slate-300">{subject}</option>
             ))}
           </select>
         </div>
@@ -219,11 +219,11 @@ const AdminDueFees: React.FC = () => {
             </thead>
             <tbody className="divide-y divide-white/5 text-sm text-slate-300">
               {filteredDueFees.length > 0 ? (
-                filteredDueFees.map((fee) => {
+                filteredDueFees.map((fee, idx) => {
                   const student = students.find(s => s.id === fee.studentId);
                   return (
                     <motion.tr 
-                      key={fee.id}
+                      key={fee.id ? `due-fee-${fee.id}` : `due-fee-idx-${idx}`}
                       layout
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}

@@ -19,6 +19,7 @@ export default function StudentProfile({ student }: { student: Student }) {
     { label: 'Subjects', value: student.subject, icon: Book, color: 'emerald' },
     { label: 'Present Class', value: student.class, icon: Layers, color: 'orange' },
     { label: 'Semester', value: student.semester || 'N/A', icon: Layers, color: 'rose' },
+    { label: 'Session', value: student.session || 'N/A', icon: Calendar, color: 'indigo' },
     { label: 'Date of Joining', value: (() => {
       if (!student.dateOfJoining) return 'N/A';
       const date = new Date(student.dateOfJoining);

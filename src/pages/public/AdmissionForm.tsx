@@ -16,6 +16,7 @@ export default function AdmissionForm() {
     subject: '',
     class: '',
     semester: '',
+    session: '',
     dateOfJoining: '',
     mobile: '',
     whatsapp: '',
@@ -199,6 +200,16 @@ export default function AdmissionForm() {
                   <option value="Semester-III">Semester-III</option>
                   <option value="Semester-IV">Semester-IV</option>
                 </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Session</label>
+                <input 
+                  type="text"
+                  value={formData.session}
+                  onChange={(e) => setFormData({...formData, session: e.target.value})}
+                  className="input-glass w-full py-5 px-8 rounded-3xl font-bold"
+                  placeholder="e.g. 2025-2026"
+                />
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">Date of Joining</label>

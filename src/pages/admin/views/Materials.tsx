@@ -284,8 +284,8 @@ export default function StudyMaterialManagement() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {filteredMaterials.map(m => (
-          <div key={m.id} className="glass p-8 rounded-[40px] group hover:bg-white/10 transition-all border border-white/5 relative flex flex-col justify-between min-h-[280px]">
+        {filteredMaterials.map((m, idx) => (
+          <div key={m.id ? `admin-mat-${m.id}` : `mat-idx-${idx}`} className="glass p-8 rounded-[40px] group hover:bg-white/10 transition-all border border-white/5 relative flex flex-col justify-between min-h-[280px]">
              <div>
                 <div className="flex justify-between items-start mb-5">
                   <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border ${

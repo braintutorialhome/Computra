@@ -82,15 +82,15 @@ export default function StudentMaterials({ student }: { student: Student }) {
           >
             <option value="all" className="bg-slate-900">All Semesters</option>
             {availableSemesters.map(sem => (
-              <option key={sem} value={sem} className="bg-slate-900">{sem}</option>
+              <option key={`mat-sem-${sem}`} value={sem} className="bg-slate-900">{sem}</option>
             ))}
           </select>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-        {filteredMaterials.map(m => (
-          <div key={m.id} className="glass p-10 rounded-[50px] border border-white/5 hover:bg-white/[0.03] transition-all group flex flex-col justify-between relative overflow-hidden">
+        {filteredMaterials.map((m, idx) => (
+          <div key={m.id ? `student-mat-${m.id}` : `mat-idx-${idx}`} className="glass p-10 rounded-[50px] border border-white/5 hover:bg-white/[0.03] transition-all group flex flex-col justify-between relative overflow-hidden">
              {/* Hover glow effect */}
              <div className="absolute -top-10 -right-10 w-40 h-40 bg-indigo-500 opacity-0 group-hover:opacity-[0.03] rounded-full blur-3xl transition-opacity"></div>
              

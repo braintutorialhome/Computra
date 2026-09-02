@@ -42,13 +42,23 @@ export default function AdmissionManagement() {
                        )}
                     </div>
                   </div>
-                  <div className="flex gap-3">
+                  <div className="flex flex-wrap gap-3">
                     <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-[10px] font-black tracking-widest text-indigo-100 uppercase">
                       Class {s.class}
                     </span>
                     <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-[10px] font-black tracking-widest text-indigo-100 uppercase">
                       {s.subject}
                     </span>
+                    {s.semester && (
+                      <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-[10px] font-black tracking-widest text-indigo-300 uppercase">
+                        {s.semester}
+                      </span>
+                    )}
+                    {s.session && (
+                      <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-[10px] font-black tracking-widest text-emerald-300 uppercase">
+                        Session: {s.session}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>

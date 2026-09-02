@@ -23,9 +23,9 @@ export default function ExpenseManagement() {
 
   const availableMonths = useMemo(() => {
     const months = expenses.map(e => {
-      // Extract YYYY-MM from YYYY-MM-DD
-      return e.date.substring(0, 7);
-    });
+      const d = String(e.date || '').trim();
+      return d.length >= 7 ? d.substring(0, 7) : d;
+    }).filter(Boolean);
     return Array.from(new Set(months)).sort((a, b) => String(b).localeCompare(String(a)));
   }, [expenses]);
 
@@ -114,7 +114,7 @@ export default function ExpenseManagement() {
           >
             <option value="" className="bg-slate-900">All Categories</option>
             {categories.map(c => (
-              <option key={c} value={c} className="bg-slate-900">{c}</option>
+              <option key={`cat-${c}`} value={c} className="bg-slate-900">{c}</option>
             ))}
           </select>
         </div>
@@ -127,7 +127,7 @@ export default function ExpenseManagement() {
           >
             <option value="" className="bg-slate-900">All Months</option>
             {availableMonths.map(month => (
-              <option key={month} value={month} className="bg-slate-900">{month}</option>
+              <option key={`exp-month-${month}`} value={month} className="bg-slate-900">{month}</option>
             ))}
           </select>
         </div>
