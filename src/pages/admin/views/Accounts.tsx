@@ -1,17 +1,124 @@
 import React from 'react';
 import { useStorage } from '../../../hooks/useStorage';
-import { DollarSign, TrendingUp, TrendingDown, Wallet, CreditCard } from 'lucide-react';
+import { DollarSign, TrendingUp, TrendingDown, Wallet, CreditCard, Download, FileSpreadsheet } from 'lucide-react';
 import { safeFormat } from '../../../lib/utils';
 
 export default function AccountManagement() {
-  const { fees, expenses } = useStorage();
+  const { fees, expenses, students } = useStorage();
 
   const totalIncome = fees.reduce((sum, f) => sum + f.amount, 0);
   const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
   const balance = totalIncome - totalExpenses;
 
+  const handleExportCSV = () => {
+    // Combine fees (Income) and expenses (Expense) into a unified ledger sorted chronologically
+    const incomeRecords = fees.map(f => {
+      const student = students.find(s => s.id === f.studentId);
+      return {
+        date: f.date || '',
+        type: 'CREDIT (INCOME)',
+        particulars: `Fee Collection - ${student?.name || 'Student'} (${f.month || ''})`,
+        partyOrCategory: student?.name ? `${student.name} (${student.rollNumber || 'ID'})` : 'Student Fee',
+        income: f.amount || 0,
+        expense: 0
+      };
+    });
+
+    const expenseRecords = expenses.map(e => ({
+      date: e.date || '',
+      type: 'DEBIT (EXPENSE)',
+      particulars: e.description ? `${e.title || 'Expense'} - ${e.description}` : (e.title || 'Expense'),
+      partyOrCategory: e.category || 'Others',
+      income: 0,
+      expense: e.amount || 0
+    }));
+
+    const allTransactions = [...incomeRecords, ...expenseRecords].sort((a, b) => {
+      const dateA = new Date(a.date).getTime() || 0;
+      const dateB = new Date(b.date).getTime() || 0;
+      return dateA - dateB;
+    });
+
+    let running = 0;
+    const rowsWithBalance = allTransactions.map(t => {
+      running += (t.income - t.expense);
+      return [
+        safeFormat(t.date, 'yyyy-MM-dd') || t.date,
+        t.type,
+        t.particulars,
+        t.partyOrCategory,
+        t.income > 0 ? t.income : 0,
+        t.expense > 0 ? t.expense : 0,
+        running
+      ];
+    });
+
+    const headers = [
+      'Date',
+      'Transaction Type',
+      'Particulars / Description',
+      'Student / Category',
+      'Credit / Income (INR)',
+      'Debit / Expense (INR)',
+      'Running Balance (INR)'
+    ];
+
+    const escapeCell = (cell: string | number | undefined | null) => {
+      if (cell === undefined || cell === null) return '""';
+      const str = String(cell);
+      return `"${str.replace(/"/g, '""')}"`;
+    };
+
+    const summaryHeader = [
+      ['UTC Computra - Account Statement & Financial Ledger'],
+      [`Statement Generated: ${safeFormat(new Date(), 'dd MMMM yyyy HH:mm')}`],
+      [`Total Collections (INR): ${totalIncome}`, `Total Expenses (INR): ${totalExpenses}`, `Net Cash Balance (INR): ${balance}`],
+      []
+    ];
+
+    const csvContent = '\uFEFF' + [
+      ...summaryHeader.map(r => r.map(escapeCell).join(',')),
+      headers.map(escapeCell).join(','),
+      ...rowsWithBalance.map(row => row.map(escapeCell).join(','))
+    ].join('\r\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    const today = new Date().toISOString().split('T')[0];
+    link.setAttribute('download', `utc_account_statement_${today}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-12 pb-20">
+      {/* Top Header Banner */}
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-white/5 p-6 rounded-[32px] border border-white/5">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-indigo-500/20 text-indigo-400 rounded-xl">
+            <FileSpreadsheet size={24} />
+          </div>
+          <div>
+            <h3 className="font-black text-xl text-white tracking-tight">Account Statement</h3>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Comprehensive institutional ledger & cash flow</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={handleExportCSV}
+            disabled={fees.length === 0 && expenses.length === 0}
+            className="px-6 py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all hover:scale-105 active:scale-95 disabled:opacity-40 disabled:hover:scale-100 disabled:cursor-not-allowed cursor-pointer"
+            title="Export complete account statement and transaction ledger to CSV"
+          >
+            <Download size={15} /> Export CSV
+          </button>
+        </div>
+      </div>
+
       {/* Stats row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="glass p-10 rounded-[40px] bg-gradient-to-br from-emerald-500/10 to-transparent">

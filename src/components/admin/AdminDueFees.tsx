@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useStorage } from '../../hooks/useStorage';
-import { Search, Plus, Trash2, Edit2, CheckCircle, AlertCircle, X } from 'lucide-react';
+import { Search, Plus, Trash2, Edit2, CheckCircle, AlertCircle, X, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import SearchableSelect from '../ui/SearchableSelect';
 
@@ -48,6 +48,52 @@ const AdminDueFees: React.FC = () => {
     return matchesSearch && matchesSubject;
   });
 
+  const handleExportCSV = () => {
+    if (filteredDueFees.length === 0) return;
+
+    const headers = [
+      'Student Name',
+      'Roll Number / ID',
+      'Subject / Course',
+      'Class',
+      'Assessed Due Amount (INR)',
+      'Purpose / Remarks',
+      'Assessed Date'
+    ];
+
+    const rows = filteredDueFees.map(fee => {
+      const student = students.find(s => s.id === fee.studentId);
+      const d = fee.date ? new Date(fee.date) : new Date();
+      const dateStr = !isNaN(d.getTime()) ? d.toISOString().split('T')[0] : String(fee.date || '');
+      return [
+        student?.name || 'Unknown Student',
+        student?.rollNumber || 'N/A',
+        student?.subject || 'N/A',
+        student?.class || 'N/A',
+        fee.amount || 0,
+        fee.remarks || '',
+        dateStr
+      ];
+    });
+
+    const escapeCell = (cell: string | number | undefined | null) => {
+      if (cell === undefined || cell === null) return '""';
+      const str = String(cell);
+      return `"${str.replace(/"/g, '""')}"`;
+    };
+    const csvContent = '\uFEFF' + [headers.map(escapeCell).join(','), ...rows.map(row => row.map(escapeCell).join(','))].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    const today = new Date().toISOString().split('T')[0];
+    link.setAttribute('download', `utc_due_fees_report_${today}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.studentId || !formData.amount) return;
@@ -86,7 +132,7 @@ const AdminDueFees: React.FC = () => {
 
   return (
     <div className="space-y-10">
-      <div className="flex justify-between items-center bg-white/5 p-6 rounded-[32px] border border-white/5">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-white/5 p-6 rounded-[32px] border border-white/5">
         <div className="flex items-center gap-4">
            <div className="p-3 bg-red-400/20 text-red-400 rounded-xl">
              <AlertCircle size={24} />
@@ -96,14 +142,24 @@ const AdminDueFees: React.FC = () => {
              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Track and manage student pending payments</p>
            </div>
         </div>
-        {!isAdding && (
-          <button
-            onClick={() => setIsAdding(true)}
-            className="indigo-button px-8 py-3.5 text-xs font-black uppercase tracking-widest"
+        <div className="flex items-center gap-3 flex-wrap">
+          <button 
+            onClick={handleExportCSV}
+            disabled={filteredDueFees.length === 0}
+            className="px-6 py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all hover:scale-105 active:scale-95 disabled:opacity-40 disabled:hover:scale-100 disabled:cursor-not-allowed cursor-pointer"
+            title="Export filtered due fees to CSV"
           >
-            Add New Due
+            <Download size={15} /> Export CSV
           </button>
-        )}
+          {!isAdding && (
+            <button
+              onClick={() => setIsAdding(true)}
+              className="indigo-button px-8 py-3.5 text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-indigo-600/30 hover:scale-105 active:scale-95"
+            >
+              <Plus size={15} /> Add New Due
+            </button>
+          )}
+        </div>
       </div>
 
       <AnimatePresence>

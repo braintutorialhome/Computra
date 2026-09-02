@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useStorage } from '../../../hooks/useStorage';
-import { CreditCard, Plus, X, Trash2, Search, Filter, Calendar } from 'lucide-react';
+import { CreditCard, Plus, X, Trash2, Search, Filter, Calendar, Download } from 'lucide-react';
 import { safeFormat } from '../../../lib/utils';
 import SearchableSelect from '../../../components/ui/SearchableSelect';
 
@@ -64,6 +64,51 @@ export default function FeeManagement() {
     }).slice().reverse();
   }, [fees, students, searchTerm, subjectFilter, monthFilter]);
 
+  const handleExportCSV = () => {
+    if (filteredFees.length === 0) return;
+
+    const headers = [
+      'Student Name',
+      'Roll Number / ID',
+      'Subject / Course',
+      'Class',
+      'Billing Term / Month',
+      'Amount (INR)',
+      'Payment Date',
+      'Status'
+    ];
+
+    const rows = filteredFees.map(f => {
+      const student = students.find(s => s.id === f.studentId);
+      return [
+        student?.name || 'Unknown',
+        student?.rollNumber || 'N/A',
+        student?.subject || 'N/A',
+        student?.class || 'N/A',
+        f.month || '',
+        f.amount || 0,
+        safeFormat(f.date, 'yyyy-MM-dd') || f.date || '',
+        (f.status || 'paid').toUpperCase()
+      ];
+    });
+
+    const escapeCell = (cell: string | number | undefined | null) => {
+      if (cell === undefined || cell === null) return '""';
+      const str = String(cell);
+      return `"${str.replace(/"/g, '""')}"`;
+    };
+    const csvContent = '\uFEFF' + [headers.map(escapeCell).join(','), ...rows.map(row => row.map(escapeCell).join(','))].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `utc_fees_collections_${safeFormat(new Date(), 'yyyy-MM-dd')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newFee.studentId || !newFee.amount) return;
@@ -82,7 +127,7 @@ export default function FeeManagement() {
 
   return (
     <div className="space-y-10">
-      <div className="flex justify-between items-center bg-white/5 p-6 rounded-[32px] border border-white/5">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-white/5 p-6 rounded-[32px] border border-white/5">
         <div className="flex items-center gap-4">
            <div className="p-3 bg-indigo-500/20 text-indigo-400 rounded-xl">
              <CreditCard size={24} />
@@ -92,12 +137,22 @@ export default function FeeManagement() {
              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Manage and track revenues</p>
            </div>
         </div>
-        <button 
-          onClick={() => setShowAdd(true)}
-          className="indigo-button px-8 py-3.5 text-xs font-black uppercase tracking-widest"
-        >
-          Collect Fee
-        </button>
+        <div className="flex items-center gap-3 flex-wrap">
+          <button 
+            onClick={handleExportCSV}
+            disabled={filteredFees.length === 0}
+            className="px-6 py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all hover:scale-105 active:scale-95 disabled:opacity-40 disabled:hover:scale-100 disabled:cursor-not-allowed cursor-pointer"
+            title="Export filtered collections to CSV"
+          >
+            <Download size={15} /> Export CSV
+          </button>
+          <button 
+            onClick={() => setShowAdd(true)}
+            className="indigo-button px-8 py-3.5 text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-indigo-600/30 hover:scale-105 active:scale-95"
+          >
+            <Plus size={15} /> Collect Fee
+          </button>
+        </div>
       </div>
 
       {/* Search and Filter */}

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useStorage } from '../../../hooks/useStorage';
-import { Wallet, Plus, Trash2, Calendar, X, Search, Filter } from 'lucide-react';
+import { Wallet, Plus, Trash2, Calendar, X, Search, Filter, Download } from 'lucide-react';
 import { safeFormat } from '../../../lib/utils';
 
 export default function ExpenseManagement() {
@@ -47,6 +47,43 @@ export default function ExpenseManagement() {
     }).slice().reverse();
   }, [expenses, searchTerm, categoryFilter, monthFilter]);
 
+  const handleExportCSV = () => {
+    if (filteredExpenses.length === 0) return;
+
+    const headers = [
+      'Expense Title',
+      'Category',
+      'Amount (INR)',
+      'Expense Date',
+      'Description / Remarks'
+    ];
+
+    const rows = filteredExpenses.map(e => [
+      e.title || '',
+      e.category || 'Others',
+      e.amount || 0,
+      safeFormat(e.date, 'yyyy-MM-dd') || e.date || '',
+      e.description || ''
+    ]);
+
+    const escapeCell = (cell: string | number | undefined | null) => {
+      if (cell === undefined || cell === null) return '""';
+      const str = String(cell);
+      return `"${str.replace(/"/g, '""')}"`;
+    };
+    const csvContent = '\uFEFF' + [headers.map(escapeCell).join(','), ...rows.map(row => row.map(escapeCell).join(','))].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    const today = new Date().toISOString().split('T')[0];
+    link.setAttribute('download', `utc_expenses_report_${today}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newExpense.title || !newExpense.amount) return;
@@ -75,7 +112,7 @@ export default function ExpenseManagement() {
 
   return (
     <div className="space-y-10 max-w-5xl">
-       <div className="flex justify-between items-center bg-white/5 p-6 rounded-[32px] border border-white/5">
+       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-white/5 p-6 rounded-[32px] border border-white/5">
         <div className="flex items-center gap-4">
            <div className="p-3 bg-red-500/20 text-red-400 rounded-xl">
              <Wallet size={24} />
@@ -85,12 +122,22 @@ export default function ExpenseManagement() {
              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Track institutional expenses</p>
            </div>
         </div>
-        <button 
-          onClick={() => setShowAdd(true)}
-          className="bg-rose-600 hover:bg-rose-500 text-white rounded-2xl px-8 py-3.5 text-xs font-black uppercase tracking-widest shadow-lg shadow-rose-600/30 transition-all hover:scale-105 active:scale-95"
-        >
-          Add Expense
-        </button>
+        <div className="flex items-center gap-3 flex-wrap">
+          <button 
+            onClick={handleExportCSV}
+            disabled={filteredExpenses.length === 0}
+            className="px-6 py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all hover:scale-105 active:scale-95 disabled:opacity-40 disabled:hover:scale-100 disabled:cursor-not-allowed cursor-pointer"
+            title="Export filtered expenses to CSV"
+          >
+            <Download size={15} /> Export CSV
+          </button>
+          <button 
+            onClick={() => setShowAdd(true)}
+            className="bg-rose-600 hover:bg-rose-500 text-white rounded-2xl px-8 py-3.5 text-xs font-black uppercase tracking-widest shadow-lg shadow-rose-600/30 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+          >
+            <Plus size={15} /> Add Expense
+          </button>
+        </div>
       </div>
 
       {/* Search and Filter */}

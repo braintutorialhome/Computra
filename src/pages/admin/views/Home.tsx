@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { useStorage } from '../../../hooks/useStorage';
 import { 
-  Users, FileCheck, CreditCard, Calendar, TrendingUp, DollarSign
+  Users, FileCheck, Calendar
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
@@ -52,12 +52,9 @@ export default function AdminHome() {
         <h2 className="text-3xl font-black text-white tracking-tighter uppercase">Overview <span className="text-indigo-500">Center</span></h2>
       </div>
 
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <StatCard label="Total Students" value={totalStudents} icon={Users} color="blue" />
         <StatCard label="Pending Admissions" value={pendingAdmissions} icon={FileCheck} color="amber" />
-        <StatCard label="Fees Collected" value={`₹${totalFees}`} icon={CreditCard} color="emerald" />
-        <StatCard label="Net Balance" value={`₹${netBalance}`} icon={DollarSign} color="indigo" subValue={netBalance < 0 ? 'Negative' : 'Profit'} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
