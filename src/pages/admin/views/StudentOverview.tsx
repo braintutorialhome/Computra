@@ -275,7 +275,7 @@ export default function StudentOverview() {
       </div>
 
       {/* Metric Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <div className="glass p-6 rounded-3xl border border-white/5 relative overflow-hidden">
           <div className="flex items-center justify-between mb-3">
             <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Enrolled</span>
@@ -302,7 +302,7 @@ export default function StudentOverview() {
           <p className="text-[11px] font-bold text-slate-400 mt-2">All-time lifetime collections</p>
         </div>
 
-        <div className="glass p-6 rounded-3xl border border-white/5 relative overflow-hidden">
+        <div className="glass p-6 rounded-3xl border border-white/5 relative overflow-hidden sm:col-span-2 lg:col-span-1">
           <div className="flex items-center justify-between mb-3">
             <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Outstanding Dues</span>
             <div className="w-8 h-8 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center">
@@ -311,17 +311,6 @@ export default function StudentOverview() {
           </div>
           <p className="text-3xl font-black text-rose-400 tracking-tight">₹{kpis.totalOutstanding.toLocaleString('en-IN')}</p>
           <p className="text-[11px] font-bold text-slate-400 mt-2">{kpis.studentsWithDues} students with pending dues</p>
-        </div>
-
-        <div className="glass p-6 rounded-3xl border border-white/5 relative overflow-hidden">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Read-Only Safety</span>
-            <div className="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
-              <ShieldCheck size={16} />
-            </div>
-          </div>
-          <p className="text-xl font-black text-purple-300 tracking-tight">Audit & Inspection</p>
-          <p className="text-[11px] font-bold text-slate-400 mt-2">Zero accidental mutations permitted</p>
         </div>
       </div>
 

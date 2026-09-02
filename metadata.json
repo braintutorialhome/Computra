@@ -2,5 +2,7 @@
   "name": "UTC Computra",
   "description": "A comprehensive coaching center management system for student admissions, fee tracking, attendance, study materials, and online tests.",
   "requestFramePermissions": [],
-  "majorCapabilities": []
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
