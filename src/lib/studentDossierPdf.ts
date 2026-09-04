@@ -2,6 +2,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { safeFormat } from './utils';
 import { Student, Fee, DueFee, TestResult } from '../types';
+import { exportFile } from './downloadHelper';
 
 export interface StudentDossierData {
   student: Student;
@@ -409,8 +410,14 @@ export function exportStudentDossierToPDF(dossier: StudentDossierData) {
     );
   }
 
-  // Trigger Save File
+  // Trigger Save File with Universal APK / WebView & Browser Compatibility
   const safeName = (student.name || 'Student').replace(/[^a-zA-Z0-9_-]/g, '_');
   const fileName = `UTC_Dossier_${safeName}_${student.rollNumber || student.id || safeFormat(new Date(), 'yyyyMMdd')}.pdf`;
-  doc.save(fileName);
+
+  const pdfBlob = doc.output('blob');
+  return exportFile({
+    blob: pdfBlob,
+    fileName,
+    mimeType: 'application/pdf',
+  });
 }

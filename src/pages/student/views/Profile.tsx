@@ -1,7 +1,8 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Student } from '../../../types';
 import { useStorage } from '../../../hooks/useStorage';
-import { User, Mail, Phone, MapPin, Calendar, Book, Layers, ShieldCheck, Mail as MailIcon, MessageSquare } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Calendar, Book, Layers, ShieldCheck, Mail as MailIcon, MessageSquare, Eye } from 'lucide-react';
 
 export default function StudentProfile({ student }: { student: Student }) {
   const infoItems = [
@@ -69,9 +70,17 @@ export default function StudentProfile({ student }: { student: Student }) {
               </div>
             </div>
             
-            <div className="glass px-8 py-4 rounded-3xl border-emerald-500/20 bg-emerald-500/5 flex items-center gap-3 mb-4">
-              <ShieldCheck className="text-emerald-400" size={18} />
-              <span className="text-xs font-black text-emerald-400 uppercase tracking-widest">Authorized Status: {student.status}</span>
+            <div className="flex items-center gap-3 flex-wrap mb-4">
+              <Link 
+                to="/student/overview" 
+                className="px-6 py-4 rounded-3xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs uppercase tracking-widest flex items-center gap-2 shadow-xl shadow-indigo-600/30 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+              >
+                <Eye size={16} /> My Overview
+              </Link>
+              <div className="glass px-8 py-4 rounded-3xl border-emerald-500/20 bg-emerald-500/5 flex items-center gap-3">
+                <ShieldCheck className="text-emerald-400" size={18} />
+                <span className="text-xs font-black text-emerald-400 uppercase tracking-widest">Authorized Status: {student.status}</span>
+              </div>
             </div>
           </div>
 

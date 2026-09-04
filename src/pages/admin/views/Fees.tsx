@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useStorage } from '../../../hooks/useStorage';
 import { CreditCard, Plus, X, Trash2, Search, Filter, Calendar, Download } from 'lucide-react';
 import { safeFormat } from '../../../lib/utils';
+import { exportCsvFile } from '../../../lib/downloadHelper';
 import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export default function FeeManagement() {
@@ -97,16 +98,8 @@ export default function FeeManagement() {
       const str = String(cell);
       return `"${str.replace(/"/g, '""')}"`;
     };
-    const csvContent = '\uFEFF' + [headers.map(escapeCell).join(','), ...rows.map(row => row.map(escapeCell).join(','))].join('\r\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `utc_fees_collections_${safeFormat(new Date(), 'yyyy-MM-dd')}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    const csvContent = [headers.map(escapeCell).join(','), ...rows.map(row => row.map(escapeCell).join(','))].join('\r\n');
+    exportCsvFile(csvContent, `utc_fees_collections_${safeFormat(new Date(), 'yyyy-MM-dd')}.csv`);
   };
 
   const handleSubmit = (e: React.FormEvent) => {

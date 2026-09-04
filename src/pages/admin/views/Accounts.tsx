@@ -2,6 +2,7 @@ import React from 'react';
 import { useStorage } from '../../../hooks/useStorage';
 import { DollarSign, TrendingUp, TrendingDown, Wallet, CreditCard, Download, FileSpreadsheet } from 'lucide-react';
 import { safeFormat } from '../../../lib/utils';
+import { exportCsvFile } from '../../../lib/downloadHelper';
 
 export default function AccountManagement() {
   const { fees, expenses, students } = useStorage();
@@ -76,22 +77,14 @@ export default function AccountManagement() {
       []
     ];
 
-    const csvContent = '\uFEFF' + [
+    const csvContent = [
       ...summaryHeader.map(r => r.map(escapeCell).join(',')),
       headers.map(escapeCell).join(','),
       ...rowsWithBalance.map(row => row.map(escapeCell).join(','))
     ].join('\r\n');
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
     const today = new Date().toISOString().split('T')[0];
-    link.setAttribute('download', `utc_account_statement_${today}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    exportCsvFile(csvContent, `utc_account_statement_${today}.csv`);
   };
 
   return (

@@ -1,12 +1,12 @@
 import React from 'react';
 import { useStorage } from '../../../hooks/useStorage';
 import { Student } from '../../../types';
-import { CreditCard, Brain, Calendar, Bell, ArrowRight, BookMarked, Trophy, AlertCircle, ExternalLink, FileCheck, User } from 'lucide-react';
+import { CreditCard, Brain, Calendar, Bell, ArrowRight, BookOpen, Trophy, AlertCircle, ExternalLink, FileCheck, User, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 
 export default function StudentHome({ student }: { student: Student }) {
-  const { fees, attendance, testResults, notices, dueFees } = useStorage();
+  const { fees, attendance, testResults, notices, dueFees, materials } = useStorage();
   const [currentTime, setCurrentTime] = React.useState(new Date());
 
   React.useEffect(() => {
@@ -48,17 +48,83 @@ export default function StudentHome({ student }: { student: Student }) {
   const today = new Date().toISOString().split('T')[0];
   const isPresentToday = attendance.find(a => a.date === today && a.studentId === student.id)?.status === 'present';
 
+  const sClassClean = String(student.class || '').replace('Class-', '').trim();
+  const studentMaterials = materials.filter(m => {
+    if (!m.class) return true;
+    const mClassClean = String(m.class).replace('Class-', '').trim();
+    return !sClassClean || mClassClean === sClassClean;
+  });
+
   return (
     <div className="space-y-12">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 h-full">
-        <div className="space-y-2">
-           <p className="text-xs font-black uppercase tracking-widest text-indigo-500">{kolkataTime}</p>
-           <h1 className="text-3xl font-black text-white tracking-tighter uppercase">{greeting}! {student.name.split(' ')[0]}</h1>
+      {/* Student Identity Header Card */}
+      <div className="glass p-6 sm:p-8 rounded-[36px] border border-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden shadow-2xl">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 relative z-10">
+          {/* Student Photo */}
+          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl border-2 border-indigo-500/30 bg-slate-900/90 flex items-center justify-center overflow-hidden shadow-xl shrink-0 relative group">
+            {student.photoUrl ? (
+              <img 
+                src={student.photoUrl} 
+                alt={student.name} 
+                className="w-full h-full object-cover" 
+                referrerPolicy="no-referrer" 
+              />
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-indigo-950/60 to-slate-900 text-indigo-400">
+                <User size={36} />
+              </div>
+            )}
+            <div className="absolute inset-0 rounded-3xl border border-white/10 pointer-events-none" />
+          </div>
+
+          {/* Student Details: Name, ID, Roll No */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400">{kolkataTime}</span>
+              <span className="text-slate-600">•</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">{greeting}</span>
+            </div>
+
+            {/* Student Name */}
+            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight uppercase">
+              {student.name}
+            </h1>
+
+            {/* Student ID & Roll No Badges */}
+            <div className="flex flex-wrap items-center gap-2.5 pt-0.5">
+              <div className="px-3.5 py-1.5 bg-white/[0.03] rounded-xl border border-white/10 text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">Student ID:</span>
+                <strong className="text-indigo-400 font-mono font-black">{student.id}</strong>
+              </div>
+
+              <div className="px-3.5 py-1.5 bg-indigo-500/10 rounded-xl border border-indigo-500/25 text-xs font-semibold text-indigo-200 flex items-center gap-1.5">
+                <span className="text-[10px] font-black uppercase tracking-wider text-indigo-400">Roll No:</span>
+                <strong className="text-white font-mono font-black">{student.rollNumber || 'N/A'}</strong>
+              </div>
+
+              {student.class && (
+                <div className="px-3.5 py-1.5 bg-white/[0.03] rounded-xl border border-white/10 text-xs font-semibold text-slate-400 hidden sm:flex items-center gap-1.5">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">Class:</span>
+                  <strong className="text-slate-200">{student.class}</strong>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-        <div className="glass px-6 py-3 rounded-2xl flex items-center gap-3 border-white/5">
-           <div className={`w-3 h-3 rounded-full ${isPresentToday ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500 animate-bounce'}`}></div>
-           <span className="text-xs font-black uppercase tracking-widest text-slate-400">System Presence: {isPresentToday ? 'Online' : 'Not Linked'}</span>
+
+        {/* Quick Action Navigation */}
+        <div className="flex items-center gap-3 relative z-10 w-full sm:w-auto">
+          <Link 
+            to="/student/overview" 
+            className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-xl shadow-indigo-600/30 hover:scale-105 active:scale-95 cursor-pointer"
+            title="Access your verified Student Overview & Dossier"
+          >
+            <Eye size={16} /> My Overview
+          </Link>
         </div>
+
+        {/* Ambient background decoration */}
+        <div className="absolute right-0 top-0 w-96 h-full bg-gradient-to-l from-indigo-600/10 via-indigo-500/5 to-transparent pointer-events-none" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -111,17 +177,24 @@ export default function StudentHome({ student }: { student: Student }) {
 
         <div className="glass p-10 rounded-[40px] bg-gradient-to-br from-emerald-500/10 to-transparent flex flex-col justify-between group relative overflow-hidden">
           <div className="absolute top-0 right-0 p-8 opacity-5 scale-150 group-hover:scale-[1.7] transition-transform">
-             <Calendar size={120} />
+             <BookOpen size={120} />
           </div>
           <div>
-            <div className={`w-14 h-14 ${isPresentToday ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'} rounded-2xl flex items-center justify-center mb-10 border border-white/5 transition-all duration-500`}>
-               <Calendar size={28} />
+            <div className="w-14 h-14 bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center mb-10 border border-emerald-500/20 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-500">
+               <BookOpen size={28} />
             </div>
-            <p className="text-xs font-black uppercase tracking-widest text-slate-500 mb-2">Attendance</p>
-            <h3 className={`text-4xl font-black tracking-tighter uppercase ${isPresentToday ? 'text-emerald-400' : 'text-rose-400'}`}>
-              {isPresentToday ? 'Verified' : 'Absent'}
+            <p className="text-xs font-black uppercase tracking-widest text-slate-500 mb-2">Study Materials</p>
+            <h3 className="text-4xl font-black text-white tracking-tighter">
+              {studentMaterials.length > 0 ? (
+                <span>{studentMaterials.length} <span className="text-slate-500 text-xl font-bold">Files</span></span>
+              ) : (
+                'Vault'
+              )}
             </h3>
           </div>
+          <Link to="/student/materials" className="mt-10 text-xs font-black uppercase tracking-widest text-emerald-400 flex items-center gap-2 hover:gap-4 transition-all">
+            Access Materials <ArrowRight size={14} />
+          </Link>
         </div>
       </div>
 
@@ -148,7 +221,7 @@ export default function StudentHome({ student }: { student: Student }) {
           )}
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
            <Link to="/student/test-master" className="glass p-8 rounded-[40px] group hover:bg-slate-400/20 transition-all border border-white/5 flex flex-col justify-between">
               <div className="w-12 h-12 bg-amber-500/20 text-amber-400 rounded-2xl flex items-center justify-center group-hover:bg-amber-500 group-hover:text-white transition-all">
                 <ExternalLink size={24} />
@@ -165,15 +238,6 @@ export default function StudentHome({ student }: { student: Student }) {
               <div className="mt-8">
                 <p className="text-xs font-black uppercase tracking-widest text-slate-500 group-hover:text-white/60">Performance</p>
                 <h4 className="text-xl font-black text-white tracking-tight">Exam Results</h4>
-              </div>
-           </Link>
-           <Link to="/student/materials" className="lg:col-span-1 glass p-8 rounded-[40px] group hover:bg-slate-400/20 transition-all border border-white/5 flex flex-col justify-between">
-              <div className="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-all">
-                <BookMarked size={24} />
-              </div>
-              <div className="mt-8">
-                <p className="text-xs font-black uppercase tracking-widest text-slate-500 group-hover:text-white/60">Study Materials</p>
-                <h4 className="text-xl font-black text-white tracking-tight">Documents</h4>
               </div>
            </Link>
         </div>

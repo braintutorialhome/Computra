@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useStorage } from '../../../hooks/useStorage';
 import { Wallet, Plus, Trash2, Calendar, X, Search, Filter, Download } from 'lucide-react';
 import { safeFormat } from '../../../lib/utils';
+import { exportCsvFile } from '../../../lib/downloadHelper';
 
 export default function ExpenseManagement() {
   const { expenses, addExpense, deleteExpense } = useStorage();
@@ -71,17 +72,9 @@ export default function ExpenseManagement() {
       const str = String(cell);
       return `"${str.replace(/"/g, '""')}"`;
     };
-    const csvContent = '\uFEFF' + [headers.map(escapeCell).join(','), ...rows.map(row => row.map(escapeCell).join(','))].join('\r\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
+    const csvContent = [headers.map(escapeCell).join(','), ...rows.map(row => row.map(escapeCell).join(','))].join('\r\n');
     const today = new Date().toISOString().split('T')[0];
-    link.setAttribute('download', `utc_expenses_report_${today}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    exportCsvFile(csvContent, `utc_expenses_report_${today}.csv`);
   };
 
   const handleSubmit = (e: React.FormEvent) => {

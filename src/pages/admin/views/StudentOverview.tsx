@@ -9,6 +9,7 @@ import { useStorage } from '../../../hooks/useStorage';
 import { Student } from '../../../types';
 import { format, parseISO } from 'date-fns';
 import { exportStudentDossierToPDF, StudentDossierData } from '../../../lib/studentDossierPdf';
+import { exportCsvFile } from '../../../lib/downloadHelper';
 
 export default function StudentOverview() {
   const { students, fees, dueFees, attendance, testResults, currentUser } = useStorage();
@@ -213,14 +214,8 @@ export default function StudentOverview() {
       `"${(student.address || '').replace(/"/g, '""')}"`
     ]);
 
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `utc_student_overview_${format(new Date(), 'yyyy-MM-dd')}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const csvContent = [headers.join(','), ...rows.map(e => e.join(','))].join('\r\n');
+    exportCsvFile(csvContent, `utc_student_overview_${format(new Date(), 'yyyy-MM-dd')}.csv`);
   };
 
   const handlePrint = () => {
