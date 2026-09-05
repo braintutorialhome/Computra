@@ -82,7 +82,7 @@ export default function MyOverview({ student }: MyOverviewProps) {
               <div className="flex items-center gap-2.5 flex-wrap">
                 <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight uppercase">{student.name}</h1>
                 <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase tracking-wider rounded-full border border-emerald-500/20 flex items-center gap-1">
-                  <ShieldCheck size={12} /> Verified Record
+                  <ShieldCheck size={12} /> Verified
                 </span>
               </div>
               <p className="text-xs text-slate-400 font-semibold mt-1">
