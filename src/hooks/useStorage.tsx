@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { Student, Fee, Expense, Attendance, Test, TestResult, StudyMaterial, Notice, User, UserRole, DueFee, ExternalTest, ResultLink } from '../types';
+import { Student, Fee, Expense, Attendance, Test, TestResult, StudyMaterial, Notice, User, UserRole, DueFee, ExternalTest, ResultLink, StudentRemark } from '../types';
 
 // Fallback for crypto.randomUUID
 const uuid = () => {
@@ -52,6 +52,19 @@ const sanitizeDueFee = (df: any): DueFee => {
   };
 };
 
+const sanitizeRemark = (r: any): StudentRemark => {
+  if (!r) return r;
+  return {
+    id: String(r.id || ''),
+    studentId: String(r.studentId || ''),
+    studentName: r.studentName !== undefined ? String(r.studentName) : undefined,
+    remark: String(r.remark || ''),
+    category: r.category || 'General',
+    date: String(r.date || new Date().toISOString()),
+    createdBy: r.createdBy !== undefined ? String(r.createdBy) : 'Admin'
+  };
+};
+
 interface StorageContextType {
   students: Student[];
   fees: Fee[];
@@ -63,6 +76,8 @@ interface StorageContextType {
   notices: Notice[];
   dueFees: DueFee[];
   externalTests: ExternalTest[];
+  resultLinks: ResultLink[];
+  remarks: StudentRemark[];
   users: User[];
   currentUser: User | null;
   
@@ -104,6 +119,9 @@ interface StorageContextType {
   addResultLink: (result: Omit<ResultLink, 'id' | 'date'>) => void;
   updateResultLink: (result: ResultLink) => void;
   deleteResultLink: (id: string) => void;
+  addRemark: (remark: Omit<StudentRemark, 'id' | 'date'>) => void;
+  updateRemark: (remark: StudentRemark) => void;
+  deleteRemark: (id: string) => void;
   deleteTest: (id: string) => void;
   deleteFee: (id: string) => void;
   clearAllData: () => void;
@@ -135,6 +153,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [dueFees, setDueFees] = useState<DueFee[]>([]);
   const [externalTests, setExternalTests] = useState<ExternalTest[]>([]);
   const [resultLinks, setResultLinks] = useState<ResultLink[]>([]);
+  const [remarks, setRemarks] = useState<StudentRemark[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
     const saved = localStorage.getItem('utc_current_user');
@@ -181,6 +200,16 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
         date: tr.date
       }));
 
+      const enrichedRemarks = remarks.map(r => ({
+        id: r.id,
+        studentId: r.studentId,
+        studentName: students.find(s => s.id === r.studentId)?.name || r.studentName || 'Unknown',
+        remark: r.remark,
+        category: r.category || 'General',
+        date: r.date,
+        createdBy: r.createdBy || 'Admin'
+      }));
+
       const payload = {
         type: 'BACKUP',
         action: 'SYNC_ALL',
@@ -199,6 +228,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
           dueFees,
           externalTests,
           resultLinks,
+          remarks: enrichedRemarks,
           users,
           logs: JSON.parse(localStorage.getItem('utc_activity_logs') || '[]')
         }
@@ -234,7 +264,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
     }, 2000); // 2 second debounce
     return () => clearTimeout(timer);
-  }, [students, fees, expenses, attendance, tests, testResults, materials, notices, dueFees, externalTests, resultLinks, users, isInitialSyncing, isFetchSuccessful]);
+  }, [students, fees, expenses, attendance, tests, testResults, materials, notices, dueFees, externalTests, resultLinks, remarks, users, isInitialSyncing, isFetchSuccessful]);
 
   const refreshCloudData = useCallback(async () => {
     const cleanUrl = scriptUrl.trim();
@@ -284,6 +314,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
           if (data.dueFees) setDueFees(Array.isArray(data.dueFees) ? data.dueFees.map(sanitizeDueFee) : []);
           if (data.externalTests) setExternalTests(data.externalTests);
           if (data.resultLinks) setResultLinks(data.resultLinks);
+          if (data.remarks) setRemarks(Array.isArray(data.remarks) ? data.remarks.map(sanitizeRemark) : []);
           if (data.materials) setMaterials(data.materials);
           if (data.tests) setTests(data.tests);
           if (data.testResults) setTestResults(data.testResults);
@@ -442,6 +473,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     load('utc_due_fees', setDueFees, sanitizeDueFee);
     load('utc_external_tests', setExternalTests);
     load('utc_result_links', setResultLinks);
+    load('utc_remarks', setRemarks, sanitizeRemark);
     load('utc_users', setUsers);
   }, []);
 
@@ -457,12 +489,13 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   useEffect(() => { localStorage.setItem('utc_due_fees', JSON.stringify(dueFees)); }, [dueFees]);
   useEffect(() => { localStorage.setItem('utc_external_tests', JSON.stringify(externalTests)); }, [externalTests]);
   useEffect(() => { localStorage.setItem('utc_result_links', JSON.stringify(resultLinks)); }, [resultLinks]);
+  useEffect(() => { localStorage.setItem('utc_remarks', JSON.stringify(remarks)); }, [remarks]);
   useEffect(() => { localStorage.setItem('utc_users', JSON.stringify(users)); }, [users]);
 
   const clearAllData = () => {
-    const keys = ['students', 'fees', 'expenses', 'attendance', 'tests', 'testResults', 'materials', 'notices', 'due_fees', 'external_tests', 'result_links', 'users'];
+    const keys = ['students', 'fees', 'expenses', 'attendance', 'tests', 'testResults', 'materials', 'notices', 'due_fees', 'external_tests', 'result_links', 'remarks', 'users'];
     keys.forEach(k => localStorage.removeItem(`utc_${k}`));
-    setStudents([]); setFees([]); setExpenses([]); setAttendance([]); setTests([]); setTestResults([]); setMaterials([]); setNotices([]); setDueFees([]); setExternalTests([]); setResultLinks([]); setUsers([]);
+    setStudents([]); setFees([]); setExpenses([]); setAttendance([]); setTests([]); setTestResults([]); setMaterials([]); setNotices([]); setDueFees([]); setExternalTests([]); setResultLinks([]); setRemarks([]); setUsers([]);
   };
 
   const addStudent = (s: Omit<Student, 'id' | 'admissionDate' | 'status'>) => {
@@ -494,7 +527,8 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setAttendance(prev => prev.filter(a => a.studentId !== id));
     setTestResults(prev => prev.filter(tr => tr.studentId !== id));
     setDueFees(prev => prev.filter(df => df.studentId !== id));
-    addLog('STUDENT_DELETE', `Permanently deleted student ${id} and all their credentials, fees, attendance, results, and due fee history`);
+    setRemarks(prev => prev.filter(r => r.studentId !== id));
+    addLog('STUDENT_DELETE', `Permanently deleted student ${id} and all their credentials, fees, attendance, results, due fees, and remarks`);
   };
   
   const approveStudent = (id: string) => {
@@ -663,15 +697,41 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     addLog('RESULT_DELETED', `Deleted result link ${id}`);
   };
 
+  const addRemark = (r: Omit<StudentRemark, 'id' | 'date'>) => {
+    const student = students.find(s => s.id === r.studentId);
+    const studentName = student?.name || r.studentName || 'Unknown';
+    const newRemark = sanitizeRemark({
+      ...r,
+      id: uuid(),
+      studentName,
+      date: new Date().toISOString()
+    });
+    setRemarks(prev => [newRemark, ...prev]);
+    addLog('REMARK_ADDED', `Added remark for student ${studentName}: "${newRemark.remark.slice(0, 30)}..."`);
+  };
+
+  const updateRemark = (r: StudentRemark) => {
+    const sanitized = sanitizeRemark(r);
+    setRemarks(prev => prev.map(item => item.id === r.id ? sanitized : item));
+    addLog('REMARK_UPDATE', `Updated remark ${r.id} for student ${sanitized.studentName || sanitized.studentId}`);
+  };
+
+  const deleteRemark = (id: string) => {
+    const existing = remarks.find(r => r.id === id);
+    setRemarks(prev => prev.filter(item => item.id !== id));
+    addLog('REMARK_DELETED', `Deleted remark record ${id}${existing?.studentName ? ` for ${existing.studentName}` : ''}`);
+  };
+
   return (
     <StorageContext.Provider value={{
-      students, fees, expenses, attendance, tests, testResults, materials, notices, dueFees, externalTests, resultLinks, users, currentUser,
+      students, fees, expenses, attendance, tests, testResults, materials, notices, dueFees, externalTests, resultLinks, remarks, users, currentUser,
       login, signup, logout, refreshCloudData, updateUser,
       scriptUrl, syncError, isInitialSyncing,
       addStudent, updateStudent, deleteStudent, removeStudentPermanently, approveStudent, rejectStudent,
       addFee, updateFee, deleteFee, addExpense, updateExpense, deleteExpense, markAttendance,
       addTest, deleteTest, submitTestResult, addMaterial, updateMaterial, deleteMaterial, addNotice, deleteNotice, 
-      addDueFee, updateDueFee, deleteDueFee, addExternalTest, updateExternalTest, deleteExternalTest, addResultLink, updateResultLink, deleteResultLink, clearAllData, addLog
+      addDueFee, updateDueFee, deleteDueFee, addExternalTest, updateExternalTest, deleteExternalTest, addResultLink, updateResultLink, deleteResultLink,
+      addRemark, updateRemark, deleteRemark, clearAllData, addLog
     }}>
       {children}
     </StorageContext.Provider>

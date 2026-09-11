@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
-  BarChart2, User, CreditCard, BookMarked, Bell, LogOut, Menu, X, ArrowRight, Phone, MessageSquare, Compass, AlertCircle, ExternalLink, FileCheck, Eye
+  BarChart2, User, CreditCard, BookMarked, Bell, LogOut, Menu, X, ArrowRight, Phone, MessageSquare, Compass, AlertCircle, ExternalLink, FileCheck, Eye, MessageSquareQuote
 } from 'lucide-react';
 import { useStorage } from '../../hooks/useStorage';
 import { motion, AnimatePresence } from 'motion/react';
 import StudentHome from './views/Home';
 import MyOverview from './views/MyOverview';
 import StudentProfile from './views/Profile';
+import StudentRemarksView from './views/Remarks';
 import StudentFees from './views/Fees';
 import StudentTestMaster from './views/TestMaster';
 import StudentResults from './views/Results';
@@ -91,6 +92,7 @@ export default function StudentDashboard() {
     { to: '/student/test-master', icon: ExternalLink, label: 'Exam Portal' },
     { to: '/student/results', icon: FileCheck, label: 'Results' },
     { to: '/student/materials', icon: BookMarked, label: 'Study Material' },
+    { to: '/student/remarks', icon: MessageSquareQuote, label: 'Remarks' },
     { to: '/student/notices', icon: Bell, label: 'Notice' },
   ];
 
@@ -213,6 +215,7 @@ export default function StudentDashboard() {
                   <Route path="overview" element={<MyOverview student={currentStudent} />} />
                   <Route path="my-overview" element={<MyOverview student={currentStudent} />} />
                   <Route path="profile" element={<StudentProfile student={currentStudent} />} />
+                  <Route path="remarks" element={<StudentRemarksView student={currentStudent} />} />
                   <Route path="fees" element={<StudentFees student={currentStudent} />} />
                   <Route path="due-fees" element={<StudentDueFees student={currentStudent} />} />
                   <Route path="test-master" element={<StudentTestMaster />} />

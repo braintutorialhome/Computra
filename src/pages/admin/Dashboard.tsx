@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
-  BarChart2, Users, FileCheck, CreditCard, Wallet, Calendar, BookMarked, Bell, LogOut, Menu, X, Plus, Trash2, Edit2, TrendingUp, TrendingDown, DollarSign, Settings, AlertCircle, ExternalLink, UserCheck, GraduationCap
+  BarChart2, Users, FileCheck, CreditCard, Wallet, Calendar, BookMarked, Bell, LogOut, Menu, X, Plus, Trash2, Edit2, TrendingUp, TrendingDown, DollarSign, Settings, AlertCircle, ExternalLink, UserCheck, GraduationCap, MessageSquareQuote
 } from 'lucide-react';
 import { useStorage } from '../../hooks/useStorage';
 import AdminHome from './views/Home';
 import StudentManagement from './views/Students';
 import StudentOverview from './views/StudentOverview';
+import StudentRemarks from './views/StudentRemarks';
 import AdmissionManagement from './views/Admissions';
 import FeeManagement from './views/Fees';
 import ExpenseManagement from './views/Expenses';
@@ -80,6 +81,7 @@ export default function AdminDashboard() {
     { to: '/admin/test-master', icon: ExternalLink, label: 'Exam Portal' },
     { to: '/admin/results', icon: FileCheck, label: 'Results' },
     { to: '/admin/materials', icon: BookMarked, label: 'Study Materials' },
+    { to: '/admin/student-remarks', icon: MessageSquareQuote, label: 'Student Remarks' },
     { to: '/admin/notices', icon: Bell, label: 'Notices' },
   ];
 
@@ -87,6 +89,7 @@ export default function AdminDashboard() {
     '/admin/dashboard': 'System Dashboard',
     '/admin/admissions': 'Admission Panel',
     '/admin/students': 'Student Records',
+    '/admin/student-remarks': 'Student Remarks',
     '/admin/student-overview': 'Student Overview',
     '/admin/student-fee-tracker': 'Student Management & Fee Tracker',
     '/admin/fees': 'Fees & Collections',
@@ -227,6 +230,7 @@ export default function AdminDashboard() {
           <Routes>
             <Route path="dashboard" element={<AdminHome />} />
             <Route path="students" element={<StudentManagement />} />
+            <Route path="student-remarks" element={<StudentRemarks />} />
             <Route path="student-overview" element={<StudentOverview />} />
             <Route path="student-fee-tracker" element={<StudentFeeTracker />} />
             <Route path="admissions" element={<AdmissionManagement />} />

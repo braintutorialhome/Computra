@@ -1,12 +1,12 @@
 import React from 'react';
 import { useStorage } from '../../../hooks/useStorage';
 import { Student } from '../../../types';
-import { CreditCard, Brain, Calendar, Bell, ArrowRight, BookOpen, Trophy, AlertCircle, ExternalLink, FileCheck, User, Eye } from 'lucide-react';
+import { CreditCard, Brain, Calendar, Bell, ArrowRight, BookOpen, Trophy, AlertCircle, ExternalLink, FileCheck, User, Eye, MessageSquareQuote } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 
 export default function StudentHome({ student }: { student: Student }) {
-  const { fees, attendance, testResults, notices, dueFees, materials } = useStorage();
+  const { fees, attendance, testResults, notices, dueFees, materials, remarks } = useStorage();
   const [currentTime, setCurrentTime] = React.useState(new Date());
 
   React.useEffect(() => {
@@ -221,23 +221,32 @@ export default function StudentHome({ student }: { student: Student }) {
           )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-           <Link to="/student/test-master" className="glass p-8 rounded-[40px] group hover:bg-slate-400/20 transition-all border border-white/5 flex flex-col justify-between">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+           <Link to="/student/remarks" className="glass p-6 rounded-[36px] group hover:bg-slate-400/20 transition-all border border-white/5 flex flex-col justify-between">
+              <div className="w-12 h-12 bg-indigo-500/20 text-indigo-400 rounded-2xl flex items-center justify-center group-hover:bg-indigo-500 group-hover:text-white transition-all">
+                <MessageSquareQuote size={24} />
+              </div>
+              <div className="mt-6">
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 group-hover:text-white/60">Conduct & Review</p>
+                <h4 className="text-lg font-black text-white tracking-tight">Remarks</h4>
+              </div>
+           </Link>
+           <Link to="/student/test-master" className="glass p-6 rounded-[36px] group hover:bg-slate-400/20 transition-all border border-white/5 flex flex-col justify-between">
               <div className="w-12 h-12 bg-amber-500/20 text-amber-400 rounded-2xl flex items-center justify-center group-hover:bg-amber-500 group-hover:text-white transition-all">
                 <ExternalLink size={24} />
               </div>
-              <div className="mt-8">
-                <p className="text-xs font-black uppercase tracking-widest text-slate-500 group-hover:text-white/60">Exam Portal</p>
-                <h4 className="text-xl font-black text-white tracking-tight">External Links</h4>
+              <div className="mt-6">
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 group-hover:text-white/60">Exam Portal</p>
+                <h4 className="text-lg font-black text-white tracking-tight">External Links</h4>
               </div>
            </Link>
-           <Link to="/student/results" className="glass p-8 rounded-[40px] group hover:bg-slate-400/20 transition-all border border-white/5 flex flex-col justify-between">
+           <Link to="/student/results" className="glass p-6 rounded-[36px] group hover:bg-slate-400/20 transition-all border border-white/5 flex flex-col justify-between">
               <div className="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-all">
                 <FileCheck size={24} />
               </div>
-              <div className="mt-8">
-                <p className="text-xs font-black uppercase tracking-widest text-slate-500 group-hover:text-white/60">Performance</p>
-                <h4 className="text-xl font-black text-white tracking-tight">Exam Results</h4>
+              <div className="mt-6">
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 group-hover:text-white/60">Performance</p>
+                <h4 className="text-lg font-black text-white tracking-tight">Exam Results</h4>
               </div>
            </Link>
         </div>

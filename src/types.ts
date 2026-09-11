@@ -121,3 +121,13 @@ export interface ResultLink {
   url: string;
   date: string;
 }
+
+export interface StudentRemark {
+  id: string;
+  studentId: string;
+  studentName?: string;
+  remark: string;
+  category?: 'Academic' | 'Performance' | 'Discipline' | 'Attendance' | 'General';
+  date: string;
+  createdBy?: string;
+}
