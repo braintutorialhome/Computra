@@ -166,7 +166,7 @@ export default function AdminDashboard() {
                </h2>
                <div className="flex items-center gap-2">
                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-none">
-                   UTC Computra • {kolkataTime}
+                   UTC Computra • {kolkataTime} IST
                  </p>
                  {isInitialSyncing && (
                    <span className="flex items-center gap-1.5 text-[10px] font-black text-indigo-400 uppercase tracking-widest">

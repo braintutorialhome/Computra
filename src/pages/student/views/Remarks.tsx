@@ -5,7 +5,7 @@ import {
   MessageSquareQuote, Award, ShieldCheck, Calendar, 
   Clock, CheckCircle2, UserCheck, AlertCircle, Info, Sparkles 
 } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import { formatIST } from '../../../lib/dateUtils';
 
 interface StudentRemarksProps {
   student?: Student;
@@ -36,19 +36,9 @@ export default function StudentRemarksView({ student }: StudentRemarksProps) {
     return remarks.filter(r => r.studentId === activeStudent.id);
   }, [remarks, activeStudent]);
 
-  // Safe date formatter
+  // Safe date formatter in IST
   const safeFormatDate = (dateStr?: string, fmt = 'dd MMMM yyyy') => {
-    if (!dateStr) return 'N/A';
-    try {
-      const parsed = parseISO(dateStr);
-      if (isNaN(parsed.getTime())) {
-        const d = new Date(dateStr);
-        return isNaN(d.getTime()) ? dateStr : format(d, fmt);
-      }
-      return format(parsed, fmt);
-    } catch {
-      return dateStr;
-    }
+    return formatIST(dateStr, fmt);
   };
 
   return (

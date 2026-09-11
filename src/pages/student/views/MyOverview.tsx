@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { useStorage } from '../../../hooks/useStorage';
 import { Student } from '../../../types';
-import { format, parseISO } from 'date-fns';
+import { formatIST } from '../../../lib/dateUtils';
 import { StudentDossierData } from '../../../lib/studentDossierPdf';
 
 interface MyOverviewProps {
@@ -17,19 +17,9 @@ interface MyOverviewProps {
 export default function MyOverview({ student }: MyOverviewProps) {
   const { fees, dueFees } = useStorage();
 
-  // Safe date formatting helper
+  // Safe date formatting helper in IST
   const safeFormatDate = (dateStr?: string, fmt = 'dd MMM yyyy') => {
-    if (!dateStr) return 'N/A';
-    try {
-      const parsed = parseISO(dateStr);
-      if (isNaN(parsed.getTime())) {
-        const d = new Date(dateStr);
-        return isNaN(d.getTime()) ? dateStr : format(d, fmt);
-      }
-      return format(parsed, fmt);
-    } catch {
-      return dateStr;
-    }
+    return formatIST(dateStr, fmt);
   };
 
   // Compile dossier data for the logged-in student

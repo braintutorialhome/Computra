@@ -1,5 +1,6 @@
 import React from 'react';
 import { useStorage } from '../../../hooks/useStorage';
+import { formatIST } from '../../../lib/dateUtils';
 import { ExternalLink, Calendar, ClipboardList } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -40,7 +41,7 @@ const StudentTestMaster: React.FC = () => {
                   )}
                   <div className="flex items-center mt-4 text-slate-500 text-xs font-black uppercase tracking-widest gap-2">
                     <Calendar className="w-4 h-4 text-slate-600" />
-                    <span>Posted On {new Date(test.date).toLocaleDateString()}</span>
+                    <span>Posted On {formatIST(test.date, 'dd MMM yyyy')}</span>
                   </div>
                 </div>
               </div>

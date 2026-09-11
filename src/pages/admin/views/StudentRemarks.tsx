@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import SearchableSelect from '../../../components/ui/SearchableSelect';
 import { exportCsvFile } from '../../../lib/downloadHelper';
 import { StudentRemark } from '../../../types';
-import { format, parseISO } from 'date-fns';
+import { formatIST, getISTDateString, getISTISOString } from '../../../lib/dateUtils';
 
 type RemarkCategory = 'Academic' | 'Performance' | 'Discipline' | 'Attendance' | 'General';
 
@@ -49,7 +49,7 @@ export default function StudentRemarks() {
   const [selectedStudentId, setSelectedStudentId] = useState('');
   const [category, setCategory] = useState<RemarkCategory>('General');
   const [remarkText, setRemarkText] = useState('');
-  const [remarkDate, setRemarkDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [remarkDate, setRemarkDate] = useState(() => getISTDateString());
   const [formError, setFormError] = useState('');
 
   // Approved students options for SearchableSelect
@@ -64,19 +64,9 @@ export default function StudentRemarks() {
     [students]
   );
 
-  // Safe date formatter
+  // Safe date formatter in IST
   const safeFormatDate = (dateStr?: string, fmt = 'dd MMM yyyy') => {
-    if (!dateStr) return 'N/A';
-    try {
-      const parsed = parseISO(dateStr);
-      if (isNaN(parsed.getTime())) {
-        const d = new Date(dateStr);
-        return isNaN(d.getTime()) ? dateStr : format(d, fmt);
-      }
-      return format(parsed, fmt);
-    } catch {
-      return dateStr;
-    }
+    return formatIST(dateStr, fmt);
   };
 
   // Filtered Remarks
@@ -119,7 +109,7 @@ export default function StudentRemarks() {
     setSelectedStudentId(prefillStudentId || (studentOptions[0]?.id || ''));
     setCategory('General');
     setRemarkText('');
-    setRemarkDate(new Date().toISOString().split('T')[0]);
+    setRemarkDate(getISTDateString());
     setFormError('');
     setIsModalOpen(true);
   };
@@ -130,7 +120,7 @@ export default function StudentRemarks() {
     setSelectedStudentId(rem.studentId);
     setCategory((rem.category as RemarkCategory) || 'General');
     setRemarkText(rem.remark);
-    setRemarkDate(rem.date ? rem.date.split('T')[0] : new Date().toISOString().split('T')[0]);
+    setRemarkDate(rem.date ? (rem.date.includes('T') ? rem.date.split('T')[0] : rem.date) : getISTDateString());
     setFormError('');
     setIsModalOpen(true);
   };
@@ -157,7 +147,7 @@ export default function StudentRemarks() {
         studentName,
         remark: remarkText.trim(),
         category,
-        date: remarkDate ? new Date(remarkDate).toISOString() : new Date().toISOString(),
+        date: remarkDate ? getISTISOString(remarkDate) : getISTISOString(),
         createdBy: currentUser?.name || 'Admin'
       });
     } else {
@@ -214,7 +204,7 @@ export default function StudentRemarks() {
       ...rows.map(row => row.map(val => `"${String(val).replace(/"/g, '""')}"`).join(','))
     ].join('\n');
 
-    exportCsvFile(csvContent, `student_remarks_${new Date().toISOString().split('T')[0]}.csv`);
+    exportCsvFile(csvContent, `student_remarks_${getISTDateString()}.csv`);
   };
 
   // Find Category Styling

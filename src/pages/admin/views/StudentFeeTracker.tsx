@@ -6,7 +6,7 @@ import {
   Edit2, Plus, Phone, User as UserIcon,
   DollarSign, Lock, Eye, TrendingUp, FileText
 } from 'lucide-react';
-import { safeFormat } from '../../../lib/utils';
+import { safeFormat, getISTDateString, getISTToday, formatIST } from '../../../lib/dateUtils';
 
 export default function StudentFeeTracker() {
   const { 
@@ -49,7 +49,7 @@ export default function StudentFeeTracker() {
   const [paymentForm, setPaymentForm] = useState({
     amount: '',
     month: '',
-    date: new Date().toISOString().split('T')[0]
+    date: getISTDateString()
   });
 
   // Adjust due form state
@@ -169,8 +169,8 @@ export default function StudentFeeTracker() {
     });
     setPaymentForm({
       amount: '',
-      month: `${new Date().toLocaleString('default', { month: 'long' })} ${new Date().getFullYear()}`,
-      date: new Date().toISOString().split('T')[0]
+      month: formatIST(getISTToday(), 'MMMM yyyy'),
+      date: getISTDateString()
     });
     setDueForm({
       amount: '',
@@ -222,12 +222,12 @@ export default function StudentFeeTracker() {
       studentId: selectedStudent.id,
       studentName: selectedStudent.name,
       amount: numAmount,
-      date: paymentForm.date || new Date().toISOString().split('T')[0],
+      date: paymentForm.date || getISTDateString(),
       status: 'paid',
       month: paymentForm.month || 'Fee Payment'
     });
 
-    setPaymentForm({ amount: '', month: '', date: new Date().toISOString().split('T')[0] });
+    setPaymentForm({ amount: '', month: '', date: getISTDateString() });
     setModalTab('overview');
     showToast(`Payment receipt of ₹${numAmount.toLocaleString()} recorded globally for ${selectedStudent.name}`);
   };
@@ -499,7 +499,7 @@ export default function StudentFeeTracker() {
                     </span>
                   </div>
                   <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mt-0.5">
-                    {selectedStudent.class || selectedStudent.subject || 'General Batch'} • Joining Date: {selectedStudent.dateOfJoining || selectedStudent.admissionDate || 'N/A'}
+                    {selectedStudent.class || selectedStudent.subject || 'General Batch'} • Joining Date: {safeFormat(selectedStudent.dateOfJoining || selectedStudent.admissionDate, 'dd MMM yyyy')}
                   </p>
                 </div>
               </div>
@@ -854,7 +854,7 @@ export default function StudentFeeTracker() {
                       <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
                         <p className="text-[10px] font-black uppercase text-slate-500">Joining Date</p>
                         <p className="text-sm font-black text-white mt-1">
-                          {selectedStudent.dateOfJoining || selectedStudent.admissionDate || 'N/A'}
+                          {safeFormat(selectedStudent.dateOfJoining || selectedStudent.admissionDate, 'dd MMM yyyy')}
                         </p>
                       </div>
 

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Student, Fee, Expense, Attendance, Test, TestResult, StudyMaterial, Notice, User, UserRole, DueFee, ExternalTest, ResultLink, StudentRemark } from '../types';
+import { getISTISOString, getISTDateString } from '../lib/dateUtils';
 
 // Fallback for crypto.randomUUID
 const uuid = () => {
@@ -60,7 +61,7 @@ const sanitizeRemark = (r: any): StudentRemark => {
     studentName: r.studentName !== undefined ? String(r.studentName) : undefined,
     remark: String(r.remark || ''),
     category: r.category || 'General',
-    date: String(r.date || new Date().toISOString()),
+    date: String(r.date || getISTISOString()),
     createdBy: r.createdBy !== undefined ? String(r.createdBy) : 'Admin'
   };
 };
@@ -243,8 +244,8 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
         body: JSON.stringify(payload)
       });
       console.log('Cloud Sync Triggered');
-      setLastSyncTime(new Date().toISOString());
-      localStorage.setItem('utc_last_sync', new Date().toISOString());
+      setLastSyncTime(getISTISOString());
+      localStorage.setItem('utc_last_sync', getISTISOString());
     } catch (e: any) {
       console.error('Cloud Sync Diagnostic:', e);
       let errorMsg = e.message || 'Sync failed';
@@ -324,8 +325,8 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
             localStorage.setItem('utc_activity_logs', JSON.stringify(data.logs.slice(0, 100)));
           }
           
-          setLastSyncTime(new Date().toISOString());
-          localStorage.setItem('utc_last_sync', new Date().toISOString());
+          setLastSyncTime(getISTISOString());
+          localStorage.setItem('utc_last_sync', getISTISOString());
           setIsFetchSuccessful(true);
           console.log('✓ Cloud Data Synchronized');
         }
@@ -434,7 +435,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const addLog = (action: string, details: string) => {
     const newLog = {
-      timestamp: new Date().toISOString(),
+      timestamp: getISTISOString(),
       user: currentUser ? `${currentUser.name} (${currentUser.role})` : 'System',
       action,
       details
@@ -502,7 +503,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const newStudent: Student = { 
       ...s, 
       id: shortId(), 
-      admissionDate: new Date().toISOString(), 
+      admissionDate: getISTISOString(), 
       status: 'pending',
       rollNumber: 'N/A'
     };
@@ -615,7 +616,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const addMaterial = (m: Omit<StudyMaterial, 'id' | 'uploadDate'>) => {
-    const newItem = { ...m, id: uuid(), uploadDate: new Date().toISOString() };
+    const newItem = { ...m, id: uuid(), uploadDate: getISTISOString() };
     setMaterials([...materials, newItem]);
     addLog('MATERIAL_ADD', `Added study material: ${m.title}`);
   };
@@ -644,12 +645,12 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const addNotice = (n: Omit<Notice, 'id' | 'date'>) => {
-    const newNotice = { ...n, id: uuid(), date: new Date().toISOString() };
+    const newNotice = { ...n, id: uuid(), date: getISTISOString() };
     setNotices([...notices, newNotice]);
   };
 
   const addDueFee = (df: Omit<DueFee, 'id' | 'date'>) => {
-    const newDueFee = sanitizeDueFee({ ...df, id: uuid(), date: new Date().toISOString() });
+    const newDueFee = sanitizeDueFee({ ...df, id: uuid(), date: getISTISOString() });
     setDueFees([...dueFees, newDueFee]);
     const studentName = students.find(s => s.id === newDueFee.studentId)?.name || 'Unknown';
     addLog('DUE_FEE_ADDED', `Added due amount of ₹${newDueFee.amount} for ${studentName}: ${newDueFee.remarks}`);
@@ -666,7 +667,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const addExternalTest = (t: Omit<ExternalTest, 'id' | 'date'>) => {
-    const newTest = { ...t, id: uuid(), date: new Date().toISOString() };
+    const newTest = { ...t, id: uuid(), date: getISTISOString() };
     setExternalTests([...externalTests, newTest]);
     addLog('EXTERNAL_TEST_ADDED', `Added new external test link: ${t.title}`);
   };
@@ -682,7 +683,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const addResultLink = (t: Omit<ResultLink, 'id' | 'date'>) => {
-    const newResult = { ...t, id: uuid(), date: new Date().toISOString() };
+    const newResult = { ...t, id: uuid(), date: getISTISOString() };
     setResultLinks([...resultLinks, newResult]);
     addLog('RESULT_ADDED', `Added new result link: ${t.title}`);
   };
@@ -704,7 +705,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
       ...r,
       id: uuid(),
       studentName,
-      date: new Date().toISOString()
+      date: getISTISOString()
     });
     setRemarks(prev => [newRemark, ...prev]);
     addLog('REMARK_ADDED', `Added remark for student ${studentName}: "${newRemark.remark.slice(0, 30)}..."`);

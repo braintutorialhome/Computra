@@ -1,5 +1,6 @@
 import React from 'react';
 import { useStorage } from '../../../hooks/useStorage';
+import { getISTDateString } from '../../../lib/dateUtils';
 import { Student } from '../../../types';
 import { CreditCard, Brain, Calendar, Bell, ArrowRight, BookOpen, Trophy, AlertCircle, ExternalLink, FileCheck, User, Eye, MessageSquareQuote } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -45,7 +46,7 @@ export default function StudentHome({ student }: { student: Student }) {
   const myDueFees = dueFees.filter(df => df.studentId === student.id);
   const totalDue = myDueFees.reduce((sum, item) => sum + item.amount, 0);
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = getISTDateString();
   const isPresentToday = attendance.find(a => a.date === today && a.studentId === student.id)?.status === 'present';
 
   const sClassClean = String(student.class || '').replace('Class-', '').trim();
@@ -80,7 +81,7 @@ export default function StudentHome({ student }: { student: Student }) {
           {/* Student Details: Name, ID, Roll No */}
           <div className="space-y-2">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400">{kolkataTime}</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400">{kolkataTime} IST</span>
               <span className="text-slate-600">•</span>
               <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">{greeting}</span>
             </div>
