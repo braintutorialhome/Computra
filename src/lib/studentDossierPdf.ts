@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { safeFormat } from './utils';
+import { getISTToday, getISTDateString } from './dateUtils';
 import { Student, Fee, DueFee, TestResult } from '../types';
 import { exportFile } from './downloadHelper';
 
@@ -58,7 +59,7 @@ export function exportStudentDossierToPDF(dossier: StudentDossierData) {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
   doc.setTextColor(100, 116, 139);
-  doc.text(`Generated: ${safeFormat(new Date(), 'dd MMM yyyy, HH:mm')}`, pageWidth - margin, currentY + 11, { align: 'right' });
+  doc.text(`Generated: ${safeFormat(getISTToday(), 'dd MMM yyyy, HH:mm')} IST`, pageWidth - margin, currentY + 11, { align: 'right' });
   doc.text(`Doc ID: DOS-${student.id || 'N/A'}`, pageWidth - margin, currentY + 15, { align: 'right' });
 
   // Divider Line
@@ -412,7 +413,7 @@ export function exportStudentDossierToPDF(dossier: StudentDossierData) {
 
   // Trigger Save File with Universal APK / WebView & Browser Compatibility
   const safeName = (student.name || 'Student').replace(/[^a-zA-Z0-9_-]/g, '_');
-  const fileName = `UTC_Dossier_${safeName}_${student.rollNumber || student.id || safeFormat(new Date(), 'yyyyMMdd')}.pdf`;
+  const fileName = `UTC_Dossier_${safeName}_${student.rollNumber || student.id || getISTDateString().replace(/-/g, '')}.pdf`;
 
   const pdfBlob = doc.output('blob');
   return exportFile({

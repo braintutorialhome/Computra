@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useStorage } from '../../../hooks/useStorage';
 import { CreditCard, Plus, X, Trash2, Search, Filter, Calendar, Download } from 'lucide-react';
 import { safeFormat } from '../../../lib/utils';
+import { getISTDateString, getISTToday } from '../../../lib/dateUtils';
 import { exportCsvFile } from '../../../lib/downloadHelper';
 import SearchableSelect from '../../../components/ui/SearchableSelect';
 
@@ -15,8 +16,8 @@ export default function FeeManagement() {
   const [newFee, setNewFee] = useState({
     studentId: '',
     amount: '',
-    month: safeFormat(new Date(), 'MMMM yyyy'),
-    date: new Date().toISOString().split('T')[0]
+    month: safeFormat(getISTToday(), 'MMMM yyyy'),
+    date: getISTDateString()
   });
 
   const approvedOptions = useMemo(() => 
@@ -99,7 +100,7 @@ export default function FeeManagement() {
       return `"${str.replace(/"/g, '""')}"`;
     };
     const csvContent = [headers.map(escapeCell).join(','), ...rows.map(row => row.map(escapeCell).join(','))].join('\r\n');
-    exportCsvFile(csvContent, `utc_fees_collections_${safeFormat(new Date(), 'yyyy-MM-dd')}.csv`);
+    exportCsvFile(csvContent, `utc_fees_collections_${getISTDateString()}.csv`);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -115,7 +116,7 @@ export default function FeeManagement() {
     });
     
     setShowAdd(false);
-    setNewFee({ studentId: '', amount: '', month: safeFormat(new Date(), 'MMMM yyyy'), date: new Date().toISOString().split('T')[0] });
+    setNewFee({ studentId: '', amount: '', month: safeFormat(getISTToday(), 'MMMM yyyy'), date: getISTDateString() });
   };
 
   return (

@@ -2,6 +2,7 @@ import React from 'react';
 import { useStorage } from '../../../hooks/useStorage';
 import { DollarSign, TrendingUp, TrendingDown, Wallet, CreditCard, Download, FileSpreadsheet } from 'lucide-react';
 import { safeFormat } from '../../../lib/utils';
+import { getISTDateString, getISTToday } from '../../../lib/dateUtils';
 import { exportCsvFile } from '../../../lib/downloadHelper';
 
 export default function AccountManagement() {
@@ -72,7 +73,7 @@ export default function AccountManagement() {
 
     const summaryHeader = [
       ['UTC Computra - Account Statement & Financial Ledger'],
-      [`Statement Generated: ${safeFormat(new Date(), 'dd MMMM yyyy HH:mm')}`],
+      [`Statement Generated: ${safeFormat(getISTToday(), 'dd MMMM yyyy HH:mm')} IST`],
       [`Total Collections (INR): ${totalIncome}`, `Total Expenses (INR): ${totalExpenses}`, `Net Cash Balance (INR): ${balance}`],
       []
     ];
@@ -83,7 +84,7 @@ export default function AccountManagement() {
       ...rowsWithBalance.map(row => row.map(escapeCell).join(','))
     ].join('\r\n');
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = getISTDateString();
     exportCsvFile(csvContent, `utc_account_statement_${today}.csv`);
   };
 

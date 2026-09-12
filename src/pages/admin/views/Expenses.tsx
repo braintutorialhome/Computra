@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useStorage } from '../../../hooks/useStorage';
 import { Wallet, Plus, Trash2, Calendar, X, Search, Filter, Download } from 'lucide-react';
 import { safeFormat } from '../../../lib/utils';
+import { getISTDateString } from '../../../lib/dateUtils';
 import { exportCsvFile } from '../../../lib/downloadHelper';
 
 export default function ExpenseManagement() {
@@ -16,7 +17,7 @@ export default function ExpenseManagement() {
     title: '',
     amount: '',
     category: 'Others',
-    date: new Date().toISOString().split('T')[0],
+    date: getISTDateString(),
     description: ''
   });
 
@@ -73,7 +74,7 @@ export default function ExpenseManagement() {
       return `"${str.replace(/"/g, '""')}"`;
     };
     const csvContent = [headers.map(escapeCell).join(','), ...rows.map(row => row.map(escapeCell).join(','))].join('\r\n');
-    const today = new Date().toISOString().split('T')[0];
+    const today = getISTDateString();
     exportCsvFile(csvContent, `utc_expenses_report_${today}.csv`);
   };
 
@@ -90,7 +91,7 @@ export default function ExpenseManagement() {
     });
     
     setShowAdd(false);
-    setNewExpense({ title: '', amount: '', category: 'Others', date: new Date().toISOString().split('T')[0], description: '' });
+    setNewExpense({ title: '', amount: '', category: 'Others', date: getISTDateString(), description: '' });
   };
 
   const handleDelete = (id: string) => {

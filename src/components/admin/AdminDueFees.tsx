@@ -4,6 +4,7 @@ import { Search, Plus, Trash2, Edit2, CheckCircle, AlertCircle, X, Download } fr
 import { motion, AnimatePresence } from 'motion/react';
 import SearchableSelect from '../ui/SearchableSelect';
 import { exportCsvFile } from '../../lib/downloadHelper';
+import { formatIST, getISTDateString, getISTISOString } from '../../lib/dateUtils';
 
 const AdminDueFees: React.FC = () => {
   const { students, dueFees, addDueFee, updateDueFee, deleteDueFee } = useStorage();
@@ -64,8 +65,7 @@ const AdminDueFees: React.FC = () => {
 
     const rows = filteredDueFees.map(fee => {
       const student = students.find(s => s.id === fee.studentId);
-      const d = fee.date ? new Date(fee.date) : new Date();
-      const dateStr = !isNaN(d.getTime()) ? d.toISOString().split('T')[0] : String(fee.date || '');
+      const dateStr = formatIST(fee.date, 'yyyy-MM-dd');
       return [
         student?.name || 'Unknown Student',
         student?.rollNumber || 'N/A',
@@ -83,7 +83,7 @@ const AdminDueFees: React.FC = () => {
       return `"${str.replace(/"/g, '""')}"`;
     };
     const csvContent = [headers.map(escapeCell).join(','), ...rows.map(row => row.map(escapeCell).join(','))].join('\r\n');
-    const today = new Date().toISOString().split('T')[0];
+    const today = getISTDateString();
     exportCsvFile(csvContent, `utc_due_fees_report_${today}.csv`);
   };
 
@@ -97,7 +97,7 @@ const AdminDueFees: React.FC = () => {
         studentId: formData.studentId,
         amount: Number(formData.amount),
         remarks: formData.remarks,
-        date: new Date().toISOString()
+        date: getISTISOString()
       });
       setEditingId(null);
     } else {
@@ -301,7 +301,7 @@ const AdminDueFees: React.FC = () => {
                         <span className="text-slate-300 font-bold">{fee.remarks}</span>
                       </td>
                       <td className="px-10 py-6 text-slate-400 font-bold tracking-tighter">
-                        {new Date(fee.date).toLocaleDateString()}
+                        {formatIST(fee.date, 'dd MMM yyyy')}
                       </td>
                       <td className="px-10 py-6">
                         <div className="flex items-center justify-end space-x-3">

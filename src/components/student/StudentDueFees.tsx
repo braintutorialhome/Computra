@@ -1,6 +1,7 @@
 import React from 'react';
 import { useStorage } from '../../hooks/useStorage';
 import { Student } from '../../types';
+import { formatIST } from '../../lib/dateUtils';
 import { AlertCircle, Calendar, ClipboardList } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -87,11 +88,7 @@ const StudentDueFees: React.FC<StudentDueFeesProps> = ({ student }) => {
                   <div className="flex items-center mt-4 text-slate-500 text-xs font-black uppercase tracking-widest gap-2">
                     <Calendar className="w-4 h-4 text-slate-600" />
                     <span>
-                      Posted {new Date(fee.date).toLocaleDateString(undefined, { 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
-                      })}
+                      Posted {formatIST(fee.date, 'dd MMMM yyyy')}
                     </span>
                   </div>
                 </div>

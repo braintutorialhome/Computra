@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
-  BarChart2, User, CreditCard, BookMarked, Bell, LogOut, Menu, X, ArrowRight, Phone, MessageSquare, Compass, AlertCircle, ExternalLink, FileCheck, Eye, MessageSquareQuote
+  BarChart2, User, CreditCard, BookMarked, Bell, LogOut, Menu, X, ArrowRight, Phone, MessageSquare, Compass, AlertCircle, ExternalLink, FileCheck, Eye, MessageSquareQuote, CalendarCheck
 } from 'lucide-react';
 import { useStorage } from '../../hooks/useStorage';
 import { motion, AnimatePresence } from 'motion/react';
 import StudentHome from './views/Home';
 import MyOverview from './views/MyOverview';
+import StudentAttendance from './views/Attendance';
 import StudentProfile from './views/Profile';
 import StudentRemarksView from './views/Remarks';
 import StudentFees from './views/Fees';
@@ -92,6 +93,7 @@ export default function StudentDashboard() {
     { to: '/student/test-master', icon: ExternalLink, label: 'Exam Portal' },
     { to: '/student/results', icon: FileCheck, label: 'Results' },
     { to: '/student/materials', icon: BookMarked, label: 'Study Material' },
+    { to: '/student/attendance', icon: CalendarCheck, label: 'Attendance' },
     { to: '/student/remarks', icon: MessageSquareQuote, label: 'Remarks' },
     { to: '/student/notices', icon: Bell, label: 'Notice' },
   ];
@@ -214,6 +216,7 @@ export default function StudentDashboard() {
                   <Route path="dashboard" element={<StudentHome student={currentStudent} />} />
                   <Route path="overview" element={<MyOverview student={currentStudent} />} />
                   <Route path="my-overview" element={<MyOverview student={currentStudent} />} />
+                  <Route path="attendance" element={<StudentAttendance student={currentStudent} />} />
                   <Route path="profile" element={<StudentProfile student={currentStudent} />} />
                   <Route path="remarks" element={<StudentRemarksView student={currentStudent} />} />
                   <Route path="fees" element={<StudentFees student={currentStudent} />} />

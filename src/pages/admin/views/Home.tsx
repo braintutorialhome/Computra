@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { useStorage } from '../../../hooks/useStorage';
+import { getISTDateString } from '../../../lib/dateUtils';
 import { 
   Users, FileCheck, Calendar
 } from 'lucide-react';
@@ -34,7 +35,7 @@ export default function AdminHome() {
   const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
   const netBalance = totalFees - totalExpenses;
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = getISTDateString();
   const attendanceToday = attendance.filter(a => a.date === today);
   const attendancePercent = attendanceToday.length > 0 
     ? Math.round((attendanceToday.filter(a => a.status === 'present').length / attendanceToday.length) * 100)

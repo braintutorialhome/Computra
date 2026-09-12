@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { useStorage } from '../../../hooks/useStorage';
 import { Student } from '../../../types';
-import { format, parseISO } from 'date-fns';
+import { formatIST, getISTDateString } from '../../../lib/dateUtils';
 import { exportStudentDossierToPDF, StudentDossierData } from '../../../lib/studentDossierPdf';
 import { exportCsvFile } from '../../../lib/downloadHelper';
 
@@ -40,19 +40,9 @@ export default function StudentOverview() {
   // Selected Student for Read-Only Dossier Modal
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
 
-  // Safe date formatter
+  // Safe date formatter in IST
   const safeFormatDate = (dateStr?: string, fmt = 'dd MMM yyyy') => {
-    if (!dateStr) return 'N/A';
-    try {
-      const parsed = parseISO(dateStr);
-      if (isNaN(parsed.getTime())) {
-        const d = new Date(dateStr);
-        return isNaN(d.getTime()) ? dateStr : format(d, fmt);
-      }
-      return format(parsed, fmt);
-    } catch {
-      return dateStr;
-    }
+    return formatIST(dateStr, fmt);
   };
 
   // Dynamic filter options
@@ -215,7 +205,7 @@ export default function StudentOverview() {
     ]);
 
     const csvContent = [headers.join(','), ...rows.map(e => e.join(','))].join('\r\n');
-    exportCsvFile(csvContent, `utc_student_overview_${format(new Date(), 'yyyy-MM-dd')}.csv`);
+    exportCsvFile(csvContent, `utc_student_overview_${getISTDateString()}.csv`);
   };
 
   const handlePrint = () => {

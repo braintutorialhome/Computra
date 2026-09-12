@@ -102,6 +102,8 @@ interface StorageContextType {
   deleteExpense: (id: string) => void;
   
   markAttendance: (date: string, studentId: string, status: 'present' | 'absent') => void;
+  updateAttendance: (attendanceRecord: Attendance) => void;
+  deleteAttendance: (id: string) => void;
   
   addTest: (test: Omit<Test, 'id'>) => void;
   submitTestResult: (result: Omit<TestResult, 'id'>) => void;
@@ -605,6 +607,16 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
+  const updateAttendance = (attendanceRecord: Attendance) => {
+    setAttendance(prev => prev.map(a => a.id === attendanceRecord.id ? attendanceRecord : a));
+    addLog('ATTENDANCE_UPDATE', `Updated attendance record ${attendanceRecord.id} to ${attendanceRecord.status}`);
+  };
+
+  const deleteAttendance = (id: string) => {
+    setAttendance(prev => prev.filter(a => a.id !== id));
+    addLog('ATTENDANCE_DELETE', `Deleted attendance record ${id}`);
+  };
+
   const addTest = (t: Omit<Test, 'id'>) => {
     const newTest = { ...t, id: uuid() };
     setTests([...tests, newTest]);
@@ -729,7 +741,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
       login, signup, logout, refreshCloudData, updateUser,
       scriptUrl, syncError, isInitialSyncing,
       addStudent, updateStudent, deleteStudent, removeStudentPermanently, approveStudent, rejectStudent,
-      addFee, updateFee, deleteFee, addExpense, updateExpense, deleteExpense, markAttendance,
+      addFee, updateFee, deleteFee, addExpense, updateExpense, deleteExpense, markAttendance, updateAttendance, deleteAttendance,
       addTest, deleteTest, submitTestResult, addMaterial, updateMaterial, deleteMaterial, addNotice, deleteNotice, 
       addDueFee, updateDueFee, deleteDueFee, addExternalTest, updateExternalTest, deleteExternalTest, addResultLink, updateResultLink, deleteResultLink,
       addRemark, updateRemark, deleteRemark, clearAllData, addLog

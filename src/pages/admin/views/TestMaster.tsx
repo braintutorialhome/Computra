@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useStorage } from '../../../hooks/useStorage';
+import { formatIST } from '../../../lib/dateUtils';
 import { Plus, Trash2, Link as LinkIcon, ExternalLink, Search, Pencil, X, ClipboardList } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ExternalTest } from '../../../types';
@@ -226,7 +227,7 @@ const AdminTestMaster: React.FC = () => {
                       </a>
                     </td>
                     <td className="px-10 py-6 text-slate-400 font-bold tracking-tighter">
-                      {new Date(test.date).toLocaleDateString()}
+                      {formatIST(test.date, 'dd MMM yyyy')}
                     </td>
                     <td className="px-10 py-6">
                       <div className="flex items-center justify-end gap-2">
