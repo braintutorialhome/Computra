@@ -3,7 +3,7 @@ import { useStorage } from '../../../hooks/useStorage';
 import { 
   MessageSquareQuote, Search, Plus, Trash2, Edit2, AlertCircle, 
   CheckCircle2, X, Download, User, Calendar, BookOpen, Filter,
-  Sparkles, Award, ShieldAlert, Clock, GraduationCap, ChevronRight
+  Award, ShieldAlert, Clock, GraduationCap, ChevronRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import SearchableSelect from '../../../components/ui/SearchableSelect';
@@ -19,16 +19,6 @@ const CATEGORIES: { label: RemarkCategory; color: string; bg: string; border: st
   { label: 'Discipline', color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
   { label: 'Attendance', color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
   { label: 'General', color: 'text-slate-300', bg: 'bg-slate-500/10', border: 'border-slate-500/20' },
-];
-
-const PRESET_REMARKS = [
-  { category: 'Academic' as RemarkCategory, text: 'Exhibits strong comprehension of course concepts and active participation.' },
-  { category: 'Performance' as RemarkCategory, text: 'Demonstrated outstanding scores in theoretical tests and laboratory tasks.' },
-  { category: 'Performance' as RemarkCategory, text: 'Needs additional practice in laboratory assignments to improve test marks.' },
-  { category: 'Attendance' as RemarkCategory, text: 'Regular and punctual attendance maintained throughout the current session.' },
-  { category: 'Attendance' as RemarkCategory, text: 'Irregular attendance noticed. Please maintain minimum required attendance.' },
-  { category: 'Discipline' as RemarkCategory, text: 'Displays high degree of institutional discipline and cooperative attitude.' },
-  { category: 'General' as RemarkCategory, text: 'Keep up the good effort and continue working towards career milestones.' }
 ];
 
 export default function StudentRemarks() {
@@ -698,26 +688,6 @@ export default function StudentRemarks() {
                     onChange={e => setRemarkDate(e.target.value)}
                     className="w-full px-4 py-2.5 rounded-2xl bg-black/40 border border-white/10 text-white text-xs focus:outline-none focus:border-[#1a72f2]"
                   />
-                </div>
-
-                {/* Preset Suggestions */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-slate-400">
-                    <Sparkles size={12} className="text-[#1a72f2]" />
-                    <span>Quick Templates / Presets:</span>
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {PRESET_REMARKS.map((preset, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => setRemarkText(preset.text)}
-                        className="text-[11px] px-2.5 py-1 rounded-lg glass border border-white/5 hover:border-white/20 text-slate-300 hover:text-white text-left transition-colors"
-                      >
-                        + {preset.text.slice(0, 42)}...
-                      </button>
-                    ))}
-                  </div>
                 </div>
 
                 {/* Remark Text Area */}

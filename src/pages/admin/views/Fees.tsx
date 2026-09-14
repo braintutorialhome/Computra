@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useStorage } from '../../../hooks/useStorage';
 import { CreditCard, Plus, X, Trash2, Search, Filter, Calendar, Download } from 'lucide-react';
 import { safeFormat } from '../../../lib/utils';
-import { getISTDateString, getISTToday } from '../../../lib/dateUtils';
+import { getISTDateString, getISTToday, getISTPreviousMonthCurrentYear } from '../../../lib/dateUtils';
 import { exportCsvFile } from '../../../lib/downloadHelper';
 import SearchableSelect from '../../../components/ui/SearchableSelect';
 
@@ -16,7 +16,7 @@ export default function FeeManagement() {
   const [newFee, setNewFee] = useState({
     studentId: '',
     amount: '',
-    month: safeFormat(getISTToday(), 'MMMM yyyy'),
+    month: getISTPreviousMonthCurrentYear(),
     date: getISTDateString()
   });
 
@@ -116,7 +116,7 @@ export default function FeeManagement() {
     });
     
     setShowAdd(false);
-    setNewFee({ studentId: '', amount: '', month: safeFormat(getISTToday(), 'MMMM yyyy'), date: getISTDateString() });
+    setNewFee({ studentId: '', amount: '', month: getISTPreviousMonthCurrentYear(), date: getISTDateString() });
   };
 
   return (
@@ -237,7 +237,7 @@ export default function FeeManagement() {
                   value={newFee.month}
                   onChange={(e) => setNewFee({...newFee, month: e.target.value})}
                   className="input-glass w-full py-4 rounded-2xl"
-                  placeholder="e.g. April 2024"
+                  placeholder={`e.g. ${getISTPreviousMonthCurrentYear()}`}
                 />
               </div>
               <button 

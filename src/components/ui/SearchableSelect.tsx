@@ -79,24 +79,24 @@ export default function SearchableSelect({
             initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            className="absolute left-0 right-0 top-full mt-2 glass-dark border border-white/10 rounded-3xl shadow-2xl z-50 overflow-hidden"
+            className="absolute left-0 right-0 top-full mt-2 bg-[#0c162d] border border-indigo-500/30 rounded-3xl shadow-2xl z-50 overflow-hidden"
           >
-            <div className="p-4 border-b border-white/5">
+            <div className="p-4 border-b border-white/10 bg-[#0a1226]">
               <div className="relative">
-                <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+                <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input 
                   autoFocus
                   type="text"
                   placeholder="Type to filter..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-white/5 border-none rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-slate-600 focus:ring-1 focus:ring-indigo-500 transition-all outline-none"
+                  className="w-full bg-[#111c38] border border-white/10 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none"
                   onClick={(e) => e.stopPropagation()}
                 />
               </div>
             </div>
             
-            <div className="max-h-[300px] overflow-y-auto custom-scrollbar p-2">
+            <div className="max-h-[300px] overflow-y-auto custom-scrollbar p-2 bg-[#0c162d]">
               {filteredOptions.length > 0 ? (
                 filteredOptions.map((opt) => (
                   <button
@@ -107,13 +107,13 @@ export default function SearchableSelect({
                       setIsOpen(false);
                       setSearchTerm('');
                     }}
-                    className={`w-full text-left p-3 rounded-xl transition-all flex flex-col hover:bg-indigo-500 group ${value === opt.id ? 'bg-indigo-500/20 text-indigo-400' : 'text-slate-300'}`}
+                    className={`w-full text-left p-3 rounded-xl transition-all flex flex-col hover:bg-indigo-600 group ${value === opt.id ? 'bg-indigo-600/30 text-indigo-300 border border-indigo-500/30' : 'text-slate-200'}`}
                   >
-                    <span className={`font-bold transition-colors ${value === opt.id ? 'text-indigo-400' : 'group-hover:text-white'}`}>
+                    <span className={`font-bold transition-colors ${value === opt.id ? 'text-indigo-300' : 'group-hover:text-white'}`}>
                       {opt.label}
                     </span>
                     {opt.subLabel && (
-                      <span className={`text-[10px] uppercase tracking-widest font-black transition-colors ${value === opt.id ? 'text-indigo-400/60' : 'text-slate-500 group-hover:text-white/60'}`}>
+                      <span className={`text-[10px] uppercase tracking-widest font-black transition-colors ${value === opt.id ? 'text-indigo-300/70' : 'text-slate-400 group-hover:text-white/80'}`}>
                         {opt.subLabel}
                       </span>
                     )}

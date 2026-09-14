@@ -6,7 +6,7 @@ import {
   Edit2, Plus, Phone, User as UserIcon,
   DollarSign, Lock, Eye, TrendingUp, FileText
 } from 'lucide-react';
-import { safeFormat, getISTDateString, getISTToday, formatIST } from '../../../lib/dateUtils';
+import { safeFormat, getISTDateString, getISTToday, formatIST, getISTPreviousMonthCurrentYear } from '../../../lib/dateUtils';
 
 export default function StudentFeeTracker() {
   const { 
@@ -169,7 +169,7 @@ export default function StudentFeeTracker() {
     });
     setPaymentForm({
       amount: '',
-      month: formatIST(getISTToday(), 'MMMM yyyy'),
+      month: getISTPreviousMonthCurrentYear(),
       date: getISTDateString()
     });
     setDueForm({

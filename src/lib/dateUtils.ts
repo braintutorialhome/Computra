@@ -163,6 +163,17 @@ export function getISTCurrentMonthYear(dateInput?: string | Date | number | null
 }
 
 /**
+ * Returns the previous month name with the current year in IST (e.g. "August 2026" when current month is September 2026).
+ */
+export function getISTPreviousMonthCurrentYear(dateInput?: string | Date | number | null): string {
+  const p = getISTParts(dateInput);
+  if (!p) return '';
+  const prevMonthIndex = p.month === 1 ? 11 : p.month - 2;
+  const prevMonthName = MONTH_NAMES_FULL[prevMonthIndex] || '';
+  return `${prevMonthName} ${p.year}`;
+}
+
+/**
  * Robust, single-pass date formatter strictly evaluated in Asia/Kolkata (IST).
  * Compatible with common date-fns / Moment format tokens:
  * yyyy, yy, MMMM, MMM, MM, M, dd, d, EEEE, EEE, HH, H, hh, h, mm, m, ss, s, a, z
