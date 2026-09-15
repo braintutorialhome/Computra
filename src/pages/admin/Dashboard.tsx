@@ -204,10 +204,18 @@ export default function AdminDashboard() {
                   </div>
                 </div>
               )}
-              <Link to="/admin/attendance" className="glass-button px-5 py-2.5 text-xs font-black uppercase tracking-widest text-slate-300">
+              <Link to="/admin/student-overview" className="glass-button px-4 py-2 text-xs font-black uppercase tracking-widest text-slate-300 hover:text-white flex items-center gap-2">
+                <GraduationCap size={14} className="text-indigo-400" />
+                Student Overview
+              </Link>
+              <Link to="/admin/student-fee-tracker" className="glass-button px-4 py-2 text-xs font-black uppercase tracking-widest text-slate-300 hover:text-white flex items-center gap-2">
+                <UserCheck size={14} className="text-emerald-400" />
+                Fee Tracker
+              </Link>
+              <Link to="/admin/attendance" className="glass-button px-4 py-2 text-xs font-black uppercase tracking-widest text-slate-300">
                 Attendance
               </Link>
-              <Link to="/admin/settings" className="indigo-button px-6 py-2.5 text-xs font-black uppercase tracking-widest flex items-center gap-2">
+              <Link to="/admin/settings" className="indigo-button px-5 py-2 text-xs font-black uppercase tracking-widest flex items-center gap-2">
                 <Settings size={14} />
                 Settings
               </Link>

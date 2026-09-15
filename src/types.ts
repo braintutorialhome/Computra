@@ -96,6 +96,9 @@ export interface Notice {
   content: string;
   date: string;
   isImportant: boolean;
+  category?: string;
+  updatedAt?: string;
+  referenceNo?: string;
 }
 
 export interface DueFee {

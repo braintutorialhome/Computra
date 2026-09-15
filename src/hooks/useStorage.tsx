@@ -112,6 +112,7 @@ interface StorageContextType {
   updateMaterial: (material: StudyMaterial) => void;
   deleteMaterial: (id: string) => void;
   addNotice: (notice: Omit<Notice, 'id' | 'date'>) => void;
+  updateNotice: (notice: Notice) => void;
   deleteNotice: (id: string) => void;
   addDueFee: (dueFee: Omit<DueFee, 'id' | 'date'>) => void;
   updateDueFee: (dueFee: DueFee) => void;
@@ -647,7 +648,11 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const deleteNotice = (id: string) => {
+    const target = notices.find(n => n.id === id);
     setNotices(prev => prev.filter(n => n.id !== id));
+    if (target) {
+      addLog('NOTICE_DELETE', `Deleted notice: ${target.title}`);
+    }
   };
 
   const deleteTest = (id: string) => {
@@ -658,7 +663,14 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const addNotice = (n: Omit<Notice, 'id' | 'date'>) => {
     const newNotice = { ...n, id: uuid(), date: getISTISOString() };
-    setNotices([...notices, newNotice]);
+    setNotices(prev => [...prev, newNotice]);
+    addLog('NOTICE_ADD', `Published notice: ${newNotice.title}`);
+  };
+
+  const updateNotice = (notice: Notice) => {
+    const updated = { ...notice, updatedAt: getISTISOString() };
+    setNotices(prev => prev.map(n => n.id === notice.id ? updated : n));
+    addLog('NOTICE_UPDATE', `Updated notice: ${notice.title}`);
   };
 
   const addDueFee = (df: Omit<DueFee, 'id' | 'date'>) => {
@@ -742,7 +754,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
       scriptUrl, syncError, isInitialSyncing,
       addStudent, updateStudent, deleteStudent, removeStudentPermanently, approveStudent, rejectStudent,
       addFee, updateFee, deleteFee, addExpense, updateExpense, deleteExpense, markAttendance, updateAttendance, deleteAttendance,
-      addTest, deleteTest, submitTestResult, addMaterial, updateMaterial, deleteMaterial, addNotice, deleteNotice, 
+      addTest, deleteTest, submitTestResult, addMaterial, updateMaterial, deleteMaterial, addNotice, updateNotice, deleteNotice, 
       addDueFee, updateDueFee, deleteDueFee, addExternalTest, updateExternalTest, deleteExternalTest, addResultLink, updateResultLink, deleteResultLink,
       addRemark, updateRemark, deleteRemark, clearAllData, addLog
     }}>

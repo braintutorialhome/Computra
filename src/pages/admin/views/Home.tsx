@@ -1,9 +1,10 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useStorage } from '../../../hooks/useStorage';
 import { getISTDateString } from '../../../lib/dateUtils';
 import { 
-  Users, FileCheck, Calendar
+  Users, FileCheck, Calendar, GraduationCap, UserCheck, ArrowRight, CreditCard, ChevronRight
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
@@ -26,7 +27,7 @@ const StatCard = ({ label, value, icon: Icon, color, subValue }: any) => (
 
 export default function AdminHome() {
   const { 
-    students, expenses, fees, attendance
+    students, expenses, fees, attendance, dueFees
   } = useStorage();
 
   const totalStudents = students.filter(s => s.status === 'approved').length;
@@ -34,6 +35,7 @@ export default function AdminHome() {
   const totalFees = fees.reduce((sum, f) => sum + f.amount, 0);
   const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
   const netBalance = totalFees - totalExpenses;
+  const pendingDuesCount = dueFees.length;
 
   const today = getISTDateString();
   const attendanceToday = attendance.filter(a => a.date === today);
@@ -49,8 +51,124 @@ export default function AdminHome() {
 
   return (
     <div className="space-y-10">
-      <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-black text-white tracking-tighter uppercase">Overview <span className="text-indigo-500">Center</span></h2>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-3xl font-black text-white tracking-tighter uppercase">Overview <span className="text-indigo-500">Center</span></h2>
+          <p className="text-xs font-semibold text-slate-400 mt-1">
+            Real-time institutional metrics and student management controls
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <Link
+            to="/admin/student-overview"
+            className="px-4 py-2.5 rounded-2xl bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-all"
+          >
+            <GraduationCap size={15} />
+            Student Overview
+          </Link>
+          <Link
+            to="/admin/student-fee-tracker"
+            className="px-4 py-2.5 rounded-2xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-all"
+          >
+            <UserCheck size={15} />
+            Student Fee Tracker
+          </Link>
+        </div>
+      </div>
+
+      {/* Primary Institutional Option Cards: Student Overview & Student Fee Tracker */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Option: Student Overview */}
+        <Link 
+          to="/admin/student-overview" 
+          className="glass p-8 rounded-[36px] border border-white/10 hover:border-indigo-500/40 bg-gradient-to-br from-indigo-950/40 via-slate-900/70 to-slate-900/90 group transition-all duration-300 hover:scale-[1.01] hover:shadow-2xl hover:shadow-indigo-500/10 relative overflow-hidden flex flex-col justify-between"
+        >
+          <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 group-hover:scale-110 transition-all pointer-events-none text-indigo-400">
+            <GraduationCap size={160} />
+          </div>
+
+          <div className="space-y-4 relative z-10">
+            <div className="flex items-center justify-between">
+              <div className="p-4 rounded-2xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/30 group-hover:bg-indigo-500 group-hover:text-white transition-all shadow-lg shadow-indigo-500/20">
+                <GraduationCap size={28} />
+              </div>
+              <span className="px-3.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-indigo-500/10 text-indigo-300 border border-indigo-500/25">
+                Academic Profiles
+              </span>
+            </div>
+
+            <div>
+              <h4 className="text-2xl font-black text-white tracking-tight group-hover:text-indigo-200 transition-colors">
+                Student Overview
+              </h4>
+              <p className="text-xs text-slate-400 font-medium leading-relaxed mt-2 line-clamp-2">
+                Detailed student dossiers, academic performance, test results, enrollment verification, and one-click official PDF exports.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 pt-2">
+              <span className="text-[11px] font-bold text-slate-300 bg-white/5 px-3 py-1 rounded-xl border border-white/5">
+                {totalStudents} Active Students
+              </span>
+              <span className="text-[11px] font-bold text-slate-400 bg-white/5 px-3 py-1 rounded-xl border border-white/5">
+                Dossier & Audit Records
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-8 pt-4 border-t border-white/5 flex items-center justify-between text-xs font-black uppercase tracking-widest text-indigo-400 group-hover:text-indigo-300 relative z-10">
+            <span>Launch Student Overview</span>
+            <div className="w-8 h-8 rounded-full bg-white/5 group-hover:bg-indigo-600 group-hover:text-white flex items-center justify-center transition-all">
+              <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </div>
+        </Link>
+
+        {/* Option: Student Fee Tracker */}
+        <Link 
+          to="/admin/student-fee-tracker" 
+          className="glass p-8 rounded-[36px] border border-white/10 hover:border-emerald-500/40 bg-gradient-to-br from-emerald-950/40 via-slate-900/70 to-slate-900/90 group transition-all duration-300 hover:scale-[1.01] hover:shadow-2xl hover:shadow-emerald-500/10 relative overflow-hidden flex flex-col justify-between"
+        >
+          <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 group-hover:scale-110 transition-all pointer-events-none text-emerald-400">
+            <UserCheck size={160} />
+          </div>
+
+          <div className="space-y-4 relative z-10">
+            <div className="flex items-center justify-between">
+              <div className="p-4 rounded-2xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 group-hover:bg-emerald-500 group-hover:text-white transition-all shadow-lg shadow-emerald-500/20">
+                <UserCheck size={28} />
+              </div>
+              <span className="px-3.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-300 border border-emerald-500/25">
+                Fee Management
+              </span>
+            </div>
+
+            <div>
+              <h4 className="text-2xl font-black text-white tracking-tight group-hover:text-emerald-200 transition-colors">
+                Student Fee Tracker
+              </h4>
+              <p className="text-xs text-slate-400 font-medium leading-relaxed mt-2 line-clamp-2">
+                Monthly student fee collection tracking, pending balance ledgers, direct payment recording, and real-time status reviews.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 pt-2">
+              <span className="text-[11px] font-bold text-emerald-300 bg-emerald-500/10 px-3 py-1 rounded-xl border border-emerald-500/20">
+                ₹{totalFees.toLocaleString('en-IN')} Collected
+              </span>
+              <span className="text-[11px] font-bold text-slate-400 bg-white/5 px-3 py-1 rounded-xl border border-white/5">
+                {pendingDuesCount} Pending Due Records
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-8 pt-4 border-t border-white/5 flex items-center justify-between text-xs font-black uppercase tracking-widest text-emerald-400 group-hover:text-emerald-300 relative z-10">
+            <span>Launch Student Fee Tracker</span>
+            <div className="w-8 h-8 rounded-full bg-white/5 group-hover:bg-emerald-600 group-hover:text-white flex items-center justify-center transition-all">
+              <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </div>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
