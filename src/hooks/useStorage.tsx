@@ -145,20 +145,34 @@ const SCRIPT_URL: string = 'https://script.google.com/macros/s/AKfycbz6hmunZWBRw
 
 const StorageContext = createContext<StorageContextType | undefined>(undefined);
 
+const loadInitial = <T,>(key: string, defaultValue: T, sanitizer?: (item: any) => any): T => {
+  try {
+    const data = localStorage.getItem(key);
+    if (!data) return defaultValue;
+    const parsed = JSON.parse(data);
+    if (Array.isArray(parsed) && sanitizer) {
+      return parsed.map(sanitizer) as unknown as T;
+    }
+    return parsed as T;
+  } catch {
+    return defaultValue;
+  }
+};
+
 export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [students, setStudents] = useState<Student[]>([]);
-  const [fees, setFees] = useState<Fee[]>([]);
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [attendance, setAttendance] = useState<Attendance[]>([]);
-  const [tests, setTests] = useState<Test[]>([]);
-  const [testResults, setTestResults] = useState<TestResult[]>([]);
-  const [materials, setMaterials] = useState<StudyMaterial[]>([]);
-  const [notices, setNotices] = useState<Notice[]>([]);
-  const [dueFees, setDueFees] = useState<DueFee[]>([]);
-  const [externalTests, setExternalTests] = useState<ExternalTest[]>([]);
-  const [resultLinks, setResultLinks] = useState<ResultLink[]>([]);
-  const [remarks, setRemarks] = useState<StudentRemark[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
+  const [students, setStudents] = useState<Student[]>(() => loadInitial('utc_students', []));
+  const [fees, setFees] = useState<Fee[]>(() => loadInitial('utc_fees', [], sanitizeFee));
+  const [expenses, setExpenses] = useState<Expense[]>(() => loadInitial('utc_expenses', [], sanitizeExpense));
+  const [attendance, setAttendance] = useState<Attendance[]>(() => loadInitial('utc_attendance', []));
+  const [tests, setTests] = useState<Test[]>(() => loadInitial('utc_tests', []));
+  const [testResults, setTestResults] = useState<TestResult[]>(() => loadInitial('utc_testResults', []));
+  const [materials, setMaterials] = useState<StudyMaterial[]>(() => loadInitial('utc_materials', []));
+  const [notices, setNotices] = useState<Notice[]>(() => loadInitial('utc_notices', []));
+  const [dueFees, setDueFees] = useState<DueFee[]>(() => loadInitial('utc_due_fees', [], sanitizeDueFee));
+  const [externalTests, setExternalTests] = useState<ExternalTest[]>(() => loadInitial('utc_external_tests', []));
+  const [resultLinks, setResultLinks] = useState<ResultLink[]>(() => loadInitial('utc_result_links', []));
+  const [remarks, setRemarks] = useState<StudentRemark[]>(() => loadInitial('utc_remarks', [], sanitizeRemark));
+  const [users, setUsers] = useState<User[]>(() => loadInitial('utc_users', []));
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
     const saved = localStorage.getItem('utc_current_user');
     return saved ? JSON.parse(saved) : null;
@@ -238,22 +252,42 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
         }
       };
 
-      await fetch(cleanUrl, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        body: JSON.stringify(payload)
-      });
+      let pushDone = false;
+      // Try local proxy route first (completely bypasses browser CORS/iframe limitations)
+      try {
+        const proxyRes = await fetch('/api/cloud-sync', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload)
+        });
+        if (proxyRes.ok) {
+          pushDone = true;
+        }
+      } catch {
+        // Fallback to direct fetch
+      }
+
+      if (!pushDone) {
+        await fetch(cleanUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8',
+          },
+          body: JSON.stringify(payload)
+        });
+      }
+
       console.log('Cloud Sync Triggered');
       setLastSyncTime(getISTISOString());
       localStorage.setItem('utc_last_sync', getISTISOString());
     } catch (e: any) {
-      console.error('Cloud Sync Diagnostic:', e);
-      let errorMsg = e.message || 'Sync failed';
+      console.warn('Cloud Sync Notice:', e?.message || e);
+      let errorMsg = e?.message || 'Sync offline';
       if (errorMsg === 'Failed to fetch') {
-        errorMsg = 'CLOUD UPDATE BLOCKED: Ensure "Who has access" is set to "Anyone" and you have authorized all permissions in Apps Script.';
+        errorMsg = 'CLOUD UPDATE BLOCKED: Ensure "Who has access" is set to "Anyone" in Apps Script.';
       }
       setSyncError(errorMsg);
     }
@@ -280,29 +314,60 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setIsInitialSyncing(true);
     try {
       setSyncError(null);
-      
-      if (!cleanUrl.startsWith('https://script.google.com')) {
-        throw new Error('INVALID SCRIPT URL: Ensure you are using the Web App URL from Apps Script.');
+      let text = '';
+      let fetchSuccessful = false;
+
+      // 1. Try local server-side proxy route first (avoids browser iframe CORS/redirect limitations)
+      try {
+        const proxyController = new AbortController();
+        const proxyTimeout = setTimeout(() => proxyController.abort(), 18000);
+        const proxyResponse = await fetch(`/api/cloud-sync?action=get_all&_t=${Date.now()}`, {
+          signal: proxyController.signal
+        });
+        clearTimeout(proxyTimeout);
+
+        if (proxyResponse.ok) {
+          const proxyText = await proxyResponse.text();
+          if (proxyText && proxyText.trim().length > 0 && !proxyText.includes('<!DOCTYPE html>') && !proxyText.includes('<html')) {
+            text = proxyText;
+            fetchSuccessful = true;
+          }
+        }
+      } catch (proxyErr: any) {
+        console.warn('Local cloud proxy bypassed, trying direct handshake:', proxyErr?.message || proxyErr);
       }
 
-      const url = new URL(cleanUrl);
-      url.searchParams.set('action', 'get_all');
-      url.searchParams.set('_t', Date.now().toString());
+      // 2. Direct browser handshake fallback if proxy wasn't successful
+      if (!fetchSuccessful) {
+        if (!cleanUrl.startsWith('https://script.google.com')) {
+          throw new Error('INVALID SCRIPT URL: Ensure you are using the Web App URL from Apps Script.');
+        }
 
-      console.log('Attempting Cloud Handshake:', url.toString());
-      
-      const response = await fetch(url.toString(), {
-        method: 'GET',
-        mode: 'cors',
-        credentials: 'omit',
-        redirect: 'follow'
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Cloud Connection Error: ${response.status} ${response.statusText}`);
+        const url = new URL(cleanUrl);
+        url.searchParams.set('action', 'get_all');
+        url.searchParams.set('_t', Date.now().toString());
+
+        console.log('Attempting Cloud Handshake:', url.toString());
+        
+        const directController = new AbortController();
+        const directTimeout = setTimeout(() => directController.abort(), 15000);
+
+        const response = await fetch(url.toString(), {
+          method: 'GET',
+          mode: 'cors',
+          credentials: 'omit',
+          redirect: 'follow',
+          signal: directController.signal
+        });
+        clearTimeout(directTimeout);
+        
+        if (!response.ok) {
+          throw new Error(`Cloud Connection Error: ${response.status} ${response.statusText}`);
+        }
+        
+        text = await response.text();
       }
-      
-      const text = await response.text();
+
       if (!text || text.trim().length === 0) {
         throw new Error('Cloud response was empty. Check if your script logic is correct.');
       }
@@ -331,22 +396,22 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
           setLastSyncTime(getISTISOString());
           localStorage.setItem('utc_last_sync', getISTISOString());
           setIsFetchSuccessful(true);
+          setSyncError(null);
           console.log('✓ Cloud Data Synchronized');
         }
       } catch (parseError) {
-        console.error('JSON Parse Error. Raw response:', text.substring(0, 200));
+        console.warn('Cloud JSON parse notice. Raw response:', text.substring(0, 200));
         if (text.includes("<!DOCTYPE html>") || text.includes("<html")) {
-          setSyncError("AUTHENTICATION REQUIRED: The script returned a login page. In Apps Script, go to Deploy > Manage Deployments and set 'Who has access' to 'Anyone'.");
-          throw new Error("Target returned HTML (likely a login page). Check deployment settings.");
+          setSyncError("AUTHENTICATION REQUIRED: The script returned a login page. In Apps Script, set 'Who has access' to 'Anyone'.");
+        } else {
+          setSyncError('Data format mismatch from cloud');
         }
-        setSyncError('Data format mismatch from cloud');
-        throw new Error("Invalid Cloud Data: The script is not returning JSON.");
       }
     } catch (e: any) {
-      console.error('Fetch Diagnostic:', e);
-      let errorMsg = e.message || 'Unknown sync error';
+      console.warn('Cloud Sync Diagnostic Notice:', e?.message || e);
+      let errorMsg = e?.message || 'Sync offline';
       if (errorMsg === 'Failed to fetch') {
-        errorMsg = 'ACCESS DENIED: Browser blocked the request. Ensure "Who has access" is set to "Anyone" in your Apps Script deployment and you have authorized permissions.';
+        errorMsg = 'ACCESS RESTRICTED: Browser blocked cross-origin handshake. Operating with local data cache.';
       }
       setSyncError(errorMsg);
     } finally {
@@ -357,7 +422,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Initial data load from cloud
   useEffect(() => {
     if (scriptUrl) {
-      refreshCloudData().catch(e => console.error("Initial sync error:", e));
+      refreshCloudData().catch(e => console.warn("Initial sync notice:", e?.message || e));
     } else {
       setIsInitialSyncing(false);
     }
@@ -447,39 +512,6 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const updatedLogs = [newLog, ...currentLogs].slice(0, 100); // Keep last 100
     localStorage.setItem('utc_activity_logs', JSON.stringify(updatedLogs));
   };
-
-  // Load from localStorage for initial offline access
-  useEffect(() => {
-    const load = (key: string, setter: any, sanitizer?: (item: any) => any) => {
-      const data = localStorage.getItem(key);
-      if (data) {
-        try {
-          const parsed = JSON.parse(data);
-          if (Array.isArray(parsed) && sanitizer) {
-            setter(parsed.map(sanitizer));
-          } else {
-            setter(parsed);
-          }
-        } catch (e) {
-          console.error(e);
-        }
-      }
-    };
-
-    load('utc_students', setStudents);
-    load('utc_fees', setFees, sanitizeFee);
-    load('utc_expenses', setExpenses, sanitizeExpense);
-    load('utc_attendance', setAttendance);
-    load('utc_tests', setTests);
-    load('utc_testResults', setTestResults);
-    load('utc_materials', setMaterials);
-    load('utc_notices', setNotices);
-    load('utc_due_fees', setDueFees, sanitizeDueFee);
-    load('utc_external_tests', setExternalTests);
-    load('utc_result_links', setResultLinks);
-    load('utc_remarks', setRemarks, sanitizeRemark);
-    load('utc_users', setUsers);
-  }, []);
 
   // Persistence
   useEffect(() => { localStorage.setItem('utc_students', JSON.stringify(students)); }, [students]);

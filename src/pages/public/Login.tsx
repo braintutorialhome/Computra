@@ -190,19 +190,19 @@ export default function Login() {
             {/* Syncing loader indicator */}
             {isInitialSyncing && (
               <div className="flex items-center justify-center gap-2 text-slate-500 py-1">
-                <Loader2 className="animate-spin text-indigo-400 animate-infinite" size={14} />
-                <span className="text-[10px] font-black uppercase tracking-widest">Initial Sync Ongoing...</span>
+                <Loader2 className="animate-spin text-indigo-400" size={14} />
+                <span className="text-[10px] font-black uppercase tracking-widest">Connecting Institutional Cloud...</span>
               </div>
             )}
 
             {/* Submit Control Button */}
             <button 
               type="submit" 
-              disabled={loading || isInitialSyncing}
-              className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-3 shadow-xl shadow-indigo-600/20 active:scale-98"
+              disabled={loading}
+              className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-3 shadow-xl shadow-indigo-600/20 active:scale-98 disabled:opacity-50"
             >
               {loading ? <Loader2 className="animate-spin" size={14} /> : isLogin ? <LogIn size={14} /> : <UserPlus size={14} />}
-              <span>{isInitialSyncing ? 'Synchronizing...' : isLogin ? 'Sign In' : 'Sign Up'}</span>
+              <span>{loading ? 'Verifying...' : isLogin ? 'Sign In' : 'Sign Up'}</span>
             </button>
 
           </form>

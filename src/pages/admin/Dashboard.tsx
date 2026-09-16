@@ -84,6 +84,7 @@ export default function AdminDashboard() {
   } = useStorage();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [showTroubleshoot, setShowTroubleshoot] = useState(false);
 
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -428,12 +429,20 @@ export default function AdminDashboard() {
                       1. Check Script URL ↗
                     </a>
                     <button 
-                      onClick={() => alert("TROUBLESHOOTING:\n1. Click 'Run' in the Apps Script Editor to authorize permissions.\n2. Ensure 'Who has access' is set to 'Anyone'.\n3. Try Incognito mode if you use multiple Google accounts.")}
+                      onClick={() => setShowTroubleshoot(prev => !prev)}
                       className="text-[8px] font-black uppercase tracking-widest text-slate-500 hover:text-indigo-400 underline underline-offset-2"
                     >
-                      2. Common Fixes
+                      2. Common Fixes {showTroubleshoot ? '▲' : '▼'}
                     </button>
                   </div>
+                  {showTroubleshoot && (
+                    <div className="mt-1 p-3 bg-slate-900/95 border border-white/10 rounded-xl text-[9px] text-slate-300 max-w-xs space-y-1 text-left shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95">
+                      <p className="font-bold text-indigo-300 uppercase tracking-widest">Troubleshooting Guide:</p>
+                      <p>1. Open Apps Script Editor and click <strong className="text-white">Run</strong> once to authorize permissions.</p>
+                      <p>2. Deploy &gt; Manage Deployments &gt; Ensure <strong className="text-white">Who has access</strong> is set to <strong className="text-white">Anyone</strong>.</p>
+                      <p>3. If logged into multiple Google accounts, test in an Incognito window.</p>
+                    </div>
+                  )}
                 </div>
               )}
               <Link to="/admin/student-overview" className="glass-button px-4 py-2 text-xs font-black uppercase tracking-widest text-slate-300 hover:text-white flex items-center gap-2">
