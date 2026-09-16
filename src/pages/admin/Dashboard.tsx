@@ -113,15 +113,10 @@ export default function AdminDashboard() {
   // Subcategorized Navigation Groups (mirroring student navigation structure)
   const navGroups = [
     {
-      title: 'Core & Overview',
+      title: 'Students & Overview',
       items: [
         { to: '/admin/dashboard', icon: BarChart2, label: 'Dashboard' },
         { to: '/admin/student-overview', icon: GraduationCap, label: 'Student Overview' },
-      ]
-    },
-    {
-      title: 'Student & Admissions',
-      items: [
         { to: '/admin/student-fee-tracker', icon: UserCheck, label: 'Student Fee Tracker' },
         { to: '/admin/admissions', icon: FileCheck, label: 'Admissions' },
         { 
@@ -131,17 +126,10 @@ export default function AdminDashboard() {
           badge: students.length > 0 ? students.length : null,
           badgeColor: 'slate' as const
         },
-        { 
-          to: '/admin/student-remarks', 
-          icon: MessageSquareQuote, 
-          label: 'Student Remarks',
-          badge: remarks.length > 0 ? remarks.length : null,
-          badgeColor: 'emerald' as const
-        },
       ]
     },
     {
-      title: 'Finances & Accounts',
+      title: 'Fees & Accounts',
       items: [
         { to: '/admin/fees', icon: CreditCard, label: 'Fees & Collections' },
         { 
@@ -186,6 +174,13 @@ export default function AdminDashboard() {
       title: 'Communication & System',
       items: [
         { 
+          to: '/admin/student-remarks', 
+          icon: MessageSquareQuote, 
+          label: 'Student Remarks',
+          badge: remarks.length > 0 ? remarks.length : null,
+          badgeColor: 'emerald' as const
+        },
+        { 
           to: '/admin/notices', 
           icon: Bell, 
           label: 'Notices',
@@ -198,20 +193,20 @@ export default function AdminDashboard() {
   ];
 
   const viewNames: Record<string, { title: string; category: string }> = {
-    '/admin/dashboard': { title: 'System Dashboard', category: 'Core & Overview' },
-    '/admin/student-overview': { title: 'Student Overview', category: 'Core & Overview' },
-    '/admin/student-fee-tracker': { title: 'Student Management & Fee Tracker', category: 'Student & Admissions' },
-    '/admin/admissions': { title: 'Admission Panel', category: 'Student & Admissions' },
-    '/admin/students': { title: 'Student Records', category: 'Student & Admissions' },
-    '/admin/student-remarks': { title: 'Student Remarks & Notes', category: 'Student & Admissions' },
-    '/admin/fees': { title: 'Fees & Collections', category: 'Finances & Accounts' },
-    '/admin/due-fees': { title: 'Due Fees Management', category: 'Finances & Accounts' },
-    '/admin/expenses': { title: 'Expense Tracker', category: 'Finances & Accounts' },
-    '/admin/accounts': { title: 'Account Statement', category: 'Finances & Accounts' },
+    '/admin/dashboard': { title: 'System Dashboard', category: 'Students & Overview' },
+    '/admin/student-overview': { title: 'Student Overview', category: 'Students & Overview' },
+    '/admin/student-fee-tracker': { title: 'Student Management & Fee Tracker', category: 'Students & Overview' },
+    '/admin/admissions': { title: 'Admission Panel', category: 'Students & Overview' },
+    '/admin/students': { title: 'Student Records', category: 'Students & Overview' },
+    '/admin/fees': { title: 'Fees & Collections', category: 'Fees & Accounts' },
+    '/admin/due-fees': { title: 'Due Fees Management', category: 'Fees & Accounts' },
+    '/admin/expenses': { title: 'Expense Tracker', category: 'Fees & Accounts' },
+    '/admin/accounts': { title: 'Account Statement', category: 'Fees & Accounts' },
     '/admin/attendance': { title: 'Attendance System', category: 'Academics & Tests' },
     '/admin/test-master': { title: 'Exam Portal (External)', category: 'Academics & Tests' },
     '/admin/results': { title: 'Result Management', category: 'Academics & Tests' },
     '/admin/materials': { title: 'Study Materials', category: 'Academics & Tests' },
+    '/admin/student-remarks': { title: 'Student Remarks & Notes', category: 'Communication & System' },
     '/admin/notices': { title: 'Notice Board', category: 'Communication & System' },
     '/admin/settings': { title: 'System Settings', category: 'Communication & System' },
   };
