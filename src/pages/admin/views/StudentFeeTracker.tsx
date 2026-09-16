@@ -4,7 +4,8 @@ import { Student } from '../../../types';
 import { 
   Search, Users, CreditCard, CheckCircle2, ShieldAlert,
   Edit2, Plus, Phone, User as UserIcon,
-  DollarSign, Lock, Eye, TrendingUp, FileText
+  DollarSign, Lock, Eye, TrendingUp, FileText,
+  FileSpreadsheet, Layers, MapPin, X, AlertCircle
 } from 'lucide-react';
 import { safeFormat, getISTDateString, getISTToday, formatIST, getISTPreviousMonthCurrentYear } from '../../../lib/dateUtils';
 
@@ -21,9 +22,11 @@ export default function StudentFeeTracker() {
   } = useStorage();
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
   const [filterClass, setFilterClass] = useState('All');
   const [filterSemester, setFilterSemester] = useState('All');
   const [filterSession, setFilterSession] = useState('All');
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
   
   // Selected student modal
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
@@ -144,7 +147,10 @@ export default function StudentFeeTracker() {
     const matchesSession = filterSession === 'All' || 
       item.student.session === filterSession;
 
-    return matchesSearch && matchesClass && matchesSemester && matchesSession;
+    const matchesStatus = statusFilter === 'All' ||
+      String(item.student.status || 'pending').toLowerCase() === statusFilter.toLowerCase();
+
+    return matchesSearch && matchesClass && matchesSemester && matchesSession && matchesStatus;
   });
 
   // Global Summary Stats
@@ -152,18 +158,21 @@ export default function StudentFeeTracker() {
   const grandTotalAssessedDues = studentFeeData.reduce((sum, item) => sum + item.totalAssessedDue, 0);
 
   // Handle opening student detail modal
-  const handleOpenStudentDetail = (student: Student) => {
+  const handleOpenStudentDetail = (
+    student: Student, 
+    initialTab: 'overview' | 'personal' | 'addPayment' | 'adjustDue' = 'overview'
+  ) => {
     setSelectedStudent(student);
-    setModalTab('overview');
+    setModalTab(initialTab);
     setIsEditingProfile(false);
     setProfileForm({
       name: String(student.name || ''),
       fatherName: String(student.fatherName || ''),
       mobile: String(student.mobile || ''),
-      class: String(student.class || ''),
+      class: String(student.class || student.subject || ''),
       semester: String(student.semester || ''),
       session: String(student.session || ''),
-      subject: String(student.subject || ''),
+      subject: String(student.subject || student.class || ''),
       address: String(student.address || ''),
       rollNumber: String(student.rollNumber || '')
     });
@@ -274,71 +283,140 @@ export default function StudentFeeTracker() {
       )}
 
       {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="px-3 py-1 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
-              <Lock size={12} /> Admin-Only Access
-            </span>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 glass p-8 rounded-[40px] border border-white/10 relative overflow-hidden">
+        <div className="absolute -right-16 -top-16 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="space-y-2 z-10">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-indigo-600/20 text-indigo-400 rounded-2xl flex items-center justify-center border border-indigo-500/30">
+              <CreditCard size={24} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl font-black text-white uppercase tracking-tight">Student Management & Fee Tracker</h1>
+                <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase tracking-wider rounded-full border border-emerald-500/20 flex items-center gap-1.5">
+                  <Lock size={12} /> Admin Control
+                </span>
+              </div>
+              <p className="text-xs text-slate-400 font-medium">
+                Admin student directory, profile management, and global fee ledger synchronization.
+              </p>
+            </div>
           </div>
-          <h1 className="text-3xl font-black text-white tracking-tighter uppercase flex items-center gap-3">
-            Student Management & Fee Tracking
-          </h1>
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-            Admin portal student directory, profile management, and global fee ledger synchronization.
-          </p>
         </div>
       </div>
 
       {/* Summary KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="glass p-6 rounded-3xl border border-white/5 bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent">
-          <p className="text-[11px] font-black uppercase tracking-widest text-indigo-400 mb-2 flex items-center gap-1.5">
-            <Users size={14} /> Total Enrolled Students
-          </p>
-          <h2 className="text-3xl font-black text-white tracking-tight">{activeStudents.length}</h2>
-          <p className="text-[10px] font-bold text-slate-500 uppercase mt-1">Active Student Directory</p>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+        <div className="glass p-6 rounded-3xl border border-white/5 relative overflow-hidden">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Enrolled</span>
+            <div className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+              <Users size={16} />
+            </div>
+          </div>
+          <p className="text-3xl font-black text-white tracking-tight">{activeStudents.length}</p>
+          <div className="flex items-center gap-2 mt-2 text-[11px] font-bold text-slate-400">
+            <span className="text-emerald-400">{activeStudents.filter(s => s.status === 'approved').length} Active</span>
+            <span>•</span>
+            <span className="text-amber-400">{activeStudents.filter(s => s.status === 'pending').length} Pending</span>
+          </div>
         </div>
 
-        <div className="glass p-6 rounded-3xl border border-amber-500/20 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent">
-          <p className="text-[11px] font-black uppercase tracking-widest text-amber-400 mb-2 flex items-center gap-1.5">
-            <FileText size={14} /> Total Assessed Dues
-          </p>
-          <h2 className="text-3xl font-black text-white tracking-tight">₹{grandTotalAssessedDues.toLocaleString()}</h2>
-          <p className="text-[10px] font-bold text-slate-500 uppercase mt-1">Total Fee Obligations</p>
+        <div className="glass p-6 rounded-3xl border border-white/5 relative overflow-hidden">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Amount Paid</span>
+            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+              <TrendingUp size={16} />
+            </div>
+          </div>
+          <p className="text-3xl font-black text-emerald-400 tracking-tight">₹{grandTotalPaid.toLocaleString('en-IN')}</p>
+          <p className="text-[11px] font-bold text-slate-400 mt-2">Collected revenue receipts</p>
         </div>
 
-        <div className="glass p-6 rounded-3xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent">
-          <p className="text-[11px] font-black uppercase tracking-widest text-emerald-400 mb-2 flex items-center gap-1.5">
-            <TrendingUp size={14} /> Total Amount Paid
+        <div className="glass p-6 rounded-3xl border border-white/5 relative overflow-hidden">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Assessed Dues</span>
+            <div className="w-8 h-8 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center">
+              <AlertCircle size={16} />
+            </div>
+          </div>
+          <p className="text-3xl font-black text-rose-400 tracking-tight">₹{grandTotalAssessedDues.toLocaleString('en-IN')}</p>
+          <p className="text-[11px] font-bold text-slate-400 mt-2">
+            {studentFeeData.filter(item => item.totalAssessedDue > 0).length} students with pending dues
           </p>
-          <h2 className="text-3xl font-black text-emerald-400 tracking-tight">₹{grandTotalPaid.toLocaleString()}</h2>
-          <p className="text-[10px] font-bold text-slate-500 uppercase mt-1">Collected Revenue Receipts</p>
         </div>
       </div>
 
-      {/* Search & Filter Controls */}
-      <div className="glass p-6 rounded-3xl border border-white/5 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
-        {/* Search Input */}
-        <div className="relative flex-1">
-          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input 
-            type="text" 
-            placeholder="Search by student name, roll no, contact, batch, or class..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-white text-xs font-bold focus:outline-none focus:border-indigo-500 transition-colors placeholder:text-slate-500"
-          />
+      {/* Filter and Control Bar */}
+      <div className="glass p-6 rounded-[32px] border border-white/10 space-y-4">
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+          {/* Search Input */}
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+            <input
+              type="text"
+              placeholder="Search by student name, roll no, student ID, mobile, father, subject..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-12 pr-4 py-3.5 bg-white/5 border border-white/10 rounded-2xl text-xs font-bold text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
+            />
+            {searchTerm && (
+              <button 
+                onClick={() => setSearchTerm('')} 
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
+
+          {/* View Toggle */}
+          <div className="flex items-center gap-2 bg-white/5 p-1.5 rounded-2xl border border-white/10 self-end lg:self-auto">
+            <button
+              type="button"
+              onClick={() => setViewMode('table')}
+              className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-1.5 ${
+                viewMode === 'table' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <FileSpreadsheet size={14} /> Table View
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('cards')}
+              className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-1.5 ${
+                viewMode === 'cards' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Layers size={14} /> Cards View
+            </button>
+          </div>
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          {/* Batch / Class Filter */}
-          <div className="relative flex-1 sm:flex-initial sm:w-44">
-            <select 
+        {/* Multi-Criteria Dropdown Filters */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2 border-t border-white/5">
+          {/* Status Filter */}
+          <div>
+            <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Status</label>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-slate-300 focus:outline-none focus:border-indigo-500"
+            >
+              <option value="All" className="bg-slate-900 text-white">All Statuses</option>
+              <option value="approved" className="bg-slate-900 text-white">Active / Approved</option>
+              <option value="pending" className="bg-slate-900 text-white">Pending Approval</option>
+              <option value="rejected" className="bg-slate-900 text-white">Rejected</option>
+            </select>
+          </div>
+
+          {/* Class Filter */}
+          <div>
+            <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Batch / Class</label>
+            <select
               value={filterClass}
               onChange={(e) => setFilterClass(e.target.value)}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-xs font-bold text-slate-300 focus:outline-none focus:border-indigo-500 appearance-none"
+              className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-slate-300 focus:outline-none focus:border-indigo-500"
             >
               <option value="All" className="bg-slate-900 text-white">All Batches / Classes</option>
               {availableClasses.map(c => (
@@ -348,138 +426,366 @@ export default function StudentFeeTracker() {
           </div>
 
           {/* Semester Filter */}
-          <div className="relative flex-1 sm:flex-initial sm:w-44">
-            <select 
+          <div>
+            <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Semester</label>
+            <select
               value={filterSemester}
               onChange={(e) => setFilterSemester(e.target.value)}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-xs font-bold text-slate-300 focus:outline-none focus:border-indigo-500 appearance-none"
+              className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-slate-300 focus:outline-none focus:border-indigo-500"
             >
               {availableSemesters.map(sem => (
-                <option key={`tracker-sem-${sem}`} value={sem} className="bg-slate-900 text-white">{sem === 'All' ? 'All Semesters' : sem}</option>
+                <option key={`tracker-sem-${sem}`} value={sem} className="bg-slate-900 text-white">
+                  {sem === 'All' ? 'All Semesters' : sem}
+                </option>
               ))}
             </select>
           </div>
 
           {/* Session Filter */}
-          <div className="relative flex-1 sm:flex-initial sm:w-44">
-            <select 
+          <div>
+            <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Session</label>
+            <select
               value={filterSession}
               onChange={(e) => setFilterSession(e.target.value)}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-xs font-bold text-slate-300 focus:outline-none focus:border-indigo-500 appearance-none"
+              className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-slate-300 focus:outline-none focus:border-indigo-500"
             >
               {availableSessions.map(sess => (
-                <option key={`tracker-sess-${sess}`} value={sess} className="bg-slate-900 text-white">{sess === 'All' ? 'All Sessions' : `Session: ${sess}`}</option>
+                <option key={`tracker-sess-${sess}`} value={sess} className="bg-slate-900 text-white">
+                  {sess === 'All' ? 'All Sessions' : sess}
+                </option>
               ))}
             </select>
           </div>
         </div>
+
+        {/* Filter Summary Counter */}
+        <div className="flex items-center justify-between text-[11px] text-slate-400 font-bold pt-1">
+          <span>Showing {filteredData.length} of {activeStudents.length} students</span>
+          {(searchTerm || statusFilter !== 'All' || filterClass !== 'All' || filterSemester !== 'All' || filterSession !== 'All') && (
+            <button
+              onClick={() => {
+                setSearchTerm('');
+                setStatusFilter('All');
+                setFilterClass('All');
+                setFilterSemester('All');
+                setFilterSession('All');
+              }}
+              className="text-indigo-400 hover:text-indigo-300 underline font-semibold cursor-pointer"
+            >
+              Reset all filters
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Student List View */}
-      <div className="glass rounded-3xl border border-white/5 overflow-hidden shadow-2xl">
-        <div className="p-6 border-b border-white/5 flex items-center justify-between">
-          <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
-            <Users size={16} className="text-indigo-400" /> Enrolled Students ({filteredData.length})
-          </h3>
-          <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-            Click student row to view details & fee breakdown
-          </span>
-        </div>
-
-        {filteredData.length === 0 ? (
-          <div className="p-16 text-center space-y-3">
-            <UserIcon size={36} className="mx-auto text-slate-600" />
-            <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">No matching student records found</p>
-            <p className="text-xs text-slate-600 font-medium">Try adjusting your search criteria or filter selections.</p>
+      {/* Main Content Area */}
+      {filteredData.length === 0 ? (
+        <div className="glass p-16 rounded-[40px] border border-white/5 text-center space-y-4">
+          <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto text-slate-500">
+            <Users size={32} />
           </div>
-        ) : (
-          <div className="overflow-x-auto">
+          <h3 className="text-xl font-black text-white uppercase tracking-tight">No Students Found</h3>
+          <p className="text-sm text-slate-400 max-w-md mx-auto">
+            No student records match your current filter and search criteria. Try modifying your search term or clearing filters.
+          </p>
+        </div>
+      ) : viewMode === 'table' ? (
+        /* TABLE VIEW */
+        <div className="glass rounded-[32px] border border-white/10 overflow-hidden">
+          <div className="overflow-x-auto custom-scrollbar">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-white/5 bg-white/[0.02] text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  <th className="p-4 pl-6">Student Info</th>
-                  <th className="p-4">Class / Batch</th>
-                  <th className="p-4">Contact Number</th>
-                  <th className="p-4 text-right">Total Due</th>
-                  <th className="p-4 text-right">Amount Paid</th>
-                  <th className="p-4 pr-6 text-right">Action</th>
+                <tr className="border-b border-white/10 bg-white/[0.03] text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  <th className="py-4 pl-6 pr-4">Student Profile</th>
+                  <th className="py-4 px-4">Academic Details</th>
+                  <th className="py-4 px-4">Contact & Guardian</th>
+                  <th className="py-4 px-4">Fees Paid</th>
+                  <th className="py-4 px-4">Assessed Dues</th>
+                  <th className="py-4 px-4">Status</th>
+                  <th className="py-4 pr-6 pl-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5 text-xs font-bold text-slate-300">
-                {filteredData.map(({ student, totalPaid, totalAssessedDue }, idx) => (
+              <tbody className="divide-y divide-white/5 text-xs text-slate-300 font-medium">
+                {filteredData.map(({ student, totalPaid, totalAssessedDue, feeCount, dueCount }, idx) => (
                   <tr 
-                    key={student.id ? `fee-tracker-${student.id}` : `fee-tracker-idx-${idx}`} 
-                    onClick={() => handleOpenStudentDetail(student)}
-                    className="hover:bg-white/[0.03] transition-colors cursor-pointer group"
+                    key={student.id ? `fee-tracker-${student.id}` : `ft-idx-${idx}`}
+                    className="hover:bg-white/[0.02] transition-colors group cursor-pointer"
+                    onClick={() => handleOpenStudentDetail(student, 'overview')}
                   >
-                    <td className="p-4 pl-6">
+                    {/* Student Profile Column */}
+                    <td className="py-4 pl-6 pr-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 font-black text-sm uppercase group-hover:scale-105 transition-transform">
-                          {String(student.name || 'S').charAt(0)}
+                        <div className="w-10 h-10 rounded-xl bg-indigo-600/30 border border-indigo-500/30 text-indigo-300 font-black flex items-center justify-center text-sm flex-shrink-0 overflow-hidden">
+                          {student.photoUrl ? (
+                            <img src={student.photoUrl} alt={student.name} className="w-full h-full object-cover" />
+                          ) : (
+                            student.name?.charAt(0) || 'S'
+                          )}
                         </div>
                         <div>
-                          <p className="font-black text-white group-hover:text-indigo-400 transition-colors uppercase tracking-tight">
+                          <p className="font-bold text-white text-sm group-hover:text-indigo-400 transition-colors leading-tight">
                             {student.name}
                           </p>
-                          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                            Roll: {student.rollNumber || 'N/A'}
-                          </p>
+                          <div className="flex items-center gap-2 mt-0.5 text-[11px] text-slate-400">
+                            {student.rollNumber ? (
+                              <span className="text-indigo-400 font-bold">Roll: {student.rollNumber}</span>
+                            ) : (
+                              <span className="font-mono text-[10px] text-slate-500">ID: {student.id}</span>
+                            )}
+                            <span>•</span>
+                            <span className="capitalize">{student.gender || 'N/A'}</span>
+                          </div>
                         </div>
                       </div>
                     </td>
 
-                    <td className="p-4">
-                      <div className="space-y-1">
-                        <span className="inline-block px-3 py-1 bg-white/5 border border-white/10 rounded-xl text-[11px] font-bold text-slate-300 uppercase">
-                          {student.class || student.subject || 'General Batch'}
+                    {/* Academic Details Column */}
+                    <td className="py-4 px-4">
+                      <div>
+                        <p className="font-bold text-white">{student.subject || student.class || 'General'}</p>
+                        <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                          {student.semester && (
+                            <span className="px-2 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-[10px] font-bold text-indigo-300">
+                              {student.semester}
+                            </span>
+                          )}
+                          {student.session && (
+                            <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold text-emerald-300">
+                              {student.session}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Contact & Guardian Column */}
+                    <td className="py-4 px-4">
+                      <div>
+                        <p className="text-slate-300 font-semibold">{student.fatherName ? `F: ${student.fatherName}` : 'N/A'}</p>
+                        <div className="flex items-center gap-2 text-slate-400 text-[11px] mt-0.5">
+                          <Phone size={11} className="text-slate-500" />
+                          <span>{student.mobile || 'No Mobile'}</span>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Fees Paid Column */}
+                    <td className="py-4 px-4">
+                      <div>
+                        <span className="font-black text-emerald-400 text-sm">
+                          ₹{totalPaid.toLocaleString('en-IN')}
                         </span>
-                        {student.semester && (
-                          <p className="text-[10px] font-semibold text-indigo-400 pl-1">{student.semester}</p>
-                        )}
-                        {student.session && (
-                          <p className="text-[10px] font-semibold text-emerald-400 pl-1">Session: {student.session}</p>
+                        <p className="text-[10px] text-slate-500 font-bold">{feeCount} receipt{feeCount === 1 ? '' : 's'}</p>
+                      </div>
+                    </td>
+
+                    {/* Assessed Dues Column */}
+                    <td className="py-4 px-4">
+                      <div>
+                        {totalAssessedDue > 0 ? (
+                          <>
+                            <span className="font-black text-rose-400 text-sm">
+                              ₹{totalAssessedDue.toLocaleString('en-IN')}
+                            </span>
+                            <p className="text-[10px] text-rose-500/80 font-bold">{dueCount} pending</p>
+                          </>
+                        ) : (
+                          <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold text-emerald-400">
+                            Cleared
+                          </span>
                         )}
                       </div>
                     </td>
 
-                    <td className="p-4">
-                      <div className="space-y-0.5">
-                        <p className="text-slate-300 flex items-center gap-1.5">
-                          <Phone size={12} className="text-slate-500" /> {student.mobile || 'N/A'}
-                        </p>
-                        {student.fatherName && (
-                          <p className="text-[10px] text-slate-500 uppercase">Guardian: {student.fatherName}</p>
-                        )}
+                    {/* Status Column */}
+                    <td className="py-4 px-4">
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                        student.status === 'approved' 
+                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                          : student.status === 'pending'
+                          ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                          : student.status === 'rejected'
+                          ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                          : 'bg-slate-500/10 text-slate-400 border-slate-500/20'
+                      }`}>
+                        {student.status || 'Active'}
+                      </span>
+                    </td>
+
+                    {/* Actions Column */}
+                    <td className="py-4 pr-6 pl-4 text-right">
+                      <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenStudentDetail(student, 'overview');
+                          }}
+                          className="px-3 py-1.5 bg-white/5 hover:bg-indigo-600/30 text-indigo-300 hover:text-indigo-200 border border-white/10 hover:border-indigo-500/30 rounded-xl text-xs font-bold transition-all inline-flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <Eye size={13} /> Profile & Fees
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenStudentDetail(student, 'addPayment');
+                          }}
+                          className="px-2.5 py-1.5 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 rounded-xl text-xs font-bold transition-all inline-flex items-center gap-1 cursor-pointer"
+                          title="Record Payment"
+                        >
+                          <Plus size={13} /> Pay
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenStudentDetail(student, 'adjustDue');
+                          }}
+                          className="px-2.5 py-1.5 bg-amber-600/20 hover:bg-amber-600 text-amber-300 hover:text-white border border-amber-500/30 rounded-xl text-xs font-bold transition-all inline-flex items-center gap-1 cursor-pointer"
+                          title="Add / Adjust Due"
+                        >
+                          <DollarSign size={13} /> Due
+                        </button>
                       </div>
-                    </td>
-
-                    <td className="p-4 text-right font-black text-amber-400">
-                      ₹{totalAssessedDue.toLocaleString()}
-                    </td>
-
-                    <td className="p-4 text-right font-black text-emerald-400">
-                      ₹{totalPaid.toLocaleString()}
-                    </td>
-
-                    <td className="p-4 pr-6 text-right">
-                      <button 
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleOpenStudentDetail(student);
-                        }}
-                        className="px-3.5 py-2 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-400 text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 ml-auto transition-all"
-                      >
-                        <Eye size={14} /> Profile & Fees
-                      </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        /* CARDS VIEW */
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {filteredData.map(({ student, totalPaid, totalAssessedDue, feeCount, dueCount }, idx) => (
+            <div 
+              key={student.id ? `card-fee-${student.id}` : `card-ft-${idx}`}
+              onClick={() => handleOpenStudentDetail(student, 'overview')}
+              className="glass p-6 rounded-[32px] border border-white/10 hover:border-indigo-500/40 transition-all hover:translate-y-[-2px] cursor-pointer group flex flex-col justify-between"
+            >
+              <div>
+                {/* Header */}
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center font-black text-lg overflow-hidden flex-shrink-0">
+                      {student.photoUrl ? (
+                        <img src={student.photoUrl} alt={student.name} className="w-full h-full object-cover" />
+                      ) : (
+                        student.name?.charAt(0) || 'S'
+                      )}
+                    </div>
+                    <div>
+                      <h4 className="font-black text-white text-base group-hover:text-indigo-400 transition-colors leading-tight">
+                        {student.name}
+                      </h4>
+                      <p className="text-xs text-slate-400 font-bold mt-0.5">
+                        {student.rollNumber ? `Roll: ${student.rollNumber}` : `ID: ${student.id}`}
+                      </p>
+                    </div>
+                  </div>
+                  <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                    student.status === 'approved' 
+                      ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                      : student.status === 'pending'
+                      ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                      : student.status === 'rejected'
+                      ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                      : 'bg-slate-500/10 text-slate-400 border-slate-500/20'
+                  }`}>
+                    {student.status || 'Active'}
+                  </span>
+                </div>
+
+                {/* Details Pills */}
+                <div className="flex flex-wrap gap-1.5 mb-4">
+                  <span className="px-2.5 py-1 rounded-xl bg-white/5 border border-white/5 text-[11px] font-semibold text-slate-300">
+                    {student.subject || student.class || 'General Batch'}
+                  </span>
+                  {student.semester && (
+                    <span className="px-2.5 py-1 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-[11px] font-semibold text-indigo-300">
+                      {student.semester}
+                    </span>
+                  )}
+                  {student.session && (
+                    <span className="px-2.5 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-semibold text-emerald-300">
+                      {student.session}
+                    </span>
+                  )}
+                </div>
+
+                {/* Contact & Father */}
+                <div className="space-y-1.5 py-3 border-y border-white/5 text-xs text-slate-400">
+                  {student.fatherName && (
+                    <p className="truncate"><span className="text-slate-500 font-bold">Guardian:</span> {student.fatherName}</p>
+                  )}
+                  {student.mobile && (
+                    <p className="flex items-center gap-1.5 truncate"><Phone size={12} className="text-slate-500" /> {student.mobile}</p>
+                  )}
+                  {student.address && (
+                    <p className="flex items-center gap-1.5 truncate"><MapPin size={12} className="text-slate-500" /> {student.address}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Financial & Performance Footer */}
+              <div className="mt-4 pt-2">
+                <div className="grid grid-cols-2 gap-2 bg-white/5 p-3 rounded-2xl border border-white/5 mb-3">
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Paid</span>
+                    <span className="text-sm font-black text-emerald-400">₹{totalPaid.toLocaleString('en-IN')}</span>
+                    <span className="text-[10px] text-slate-500 block font-bold mt-0.5">{feeCount} receipts</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Assessed Due</span>
+                    <span className={`text-sm font-black ${totalAssessedDue > 0 ? 'text-rose-400' : 'text-slate-400'}`}>
+                      ₹{totalAssessedDue.toLocaleString('en-IN')}
+                    </span>
+                    <span className="text-[10px] text-slate-500 block font-bold mt-0.5">
+                      {totalAssessedDue > 0 ? `${dueCount} pending` : 'Cleared'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <button 
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenStudentDetail(student, 'overview');
+                    }}
+                    className="py-2.5 bg-white/5 hover:bg-indigo-600 border border-white/10 hover:border-indigo-500 text-xs font-black uppercase tracking-wider text-slate-200 hover:text-white rounded-xl transition-all flex items-center justify-center gap-1 cursor-pointer"
+                  >
+                    <Eye size={13} /> Profile
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenStudentDetail(student, 'addPayment');
+                    }}
+                    className="py-2.5 bg-emerald-600/20 hover:bg-emerald-600 border border-emerald-500/30 text-xs font-black uppercase tracking-wider text-emerald-300 hover:text-white rounded-xl transition-all flex items-center justify-center gap-1 cursor-pointer"
+                    title="Record Payment"
+                  >
+                    <Plus size={13} /> Pay
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenStudentDetail(student, 'adjustDue');
+                    }}
+                    className="py-2.5 bg-amber-600/20 hover:bg-amber-600 border border-amber-500/30 text-xs font-black uppercase tracking-wider text-amber-300 hover:text-white rounded-xl transition-all flex items-center justify-center gap-1 cursor-pointer"
+                    title="Adjust Due"
+                  >
+                    <DollarSign size={13} /> Due
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Student Profile & Detailed Fee View Modal */}
       {selectedStudent && (

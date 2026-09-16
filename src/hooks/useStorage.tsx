@@ -510,7 +510,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
       status: 'pending',
       rollNumber: 'N/A'
     };
-    setStudents([...students, newStudent]);
+    setStudents(prev => [...prev, newStudent]);
     addLog('ADMISSION_REQUEST', `New admission request from ${s.name} for class ${s.class}`);
   };
 
@@ -569,14 +569,14 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const addFee = (f: Omit<Fee, 'id'>) => {
     const newFee = sanitizeFee({ ...f, id: uuid() });
-    setFees([...fees, newFee]);
+    setFees(prev => [...prev, newFee]);
     const studentName = students.find(s => s.id === newFee.studentId)?.name || 'Unknown';
     addLog('FEE_COLLECTION', `Collected ₹${newFee.amount} from ${studentName} for ${newFee.month}`);
   };
 
   const addExpense = (e: Omit<Expense, 'id'>) => {
     const newExpense = sanitizeExpense({ ...e, id: uuid() });
-    setExpenses([...expenses, newExpense]);
+    setExpenses(prev => [...prev, newExpense]);
   };
 
   const deleteFee = (id: string) => {
@@ -598,14 +598,13 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const markAttendance = (date: string, studentId: string, status: 'present' | 'absent') => {
-    const existing = attendance.find(a => a.date === date && a.studentId === studentId);
-    if (existing) {
-      const updated = { ...existing, status };
-      setAttendance(attendance.map(a => a.id === existing.id ? updated : a));
-    } else {
-      const newItem = { id: uuid(), date, studentId, status };
-      setAttendance([...attendance, newItem]);
-    }
+    setAttendance(prev => {
+      const existing = prev.find(a => a.date === date && a.studentId === studentId);
+      if (existing) {
+        return prev.map(a => a.id === existing.id ? { ...existing, status } : a);
+      }
+      return [...prev, { id: uuid(), date, studentId, status }];
+    });
   };
 
   const updateAttendance = (attendanceRecord: Attendance) => {
@@ -620,17 +619,17 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const addTest = (t: Omit<Test, 'id'>) => {
     const newTest = { ...t, id: uuid() };
-    setTests([...tests, newTest]);
+    setTests(prev => [...prev, newTest]);
   };
   
   const submitTestResult = (r: Omit<TestResult, 'id'>) => {
     const newResult = { ...r, id: uuid() };
-    setTestResults([...testResults, newResult]);
+    setTestResults(prev => [...prev, newResult]);
   };
 
   const addMaterial = (m: Omit<StudyMaterial, 'id' | 'uploadDate'>) => {
     const newItem = { ...m, id: uuid(), uploadDate: getISTISOString() };
-    setMaterials([...materials, newItem]);
+    setMaterials(prev => [...prev, newItem]);
     addLog('MATERIAL_ADD', `Added study material: ${m.title}`);
   };
 
@@ -675,7 +674,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const addDueFee = (df: Omit<DueFee, 'id' | 'date'>) => {
     const newDueFee = sanitizeDueFee({ ...df, id: uuid(), date: getISTISOString() });
-    setDueFees([...dueFees, newDueFee]);
+    setDueFees(prev => [...prev, newDueFee]);
     const studentName = students.find(s => s.id === newDueFee.studentId)?.name || 'Unknown';
     addLog('DUE_FEE_ADDED', `Added due amount of ₹${newDueFee.amount} for ${studentName}: ${newDueFee.remarks}`);
   };
@@ -692,7 +691,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const addExternalTest = (t: Omit<ExternalTest, 'id' | 'date'>) => {
     const newTest = { ...t, id: uuid(), date: getISTISOString() };
-    setExternalTests([...externalTests, newTest]);
+    setExternalTests(prev => [...prev, newTest]);
     addLog('EXTERNAL_TEST_ADDED', `Added new external test link: ${t.title}`);
   };
 
@@ -708,7 +707,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const addResultLink = (t: Omit<ResultLink, 'id' | 'date'>) => {
     const newResult = { ...t, id: uuid(), date: getISTISOString() };
-    setResultLinks([...resultLinks, newResult]);
+    setResultLinks(prev => [...prev, newResult]);
     addLog('RESULT_ADDED', `Added new result link: ${t.title}`);
   };
 

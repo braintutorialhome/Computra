@@ -79,7 +79,7 @@ export default function StudentDashboard() {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const { 
     students, logout, currentUser, dueFees, notices, 
-    materials, externalTests, testResults, remarks 
+    materials, externalTests, testResults, remarks, resultLinks 
   } = useStorage();
   
   const currentStudent = students.find(s => 
@@ -124,9 +124,10 @@ export default function StudentDashboard() {
   }, [myDueFees]);
 
   const myResultsCount = useMemo(() => {
+    if (resultLinks.length > 0) return resultLinks.length;
     if (!currentStudent) return 0;
     return testResults.filter(r => r.studentId === currentStudent.id).length;
-  }, [testResults, currentStudent]);
+  }, [resultLinks, testResults, currentStudent]);
 
   const sClassClean = String(currentStudent?.class || '').replace('Class-', '').trim();
   const myMaterialsCount = useMemo(() => {

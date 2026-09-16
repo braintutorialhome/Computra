@@ -13,7 +13,7 @@ import { Link } from 'react-router-dom';
 export default function StudentHome({ student }: { student: Student }) {
   const { 
     fees, attendance, testResults, tests, notices, dueFees, 
-    materials, remarks, externalTests 
+    materials, remarks, externalTests, resultLinks 
   } = useStorage();
 
   // Current Kolkata / IST Time
@@ -73,9 +73,6 @@ export default function StudentHome({ student }: { student: Student }) {
   const attendanceRate = totalAttendanceDays > 0 
     ? Math.round((presentDaysCount / totalAttendanceDays) * 100) 
     : null;
-
-  const todayRecord = attendance.find(a => a.date === today && a.studentId === student.id);
-  const todayStatus = todayRecord ? todayRecord.status : 'unmarked';
 
   // Academic Results
   const studentResults = useMemo(() => {
@@ -202,6 +199,25 @@ export default function StudentHome({ student }: { student: Student }) {
 
       {/* 3. Core Metric KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {/* Fees Paid */}
+        <Link to="/student/fees" className="glass p-6 rounded-[32px] border border-white/5 hover:border-emerald-500/30 transition-all group block relative overflow-hidden">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">Total Fees Paid</span>
+            <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white transition-all">
+              <CreditCard size={18} />
+            </div>
+          </div>
+          <h3 className="text-3xl font-black text-emerald-400 font-mono">
+            ₹{totalPaid.toLocaleString('en-IN')}
+          </h3>
+          <p className="text-xs text-slate-400 font-semibold mt-1">
+            {studentPaidFees.length} receipt(s) issued
+          </p>
+          <div className="mt-3 flex items-center gap-1.5 text-[10px] font-bold text-emerald-400">
+            <CheckCircle2 size={12} /> Clear Statements Available
+          </div>
+        </Link>
+
         {/* Attendance */}
         <Link to="/student/attendance" className="glass p-6 rounded-[32px] border border-white/5 hover:border-indigo-500/30 transition-all group block relative overflow-hidden">
           <div className="flex items-center justify-between mb-3">
@@ -226,25 +242,6 @@ export default function StudentHome({ student }: { student: Student }) {
           </div>
         </Link>
 
-        {/* Fees Paid */}
-        <Link to="/student/fees" className="glass p-6 rounded-[32px] border border-white/5 hover:border-emerald-500/30 transition-all group block relative overflow-hidden">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">Total Fees Paid</span>
-            <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white transition-all">
-              <CreditCard size={18} />
-            </div>
-          </div>
-          <h3 className="text-3xl font-black text-emerald-400 font-mono">
-            ₹{totalPaid.toLocaleString('en-IN')}
-          </h3>
-          <p className="text-xs text-slate-400 font-semibold mt-1">
-            {studentPaidFees.length} receipt(s) issued
-          </p>
-          <div className="mt-3 flex items-center gap-1.5 text-[10px] font-bold text-emerald-400">
-            <CheckCircle2 size={12} /> Clear Statements Available
-          </div>
-        </Link>
-
         {/* Tests / Results */}
         <Link to="/student/results" className="glass p-6 rounded-[32px] border border-white/5 hover:border-purple-500/30 transition-all group block relative overflow-hidden">
           <div className="flex items-center justify-between mb-3">
@@ -254,10 +251,10 @@ export default function StudentHome({ student }: { student: Student }) {
             </div>
           </div>
           <h3 className="text-3xl font-black text-white">
-            {studentResults.length}
+            {resultLinks.length}
           </h3>
           <p className="text-xs text-slate-400 font-semibold mt-1">
-            Assessments recorded
+            {resultLinks.length} result report link(s)
           </p>
           <div className="mt-3 flex items-center gap-1.5 text-[10px] font-bold text-purple-400">
             <Award size={12} /> View Scorecards & History

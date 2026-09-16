@@ -4,7 +4,7 @@ import { motion } from 'motion/react';
 import { useStorage } from '../../../hooks/useStorage';
 import { getISTDateString } from '../../../lib/dateUtils';
 import { 
-  Users, FileCheck, Calendar, GraduationCap, UserCheck, ArrowRight, CreditCard, ChevronRight
+  Users, FileCheck, Calendar, GraduationCap, UserCheck, ArrowRight, CreditCard, ChevronRight, AlertCircle
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
@@ -36,6 +36,7 @@ export default function AdminHome() {
   const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
   const netBalance = totalFees - totalExpenses;
   const pendingDuesCount = dueFees.length;
+  const totalDueAmount = dueFees.reduce((sum, df) => sum + (Number(df.amount) || 0), 0);
 
   const today = getISTDateString();
   const attendanceToday = attendance.filter(a => a.date === today);
@@ -73,12 +74,19 @@ export default function AdminHome() {
             <UserCheck size={15} />
             Student Fee Tracker
           </Link>
+          <Link
+            to="/admin/due-fees"
+            className="px-4 py-2.5 rounded-2xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-all"
+          >
+            <AlertCircle size={15} />
+            Assigned Due Fee
+          </Link>
         </div>
       </div>
 
-      {/* Primary Institutional Option Cards: Student Overview & Student Fee Tracker */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Option: Student Overview */}
+      {/* Primary Institutional Option Cards: Student Overview, Student Fee Tracker & Assigned Due Fee */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Option 1: Student Overview */}
         <Link 
           to="/admin/student-overview" 
           className="glass p-8 rounded-[36px] border border-white/10 hover:border-indigo-500/40 bg-gradient-to-br from-indigo-950/40 via-slate-900/70 to-slate-900/90 group transition-all duration-300 hover:scale-[1.01] hover:shadow-2xl hover:shadow-indigo-500/10 relative overflow-hidden flex flex-col justify-between"
@@ -124,7 +132,7 @@ export default function AdminHome() {
           </div>
         </Link>
 
-        {/* Option: Student Fee Tracker */}
+        {/* Option 2: Student Fee Tracker */}
         <Link 
           to="/admin/student-fee-tracker" 
           className="glass p-8 rounded-[36px] border border-white/10 hover:border-emerald-500/40 bg-gradient-to-br from-emerald-950/40 via-slate-900/70 to-slate-900/90 group transition-all duration-300 hover:scale-[1.01] hover:shadow-2xl hover:shadow-emerald-500/10 relative overflow-hidden flex flex-col justify-between"
@@ -157,7 +165,7 @@ export default function AdminHome() {
                 ₹{totalFees.toLocaleString('en-IN')} Collected
               </span>
               <span className="text-[11px] font-bold text-slate-400 bg-white/5 px-3 py-1 rounded-xl border border-white/5">
-                {pendingDuesCount} Pending Due Records
+                {pendingDuesCount} Pending Records
               </span>
             </div>
           </div>
@@ -165,6 +173,52 @@ export default function AdminHome() {
           <div className="mt-8 pt-4 border-t border-white/5 flex items-center justify-between text-xs font-black uppercase tracking-widest text-emerald-400 group-hover:text-emerald-300 relative z-10">
             <span>Launch Student Fee Tracker</span>
             <div className="w-8 h-8 rounded-full bg-white/5 group-hover:bg-emerald-600 group-hover:text-white flex items-center justify-center transition-all">
+              <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </div>
+        </Link>
+
+        {/* Option 3: Assigned Due Fee */}
+        <Link 
+          to="/admin/due-fees" 
+          className="glass p-8 rounded-[36px] border border-white/10 hover:border-rose-500/40 bg-gradient-to-br from-rose-950/40 via-slate-900/70 to-slate-900/90 group transition-all duration-300 hover:scale-[1.01] hover:shadow-2xl hover:shadow-rose-500/10 relative overflow-hidden flex flex-col justify-between"
+        >
+          <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 group-hover:scale-110 transition-all pointer-events-none text-rose-400">
+            <AlertCircle size={160} />
+          </div>
+
+          <div className="space-y-4 relative z-10">
+            <div className="flex items-center justify-between">
+              <div className="p-4 rounded-2xl bg-rose-500/15 text-rose-400 border border-rose-500/30 group-hover:bg-rose-500 group-hover:text-white transition-all shadow-lg shadow-rose-500/20">
+                <AlertCircle size={28} />
+              </div>
+              <span className="px-3.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-rose-500/10 text-rose-300 border border-rose-500/25">
+                Fee Assessments
+              </span>
+            </div>
+
+            <div>
+              <h4 className="text-2xl font-black text-white tracking-tight group-hover:text-rose-200 transition-colors">
+                Assigned Due Fee
+              </h4>
+              <p className="text-xs text-slate-400 font-medium leading-relaxed mt-2 line-clamp-2">
+                Assign pending dues to students, monitor unpaid fee balances, configure fee remarks, and track outstanding collections.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 pt-2">
+              <span className="text-[11px] font-bold text-rose-300 bg-rose-500/10 px-3 py-1 rounded-xl border border-rose-500/20">
+                ₹{totalDueAmount.toLocaleString('en-IN')} Total Pending
+              </span>
+              <span className="text-[11px] font-bold text-slate-400 bg-white/5 px-3 py-1 rounded-xl border border-white/5">
+                {pendingDuesCount} Due Records
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-8 pt-4 border-t border-white/5 flex items-center justify-between text-xs font-black uppercase tracking-widest text-rose-400 group-hover:text-rose-300 relative z-10">
+            <span>Launch Assigned Due Fee</span>
+            <div className="w-8 h-8 rounded-full bg-white/5 group-hover:bg-rose-600 group-hover:text-white flex items-center justify-center transition-all">
               <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
             </div>
           </div>
