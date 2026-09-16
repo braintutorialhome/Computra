@@ -253,3 +253,38 @@ export function formatISTTime(dateInput: string | Date | number | undefined | nu
 export function getISTClockString(dateInput: Date = new Date()): string {
   return formatIST(dateInput, 'EEEE, dd MMM yyyy • hh:mm:ss a IST');
 }
+
+export interface BillingMonthOption {
+  value: string;
+  label: string;
+  isCurrent: boolean;
+  offset: number;
+}
+
+/**
+ * Returns billing month quick-access options in Indian Standard Time (IST).
+ * Includes the Previous 3 Months and the Current Month.
+ * Formatted strictly as Month & Year only (no date/day numbers), e.g.
+ * ["June 2026", "July 2026", "August 2026", "September 2026"].
+ */
+export function getISTBillingMonthOptions(dateInput?: string | Date | number | null): BillingMonthOption[] {
+  const parts = getISTParts(dateInput);
+  const baseYear = parts ? parts.year : new Date().getFullYear();
+  const baseMonthIndex = parts ? parts.month - 1 : new Date().getMonth();
+
+  const options: BillingMonthOption[] = [];
+  // -3 (3 months ago), -2 (2 months ago), -1 (previous month), 0 (current month)
+  for (let offset = -3; offset <= 0; offset++) {
+    const targetDate = new Date(baseYear, baseMonthIndex + offset, 1);
+    const monthName = MONTH_NAMES_FULL[targetDate.getMonth()];
+    const year = targetDate.getFullYear();
+    const value = `${monthName} ${year}`;
+    options.push({
+      value,
+      label: value,
+      isCurrent: offset === 0,
+      offset
+    });
+  }
+  return options;
+}

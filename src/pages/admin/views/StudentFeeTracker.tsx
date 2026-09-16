@@ -7,7 +7,8 @@ import {
   DollarSign, Lock, Eye, TrendingUp, FileText,
   FileSpreadsheet, Layers, MapPin, X, AlertCircle
 } from 'lucide-react';
-import { safeFormat, getISTDateString, getISTToday, formatIST, getISTPreviousMonthCurrentYear } from '../../../lib/dateUtils';
+import { safeFormat, getISTDateString, getISTToday, formatIST, getISTPreviousMonthCurrentYear, getISTCurrentMonthYear } from '../../../lib/dateUtils';
+import BillingMonthQuickSelect from '../../../components/ui/BillingMonthQuickSelect';
 
 export default function StudentFeeTracker() {
   const { 
@@ -904,7 +905,7 @@ export default function StudentFeeTracker() {
                           <thead>
                             <tr className="bg-white/5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-white/5">
                               <th className="p-3 pl-4">Payment Date</th>
-                              <th className="p-3">Month / Notes</th>
+                              <th className="p-3">Billing Month / Term</th>
                               <th className="p-3 text-right">Amount Paid</th>
                               <th className="p-3 text-center">Status</th>
                             </tr>
@@ -1202,15 +1203,25 @@ export default function StudentFeeTracker() {
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-black uppercase text-slate-400 mb-1">
-                        Payment Month / Note
-                      </label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-[10px] font-black uppercase text-slate-400">
+                          Billing Month / Term
+                        </label>
+                        <span className="text-[10px] font-semibold text-slate-500">
+                          Month &amp; Year only
+                        </span>
+                      </div>
                       <input 
                         type="text" 
-                        placeholder="e.g. August 2026 Tuition Fee"
+                        placeholder={`e.g. ${getISTCurrentMonthYear()}`}
                         value={paymentForm.month}
                         onChange={(e) => setPaymentForm({ ...paymentForm, month: e.target.value })}
                         className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-white text-xs font-bold focus:outline-none focus:border-emerald-500"
+                      />
+                      <BillingMonthQuickSelect 
+                        value={paymentForm.month}
+                        onSelect={(month) => setPaymentForm({ ...paymentForm, month })}
+                        theme="emerald"
                       />
                     </div>
 

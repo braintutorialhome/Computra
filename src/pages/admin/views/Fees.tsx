@@ -2,9 +2,10 @@ import React, { useState, useMemo } from 'react';
 import { useStorage } from '../../../hooks/useStorage';
 import { CreditCard, Plus, X, Trash2, Search, Filter, Calendar, Download } from 'lucide-react';
 import { safeFormat } from '../../../lib/utils';
-import { getISTDateString, getISTToday, getISTPreviousMonthCurrentYear } from '../../../lib/dateUtils';
+import { getISTDateString, getISTToday, getISTPreviousMonthCurrentYear, getISTCurrentMonthYear } from '../../../lib/dateUtils';
 import { exportCsvFile } from '../../../lib/downloadHelper';
 import SearchableSelect from '../../../components/ui/SearchableSelect';
+import BillingMonthQuickSelect from '../../../components/ui/BillingMonthQuickSelect';
 
 export default function FeeManagement() {
   const { students, fees, addFee, deleteFee } = useStorage();
@@ -229,15 +230,23 @@ export default function FeeManagement() {
                   />
                 </div>
               </div>
-              <div className="space-y-3">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Billing Month</label>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between ml-1">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Billing Month / Term</label>
+                  <span className="text-[10px] font-semibold text-slate-500">Month &amp; Year only</span>
+                </div>
                 <input 
                   required
                   type="text" 
                   value={newFee.month}
                   onChange={(e) => setNewFee({...newFee, month: e.target.value})}
                   className="input-glass w-full py-4 rounded-2xl"
-                  placeholder={`e.g. ${getISTPreviousMonthCurrentYear()}`}
+                  placeholder={`e.g. ${getISTCurrentMonthYear()}`}
+                />
+                <BillingMonthQuickSelect 
+                  value={newFee.month}
+                  onSelect={(month) => setNewFee({ ...newFee, month })}
+                  theme="indigo"
                 />
               </div>
               <button 
