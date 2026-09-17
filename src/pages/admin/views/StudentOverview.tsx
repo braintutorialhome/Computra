@@ -35,7 +35,7 @@ export default function StudentOverview() {
   const [classFilter, setClassFilter] = useState<string>('all');
   const [semesterFilter, setSemesterFilter] = useState<string>('all');
   const [sessionFilter, setSessionFilter] = useState<string>('all');
-  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>('cards');
   
   // Selected Student for Read-Only Dossier Modal
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);

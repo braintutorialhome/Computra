@@ -254,24 +254,6 @@ export default function AdminDashboard() {
               <X size={18} />
             </button>
           </div>
-
-          {/* Admin Profile Quick Card */}
-          <div className="p-3.5 mb-3 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center gap-3 shrink-0">
-            <div className="w-10 h-10 bg-gradient-to-tr from-indigo-600 to-purple-600 text-white rounded-xl flex items-center justify-center font-black text-sm shadow-md shrink-0 relative">
-              {currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : 'A'}
-              <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-[#060c18] rounded-full" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="font-black text-white text-xs truncate uppercase tracking-tight">{currentUser?.name || 'Administrator'}</p>
-              <div className="flex items-center gap-2 mt-0.5 text-[10px] text-slate-400 font-semibold truncate">
-                <span className="text-indigo-400 font-bold uppercase tracking-wider">{currentUser?.role || 'Super Admin'}</span>
-                <span className="text-slate-600">•</span>
-                <span className="text-emerald-400 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Active
-                </span>
-              </div>
-            </div>
-          </div>
           
           {/* Subcategorized Navigation Groups (Scrollable) */}
           <nav className="flex-1 space-y-4 overflow-y-auto pr-1 custom-scrollbar">
@@ -301,39 +283,22 @@ export default function AdminDashboard() {
 
           {/* Support & Logout Footer */}
           <div className="mt-3 pt-3 border-t border-white/5 space-y-2 shrink-0">
-            <div className="grid grid-cols-2 gap-2">
-              <a 
-                href="tel:+919647046334" 
-                className="p-2.5 rounded-2xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 hover:border-indigo-500/40 transition-all flex flex-col justify-between group"
-                title="Helpline: +91 96470 46334"
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <div className="p-1.5 rounded-xl bg-indigo-600 text-white shadow-sm shadow-indigo-600/50 group-hover:scale-105 transition-transform">
-                    <Phone size={12} />
-                  </div>
-                  <span className="text-[9px] font-bold text-indigo-400 uppercase tracking-wider">Helpline</span>
+            <a 
+              href="tel:+919647046334" 
+              className="p-3 rounded-2xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 hover:border-indigo-500/40 transition-all flex items-center justify-between group"
+              title="Helpline: +91 96470 46334"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-indigo-600 text-white shadow-sm shadow-indigo-600/50 group-hover:scale-105 transition-transform">
+                  <Phone size={14} />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-white group-hover:text-indigo-200 transition-colors">Support Desk</p>
-                  <p className="text-[9px] text-slate-400 font-mono truncate">+91 9647046334</p>
-                </div>
-              </a>
-
-              <div className="p-2.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex flex-col justify-between">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="p-1.5 rounded-xl bg-emerald-600 text-white shadow-sm shadow-emerald-600/50">
-                    <ShieldCheck size={12} />
-                  </div>
-                  <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-wider">Cloud</span>
-                </div>
-                <div>
-                  <p className="text-[10px] font-black text-white">System Status</p>
-                  <p className="text-[9px] text-emerald-400 font-semibold truncate flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Connected
-                  </p>
+                  <p className="text-xs font-black text-white group-hover:text-indigo-200 transition-colors">Support Desk</p>
+                  <p className="text-[10px] text-slate-400 font-mono">+91 9647046334</p>
                 </div>
               </div>
-            </div>
+              <span className="text-[9px] font-bold text-indigo-400 uppercase tracking-wider">Helpline</span>
+            </a>
 
             <div className="relative">
               {showLogoutConfirm ? (

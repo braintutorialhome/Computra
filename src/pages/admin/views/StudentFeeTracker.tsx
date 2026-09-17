@@ -27,7 +27,7 @@ export default function StudentFeeTracker() {
   const [filterClass, setFilterClass] = useState('All');
   const [filterSemester, setFilterSemester] = useState('All');
   const [filterSession, setFilterSession] = useState('All');
-  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>('cards');
   
   // Selected student modal
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
