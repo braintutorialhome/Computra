@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Phone, MessageSquare, BookOpen, GraduationCap, ArrowRight, MapPin, PhoneCall, Monitor, Cpu, Brain } from 'lucide-react';
 import { useStorage } from '../../hooks/useStorage';
+import Logo from '../../components/Logo';
 
 export default function PublicHome() {
   const { currentUser } = useStorage();
@@ -23,11 +24,9 @@ export default function PublicHome() {
       {/* Header */}
       <header className="fixed top-0 w-full bg-slate-950/20 backdrop-blur-md border-b border-white/5 z-50">
         <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/30">
-              <span className="text-white font-bold text-sm tracking-tighter">UTC</span>
-            </div>
-            <span className="font-black text-xl tracking-tighter uppercase whitespace-nowrap">UTC <span className="text-indigo-400">Computra</span></span>
+          <Link to="/" className="flex items-center gap-3 group">
+            <Logo size="md" />
+            <span className="font-black text-xl tracking-tighter uppercase whitespace-nowrap">UTC <span className="text-blue-400">Computra</span></span>
           </Link>
           <nav className="hidden md:flex items-center gap-10 text-sm font-bold uppercase tracking-widest text-slate-400">
             <Link to="/" className="hover:text-white transition-colors">Home</Link>
@@ -190,10 +189,8 @@ export default function PublicHome() {
       <footer className="py-20 bg-black/40 border-t border-white/5 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <div className="flex items-center justify-center gap-3 mb-8">
-            <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10">
-              <span className="text-white font-bold">UC</span>
-            </div>
-            <span className="font-black text-2xl tracking-tighter text-white uppercase">UTC <span className="text-indigo-400">Computra</span></span>
+            <Logo size="lg" />
+            <span className="font-black text-2xl tracking-tighter text-white uppercase">UTC <span className="text-blue-400">Computra</span></span>
           </div>
           <p className="text-slate-500 font-medium mb-10 max-w-2xl mx-auto text-sm leading-relaxed">
             Powered by Unique Training Centre<br />
