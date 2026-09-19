@@ -29,6 +29,7 @@ const SHEETS = {
   USERS: "User",
   RESULTS: "Results",
   EXAM_PORTAL: "Exam Portal",
+  REMARKS: "Student Remarks",
   SYSTEM: "System Logs"
 };
 
@@ -82,6 +83,7 @@ function doGet(e) {
     data.tests = getSheetData(SHEETS.ONLINE_TESTS);
     data.testResults = getSheetData(SHEETS.TEST_RESULTS);
     data.attendance = getSheetData(SHEETS.ATTENDANCE);
+    data.remarks = getSheetData(SHEETS.REMARKS);
     data.users = getSheetData(SHEETS.USERS);
     data.logs = getSheetData(SHEETS.LOGS);
 
@@ -102,7 +104,7 @@ function doPost(e) {
       const ss = SpreadsheetApp.getActiveSpreadsheet();
       
       // Helper to clear and write sheet
-      const writeToSheet = (sheetName, items) => {
+      const writeToSheet = (sheetName, items, defaultHeaders) => {
         let sheet = ss.getSheetByName(sheetName);
         if (!sheet) {
           sheet = ss.insertSheet(sheetName);
@@ -110,7 +112,12 @@ function doPost(e) {
           sheet.clear();
         }
         
-        if (!items || items.length === 0) return;
+        if (!items || items.length === 0) {
+          if (defaultHeaders && defaultHeaders.length > 0) {
+            sheet.appendRow(defaultHeaders);
+          }
+          return;
+        }
         
         const headers = Object.keys(items[0]);
         sheet.appendRow(headers);
@@ -140,6 +147,7 @@ function doPost(e) {
       writeToSheet(SHEETS.TEST_RESULTS, data.testResults);
       writeToSheet(SHEETS.ATTENDANCE, data.attendance);
       writeToSheet(SHEETS.DUE_FEES, data.dueFees);
+      writeToSheet(SHEETS.REMARKS, data.remarks, ['id', 'studentId', 'studentName', 'category', 'remark', 'date', 'createdBy']);
       writeToSheet(SHEETS.USERS, data.users);
       writeToSheet(SHEETS.RESULTS, data.resultLinks);
       writeToSheet(SHEETS.EXAM_PORTAL, data.externalTests);

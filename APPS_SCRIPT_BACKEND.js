@@ -225,6 +225,16 @@ function updateBackupSheets(data) {
     const rows = attendance.map(a => [a.id, a.date, a.studentId, a.status]);
     aSheet.getRange(2, 1, rows.length, rows[0].length).setValues(rows);
   }
+
+  // 10. Update Remarks
+  const { remarks } = data;
+  const rSheet = getOrCreateSheet("Student Remarks");
+  rSheet.clear();
+  rSheet.appendRow(['ID', 'Student ID', 'Student Name', 'Category', 'Remark', 'Date', 'Created By']);
+  if (remarks && remarks.length > 0) {
+    const rows = remarks.map(r => [r.id, r.studentId, r.studentName || 'N/A', r.category || 'General', r.remark, r.date, r.createdBy || 'Admin']);
+    rSheet.getRange(2, 1, rows.length, rows[0].length).setValues(rows);
+  }
 }
 
 function getOrCreateSheet(name) {
@@ -241,6 +251,7 @@ function getOrCreateSheet(name) {
     if (name === "Tests") sheet.appendRow(['ID', 'Title', 'Description', 'Questions (JSON)', 'Duration']);
     if (name === "TestResults") sheet.appendRow(['ID', 'Test ID', 'Student ID', 'Score', 'Total Questions', 'Date']);
     if (name === "Attendance") sheet.appendRow(['ID', 'Date', 'Student ID', 'Status']);
+    if (name === "Student Remarks") sheet.appendRow(['ID', 'Student ID', 'Student Name', 'Category', 'Remark', 'Date', 'Created By']);
   }
   return sheet;
 }
