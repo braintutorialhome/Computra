@@ -19,6 +19,7 @@ import StudentResults from './views/Results';
 import StudentMaterials from './views/Materials';
 import StudentNotices from './views/Notices';
 import StudentDueFees from '../../components/student/StudentDueFees';
+import Logo from '../../components/Logo';
 
 interface NavItemProps {
   to: string;
@@ -289,12 +290,10 @@ export default function StudentDashboard() {
           {/* Institution Header */}
           <div className="flex items-center justify-between mb-5 shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-tr from-indigo-600 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-600/30 rotate-3">
-                <Compass className="text-white" size={20} />
-              </div>
+              <Logo size="sm" />
               <div className="flex flex-col">
-                <span className="text-base font-black leading-tight uppercase tracking-wider text-white">UTC Computra</span>
-                <span className="text-[10px] text-indigo-400 font-black uppercase tracking-widest mt-0.5 flex items-center gap-1">
+                <span className="text-base font-black leading-tight uppercase tracking-wider text-white">UTC <span className="text-blue-400">Computra</span></span>
+                <span className="text-[10px] text-blue-400 font-black uppercase tracking-widest mt-0.5 flex items-center gap-1">
                   <ShieldCheck size={11} className="text-emerald-400" /> Student Portal
                 </span>
               </div>

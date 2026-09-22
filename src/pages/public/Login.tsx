@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Shield, User, Lock, ArrowLeft, KeyRound, UserPlus, LogIn, Loader2 } from 'lucide-react';
 import { useStorage } from '../../hooks/useStorage';
+import Logo from '../../components/Logo';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -84,12 +85,15 @@ export default function Login() {
           className="glass p-8 sm:p-10 rounded-[40px] border border-white/5 shadow-2xl bg-white/[0.02]"
         >
           {/* Form Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-black uppercase tracking-widest text-indigo-400">
-              {isLogin ? 'Sign In' : 'Register'}
+          <div className="text-center mb-8 flex flex-col items-center">
+            <div className="mb-4">
+              <Logo size="xl" />
+            </div>
+            <h1 className="text-3xl font-black uppercase tracking-widest text-white">
+              UTC <span className="text-blue-400">Computra</span>
             </h1>
-            <p className="text-sm font-medium text-slate-500 mt-2">
-              {isLogin ? 'Access your automated learning account' : 'Setup administrative permissions'}
+            <p className="text-xs font-black uppercase tracking-widest text-slate-500 mt-1">
+              {isLogin ? 'Sign In to your account' : 'Setup administrative permissions'}
             </p>
           </div>
 

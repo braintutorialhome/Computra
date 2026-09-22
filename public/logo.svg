@@ -1,45 +1,33 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
-  <!-- Background circular disc (subtle white fill for perfect contrast on any background) -->
-  <circle cx="256" cy="256" r="250" fill="#FFFFFF" />
-  
-  <!-- Outer C Arc in vibrant Computra blue -->
+  <!-- Transparent / white background support -->
+  <circle cx="256" cy="256" r="252" fill="#FFFFFF"/>
+
+  <!-- Computra Outer Blue "C" Arc -->
   <path
-    d="M 416.5 111.5
-       A 216 216 0 1 0 416.5 400.5
-       L 357.1 347.0
-       A 136 136 0 1 1 357.1 165.0
+    d="M 425 125
+       A 212 212 0 1 0 425 387
+       L 368 343
+       A 140 140 0 1 1 368 169
        Z"
     fill="#1E75FF"
   />
 
-  <!-- Inner Code Symbol: < / > in dark charcoal / slate navy -->
+  <!-- Inner Code Symbols: < / > in dark charcoal / slate navy (#273444) -->
   <!-- Left Chevron: < -->
   <path
-    d="M 234 198
-       L 174 256
-       L 234 314
-       L 216 332
-       L 138 256
-       L 216 180
-       Z"
-    fill="#222C3D"
+    d="M 235 204 L 173 256 L 235 308 L 217 324 L 138 256 L 217 188 Z"
+    fill="#273444"
   />
 
   <!-- Forward Slash: / -->
-  <polygon
-    points="268,180 292,185 248,332 224,327"
-    fill="#222C3D"
+  <path
+    d="M 284 196 L 302 201 L 268 322 L 250 317 Z"
+    fill="#273444"
   />
 
   <!-- Right Chevron: > -->
   <path
-    d="M 278 198
-       L 338 256
-       L 278 314
-       L 296 332
-       L 374 256
-       L 296 180
-       Z"
-    fill="#222C3D"
+    d="M 286 204 L 348 256 L 286 308 L 304 324 L 383 256 L 304 188 Z"
+    fill="#273444"
   />
 </svg>

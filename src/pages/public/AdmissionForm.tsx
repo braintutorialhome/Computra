@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { ArrowLeft, User, Phone, MapPin, Calendar, Book, Info, CheckCircle, Compass, Sparkles } from 'lucide-react';
 import { useStorage } from '../../hooks/useStorage';
+import Logo from '../../components/Logo';
 
 export default function AdmissionForm() {
   const navigate = useNavigate();
@@ -62,20 +63,23 @@ export default function AdmissionForm() {
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-600/5 rounded-full blur-[120px]" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/5 rounded-full blur-[120px]" />
 
-      <div className="max-w-4xl mx-auto mb-12 flex items-center gap-6 relative z-10">
-        <button onClick={() => navigate(-1)} className="p-4 glass rounded-2xl hover:bg-white/10 transition-colors border-white/5 text-slate-400 hover:text-white group">
-          <ArrowLeft size={24} className="group-hover:-translate-x-1 transition-transform" />
-        </button>
-        <div className="space-y-1">
-           <p className="text-xs font-black uppercase tracking-widest text-indigo-500 flex items-center gap-3 mb-1">
-             <span className="flex h-2 w-2 relative">
-               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-               <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
-             </span>
-             UTC Computra
-           </p>
-           <h1 className="text-3xl font-black text-white tracking-tighter uppercase">Admission Entry</h1>
+      <div className="max-w-4xl mx-auto mb-12 flex items-center justify-between relative z-10">
+        <div className="flex items-center gap-6">
+          <button onClick={() => navigate(-1)} className="p-4 glass rounded-2xl hover:bg-white/10 transition-colors border-white/5 text-slate-400 hover:text-white group">
+            <ArrowLeft size={24} className="group-hover:-translate-x-1 transition-transform" />
+          </button>
+          <div className="space-y-1">
+             <p className="text-xs font-black uppercase tracking-widest text-blue-400 flex items-center gap-3 mb-1">
+               <span className="flex h-2 w-2 relative">
+                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                 <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+               </span>
+               UTC Computra
+             </p>
+             <h1 className="text-3xl font-black text-white tracking-tighter uppercase">Admission Entry</h1>
+          </div>
         </div>
+        <Logo size="md" />
       </div>
 
       <div className="max-w-4xl mx-auto glass rounded-[60px] shadow-2xl border border-white/10 overflow-hidden relative z-10">
