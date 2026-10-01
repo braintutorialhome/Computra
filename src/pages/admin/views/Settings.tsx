@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useStorage } from '../../../hooks/useStorage';
-import { Shield, User as UserIcon, Key, Lock, X, Save, RefreshCw, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Shield, User as UserIcon, Key, Lock, X, Save, RefreshCw, AlertCircle, CheckCircle2, LogOut } from 'lucide-react';
 import { User } from '../../../types';
 
 export default function SystemSettings() {
-  const { students, users, updateUser, currentUser, refreshCloudData, isInitialSyncing, syncError } = useStorage();
+  const { students, users, updateUser, currentUser, refreshCloudData, isInitialSyncing, syncError, logout } = useStorage();
+  const navigate = useNavigate();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -255,7 +258,73 @@ export default function SystemSettings() {
         </div>
       )}
 
-      {/* Activity Logs removed */}
+      {/* Admin Session & Sign Out Card */}
+      <div className="glass p-8 sm:p-10 rounded-[40px] border border-white/5 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+        <div className="space-y-1 text-center md:text-left">
+          <div className="flex items-center justify-center md:justify-start gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Active Admin Session</p>
+          </div>
+          <h3 className="text-xl font-black text-white uppercase tracking-tight">{currentUser?.name || currentUser?.username || 'Administrator'}</h3>
+          <p className="text-xs text-slate-400">Logged in with administrative access. Sign out safely from this mobile or desktop browser.</p>
+        </div>
+
+        <button
+          onClick={() => setShowLogoutModal(true)}
+          className="w-full md:w-auto px-8 py-4 rounded-2xl bg-rose-500/15 hover:bg-rose-600 hover:text-white border border-rose-500/30 text-rose-300 font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2.5 shadow-lg active:scale-95 shrink-0"
+        >
+          <LogOut size={16} />
+          <span>Sign Out of Admin Portal</span>
+        </button>
+      </div>
+
+      {/* Admin Logout Confirmation Modal */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-white/10 p-6 sm:p-7 rounded-3xl max-w-sm w-full shadow-2xl space-y-5 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0 border border-rose-500/30">
+                <LogOut size={22} />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-white uppercase tracking-tight">Sign Out</h3>
+                <p className="text-xs text-slate-400">Leave Administrator Portal</p>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/5 space-y-1">
+              <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">Administrator Account</p>
+              <p className="text-xs font-bold text-white">{currentUser?.name || currentUser?.username || 'Administrator'}</p>
+              <p className="text-[10px] text-slate-400 font-mono">Role: {currentUser?.role || 'Admin'}</p>
+            </div>
+
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Are you sure you want to sign out? You will need your administrative login credentials to return.
+            </p>
+
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  logout();
+                  navigate('/login');
+                }}
+                className="flex-1 py-3 px-4 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-lg shadow-rose-600/30 active:scale-95 text-center flex items-center justify-center gap-2"
+              >
+                <LogOut size={14} />
+                <span>Yes, Sign Out</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowLogoutModal(false)}
+                className="flex-1 py-3 px-4 rounded-2xl bg-white/10 hover:bg-white/15 text-slate-300 font-bold text-xs uppercase tracking-wider transition-all active:scale-95 text-center"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 0px; }

@@ -1,10 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Student } from '../../../types';
 import { useStorage } from '../../../hooks/useStorage';
 import { formatIST } from '../../../lib/dateUtils';
-import { User, Mail, Phone, MapPin, Calendar, Book, Layers, ShieldCheck, Mail as MailIcon, MessageSquare } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Calendar, Book, Layers, ShieldCheck, Mail as MailIcon, MessageSquare, LogOut } from 'lucide-react';
 
 export default function StudentProfile({ student }: { student: Student }) {
+  const { logout } = useStorage();
+  const navigate = useNavigate();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
   const infoItems = [
     { label: "Guardian's Name", value: student.fatherName, icon: ShieldCheck, color: 'indigo' },
     { label: 'Date of Birth', value: formatIST(student.dob, 'd MMMM yyyy'), icon: Calendar, color: 'purple' },
@@ -77,11 +86,76 @@ export default function StudentProfile({ student }: { student: Student }) {
         </div>
       </div>
       
+      {/* Current Session & Sign Out Card */}
+      <div className="glass p-8 sm:p-10 rounded-[40px] border border-white/5 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+        <div className="space-y-1 text-center md:text-left">
+          <div className="flex items-center justify-center md:justify-start gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Active Mobile / Web Session</p>
+          </div>
+          <h3 className="text-xl font-black text-white uppercase tracking-tight">{student.name} ({student.rollNumber})</h3>
+          <p className="text-xs text-slate-400">You are currently logged into the student portal. Sign out safely when using shared or mobile devices.</p>
+        </div>
+
+        <button
+          onClick={() => setShowLogoutModal(true)}
+          className="w-full md:w-auto px-8 py-4 rounded-2xl bg-rose-500/15 hover:bg-rose-600 hover:text-white border border-rose-500/30 text-rose-300 font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2.5 shadow-lg active:scale-95 shrink-0"
+        >
+          <LogOut size={16} />
+          <span>Sign Out from UTC Computra</span>
+        </button>
+      </div>
+
       <div className="flex justify-center gap-8">
-         <p className="text-xs font-black text-slate-700 uppercase tracking-widest flex items-center gap-2">
+         <p className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
            <AlertCircle size={14} /> Contact UTC office for identity modifications
          </p>
       </div>
+
+      {/* Profile Logout Confirmation Modal */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-white/10 p-6 sm:p-7 rounded-3xl max-w-sm w-full shadow-2xl space-y-5 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0 border border-rose-500/30">
+                <LogOut size={22} />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-white uppercase tracking-tight">Sign Out</h3>
+                <p className="text-xs text-slate-400">Leave Student Portal</p>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/5 space-y-1">
+              <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">Student Account</p>
+              <p className="text-xs font-bold text-white">{student.name}</p>
+              <p className="text-[10px] text-slate-400 font-mono">Roll: {student.rollNumber} • Class: {student.class}</p>
+            </div>
+
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Are you sure you want to sign out from your student account on this device?
+            </p>
+
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex-1 py-3 px-4 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-lg shadow-rose-600/30 active:scale-95 text-center flex items-center justify-center gap-2"
+              >
+                <LogOut size={14} />
+                <span>Yes, Sign Out</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowLogoutModal(false)}
+                className="flex-1 py-3 px-4 rounded-2xl bg-white/10 hover:bg-white/15 text-slate-300 font-bold text-xs uppercase tracking-wider transition-all active:scale-95 text-center"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

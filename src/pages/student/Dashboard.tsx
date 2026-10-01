@@ -283,16 +283,16 @@ export default function StudentDashboard() {
 
       {/* Advanced Sidebar */}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 w-80 glass border-r border-white/5 transform transition-transform duration-300 lg:translate-x-0 lg:static flex-shrink-0 flex flex-col h-screen
+        fixed inset-y-0 left-0 z-50 w-80 glass border-r border-white/5 transform transition-transform duration-300 lg:translate-x-0 lg:static flex-shrink-0 flex flex-col h-[100dvh] max-h-[100dvh]
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="p-6 pb-4 flex flex-col h-full overflow-hidden relative z-10">
           {/* Institution Header */}
-          <div className="flex items-center justify-between mb-5 shrink-0">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between mb-4 shrink-0 pb-3 border-b border-white/5">
+            <div className="flex items-center gap-2.5">
               <Logo size="sm" />
               <div className="flex flex-col">
-                <span className="text-base font-black leading-tight uppercase tracking-wider text-white">UTC <span className="text-blue-400">Computra</span></span>
+                <span className="text-sm sm:text-base font-black leading-tight uppercase tracking-wider text-white">UTC <span className="text-blue-400">Computra</span></span>
                 <span className="text-[10px] text-blue-400 font-black uppercase tracking-widest mt-0.5 flex items-center gap-1">
                   <ShieldCheck size={11} className="text-emerald-400" /> Student Portal
                 </span>
@@ -301,6 +301,7 @@ export default function StudentDashboard() {
             <button 
               className="lg:hidden p-2 rounded-xl bg-white/5 text-slate-400 hover:text-white transition-colors" 
               onClick={() => setIsSidebarOpen(false)}
+              aria-label="Close menu"
             >
               <X size={18} />
             </button>
@@ -350,7 +351,7 @@ export default function StudentDashboard() {
           </nav>
 
           {/* ADVANCED LEVEL: Instant Support, Instant Chat & Log Out */}
-          <div className="mt-4 pt-4 border-t border-white/5 space-y-2.5 shrink-0">
+          <div className="mt-4 pt-4 border-t border-white/5 space-y-2.5 shrink-0 pb-8 lg:pb-0">
             {/* Quick Actions Header */}
             <div className="px-2 flex items-center justify-between">
               <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
@@ -426,7 +427,7 @@ export default function StudentDashboard() {
               ) : (
                 <button 
                   onClick={() => setShowLogoutConfirm(true)}
-                  className="w-full flex items-center justify-between px-4 py-2.5 rounded-2xl bg-rose-500/[0.08] hover:bg-rose-600 hover:text-white border border-rose-500/20 transition-all font-black text-xs uppercase tracking-wider text-rose-400 group shadow-sm"
+                  className="w-full flex items-center justify-between px-4 py-2.5 rounded-2xl bg-rose-500/[0.08] hover:bg-rose-600 hover:text-white border border-rose-500/20 transition-all font-black text-xs uppercase tracking-wider text-rose-400 group shadow-sm active:scale-95"
                 >
                   <div className="flex items-center gap-2.5">
                     <div className="p-1 rounded-lg bg-rose-500/20 text-rose-400 group-hover:bg-white/20 group-hover:text-white transition-colors">
@@ -435,7 +436,7 @@ export default function StudentDashboard() {
                     <span>Sign Out</span>
                   </div>
                   <span className="text-[10px] text-slate-400 group-hover:text-rose-200 font-normal">
-                    {currentStudent.rollNumber}
+                    {currentStudent?.rollNumber}
                   </span>
                 </button>
               )}
@@ -447,32 +448,32 @@ export default function StudentDashboard() {
       {/* Main Content Area */}
       <main className="flex-1 min-w-0 flex flex-col relative z-10 h-screen overflow-hidden">
         {/* Desktop & Mobile Top Header Bar */}
-        <header className="glass border-b border-white/5 px-6 lg:px-10 h-20 flex items-center justify-between shrink-0 bg-[#060c18]/80 backdrop-blur-xl">
+        <header className="glass border-b border-white/5 px-4 sm:px-6 lg:px-10 h-20 flex items-center justify-between shrink-0 bg-[#060c18]/80 backdrop-blur-xl">
           {/* Left Side: Mobile Menu Button & Breadcrumb */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
             <button 
               onClick={() => setIsSidebarOpen(true)} 
-              className="lg:hidden p-2.5 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/5 text-slate-300 transition-all"
+              className="lg:hidden p-2.5 bg-white/5 hover:bg-white/10 active:scale-95 rounded-2xl border border-white/5 text-slate-300 transition-all shrink-0"
               aria-label="Open Sidebar"
             >
               <Menu size={20} />
             </button>
-            <div>
-              <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-indigo-400">
-                <span>{currentView.category}</span>
-                <ChevronRight size={10} className="text-slate-600" />
-                <span className="text-slate-400">{currentView.title}</span>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] font-black uppercase tracking-widest text-indigo-400 truncate">
+                <span className="truncate">{currentView.category}</span>
+                <ChevronRight size={10} className="text-slate-600 shrink-0" />
+                <span className="text-slate-400 truncate">{currentView.title}</span>
               </div>
-              <h2 className="text-lg lg:text-xl font-black text-white tracking-tight uppercase">
+              <h2 className="text-base sm:text-lg lg:text-xl font-black text-white tracking-tight uppercase truncate">
                 {currentView.title}
               </h2>
             </div>
           </div>
 
-          {/* Right Side: IST Live Clock, Pending Dues Quick Pill, Profile */}
-          <div className="flex items-center gap-3 sm:gap-4">
+          {/* Right Side: IST Live Clock, Pending Dues Quick Pill, Profile & Sign Out */}
+          <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 shrink-0">
             {/* Live IST Time */}
-            <div className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/[0.03] border border-white/5 text-xs text-slate-400 font-mono">
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/5 text-xs text-slate-400 font-mono">
               <Clock size={13} className="text-indigo-400" />
               <span>{timeStr || 'IST'}</span>
             </div>
@@ -481,7 +482,7 @@ export default function StudentDashboard() {
             {totalDueAmount > 0 && (
               <Link 
                 to="/student/due-fees" 
-                className="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/25 text-rose-300 text-xs font-bold transition-all animate-pulse"
+                className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/25 text-rose-300 text-xs font-bold transition-all animate-pulse"
               >
                 <AlertCircle size={14} className="text-rose-400" />
                 <span>Due: ₹{totalDueAmount.toLocaleString('en-IN')}</span>
@@ -489,26 +490,29 @@ export default function StudentDashboard() {
             )}
 
             {/* Student Avatar Tag */}
-            <Link 
-              to="/student/profile" 
-              className="flex items-center gap-2.5 p-1 sm:px-3 sm:py-1.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/5 transition-all group"
-            >
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white flex items-center justify-center font-black text-xs overflow-hidden">
-                {currentStudent.photoUrl ? (
-                  <img src={currentStudent.photoUrl} alt={currentStudent.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                ) : (
-                  currentStudent.name.charAt(0)
-                )}
-              </div>
-              <div className="hidden lg:block text-left">
-                <p className="text-xs font-black text-white leading-tight uppercase group-hover:text-indigo-400 transition-colors">
-                  {currentStudent.name}
-                </p>
-                <p className="text-[10px] text-slate-500 font-mono">
-                  {currentStudent.rollNumber}
-                </p>
-              </div>
-            </Link>
+            {currentStudent && (
+              <Link 
+                to="/student/profile" 
+                className="flex items-center gap-2 sm:gap-2.5 p-1 sm:px-3 sm:py-1.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/5 transition-all group shrink-0"
+                title="View Profile"
+              >
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white flex items-center justify-center font-black text-xs overflow-hidden shrink-0">
+                  {currentStudent.photoUrl ? (
+                    <img src={currentStudent.photoUrl} alt={currentStudent.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  ) : (
+                    currentStudent.name.charAt(0)
+                  )}
+                </div>
+                <div className="hidden lg:block text-left">
+                  <p className="text-xs font-black text-white leading-tight uppercase group-hover:text-indigo-400 transition-colors">
+                    {currentStudent.name}
+                  </p>
+                  <p className="text-[10px] text-slate-500 font-mono">
+                    {currentStudent.rollNumber}
+                  </p>
+                </div>
+              </Link>
+            )}
           </div>
         </header>
 
@@ -541,6 +545,58 @@ export default function StudentDashboard() {
           </AnimatePresence>
         </div>
       </main>
+
+      {/* Sign Out Confirmation Modal (Works globally across mobile and desktop) */}
+      <AnimatePresence>
+        {showLogoutConfirm && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="bg-slate-900 border border-white/10 p-6 sm:p-7 rounded-3xl max-w-sm w-full shadow-2xl space-y-5"
+            >
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0 border border-rose-500/30">
+                  <LogOut size={22} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-white uppercase tracking-tight">Sign Out</h3>
+                  <p className="text-xs text-slate-400">Leave Student Portal</p>
+                </div>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/5 space-y-1">
+                <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">Student Account</p>
+                <p className="text-xs font-bold text-white">{currentStudent?.name || currentUser?.name || 'Student'}</p>
+                <p className="text-[10px] text-slate-400 font-mono">Roll: {currentStudent?.rollNumber || currentUser?.username} • Class: {currentStudent?.class || 'N/A'}</p>
+              </div>
+
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Are you sure you want to sign out? You will need your roll number and password to sign back in.
+              </p>
+
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="flex-1 py-3 px-4 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-lg shadow-rose-600/30 active:scale-95 text-center flex items-center justify-center gap-2"
+                >
+                  <LogOut size={14} />
+                  <span>Yes, Sign Out</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowLogoutConfirm(false)}
+                  className="flex-1 py-3 px-4 rounded-2xl bg-white/10 hover:bg-white/15 text-slate-300 font-bold text-xs uppercase tracking-wider transition-all active:scale-95 text-center"
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }

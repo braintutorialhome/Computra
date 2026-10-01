@@ -231,16 +231,16 @@ export default function AdminDashboard() {
 
       {/* Sidebar Navigation */}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 w-80 glass border-r border-white/5 transform transition-transform duration-300 lg:translate-x-0 lg:static flex-shrink-0 flex flex-col h-screen
+        fixed inset-y-0 left-0 z-50 w-80 glass border-r border-white/5 transform transition-transform duration-300 lg:translate-x-0 lg:static flex-shrink-0 flex flex-col h-[100dvh] max-h-[100dvh]
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="p-6 pb-4 flex flex-col h-full overflow-hidden relative z-10">
           {/* Institution Header */}
-          <div className="flex items-center justify-between mb-4 shrink-0">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between mb-4 shrink-0 pb-3 border-b border-white/5">
+            <div className="flex items-center gap-2.5">
               <Logo size="sm" />
               <div className="flex flex-col">
-                <span className="text-base font-black leading-tight uppercase tracking-wider text-white">UTC <span className="text-blue-400">Computra</span></span>
+                <span className="text-sm sm:text-base font-black leading-tight uppercase tracking-wider text-white">UTC <span className="text-blue-400">Computra</span></span>
                 <span className="text-[10px] text-blue-400 font-black uppercase tracking-widest mt-0.5 flex items-center gap-1">
                   <ShieldCheck size={11} className="text-emerald-400" /> Admin Portal
                 </span>
@@ -249,6 +249,7 @@ export default function AdminDashboard() {
             <button 
               className="lg:hidden p-2 rounded-xl bg-white/5 text-slate-400 hover:text-white transition-colors" 
               onClick={() => setIsSidebarOpen(false)}
+              aria-label="Close menu"
             >
               <X size={18} />
             </button>
@@ -281,7 +282,7 @@ export default function AdminDashboard() {
           </nav>
 
           {/* Support & Logout Footer */}
-          <div className="mt-3 pt-3 border-t border-white/5 space-y-2 shrink-0">
+          <div className="mt-3 pt-3 border-t border-white/5 space-y-2 shrink-0 pb-8 lg:pb-0">
             <a 
               href="tel:+919647046334" 
               className="p-3 rounded-2xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 hover:border-indigo-500/40 transition-all flex items-center justify-between group"
@@ -321,7 +322,7 @@ export default function AdminDashboard() {
               ) : (
                 <button 
                   onClick={() => setShowLogoutConfirm(true)}
-                  className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl bg-rose-500/[0.08] hover:bg-rose-600 hover:text-white border border-rose-500/20 transition-all font-black text-xs uppercase tracking-wider text-rose-400 group shadow-sm"
+                  className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl bg-rose-500/[0.08] hover:bg-rose-600 hover:text-white border border-rose-500/20 transition-all font-black text-xs uppercase tracking-wider text-rose-400 group shadow-sm active:scale-95"
                 >
                   <div className="flex items-center gap-2.5">
                     <div className="p-1 rounded-lg bg-rose-500/20 text-rose-400 group-hover:bg-white/20 group-hover:text-white transition-colors">
@@ -342,37 +343,41 @@ export default function AdminDashboard() {
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Header */}
-        <header className="h-24 border-b border-white/5 flex items-center justify-between px-8 bg-slate-950/20 backdrop-blur-md">
-           <div className="flex items-center gap-4">
-             <button className="lg:hidden p-2 bg-white/5 rounded-xl border border-white/10 text-white" onClick={() => setIsSidebarOpen(true)}>
-               <Menu size={24} />
+        <header className="h-20 sm:h-24 border-b border-white/5 flex items-center justify-between px-4 sm:px-8 bg-slate-950/20 backdrop-blur-md">
+           <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+             <button 
+               className="lg:hidden p-2.5 bg-white/5 hover:bg-white/10 active:scale-95 rounded-xl border border-white/10 text-white shrink-0 transition-all" 
+               onClick={() => setIsSidebarOpen(true)}
+               aria-label="Open menu"
+             >
+               <Menu size={20} />
              </button>
-             <div>
-               <div className="flex items-center gap-2 mb-1">
-                 <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+             <div className="min-w-0">
+               <div className="flex items-center gap-2 mb-0.5 sm:mb-1">
+                 <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 truncate">
                    {currentView.category}
                  </span>
                </div>
-               <h2 className="text-2xl font-black text-white tracking-tight leading-none mb-1">
+               <h2 className="text-base sm:text-xl md:text-2xl font-black text-white tracking-tight leading-none mb-1 truncate">
                  {currentView.title}
                </h2>
                <div className="flex items-center gap-2">
-                 <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-none">
+                 <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-none truncate">
                    UTC Computra • {kolkataTime} IST
                  </p>
                  {isInitialSyncing && (
-                   <span className="flex items-center gap-1.5 text-[10px] font-black text-indigo-400 uppercase tracking-widest">
+                   <span className="hidden xs:flex items-center gap-1.5 text-[10px] font-black text-indigo-400 uppercase tracking-widest shrink-0">
                      <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse"></span>
-                     Syncing with Cloud...
+                     Syncing...
                    </span>
                  )}
                </div>
              </div>
            </div>
            
-           <div className="hidden sm:flex gap-4 items-center">
+           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
               {syncError && (
-                <div className="flex flex-col gap-1 items-end">
+                <div className="hidden xl:flex flex-col gap-1 items-end">
                   <div className="flex items-center gap-2 px-4 py-2 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-400 max-w-sm animate-in slide-in-from-top duration-500">
                     <AlertCircle size={14} className="shrink-0" />
                     <span className="text-[10px] font-black uppercase tracking-widest line-clamp-1">{syncError}</span>
@@ -404,21 +409,25 @@ export default function AdminDashboard() {
                   )}
                 </div>
               )}
-              <Link to="/admin/student-overview" className="glass-button px-4 py-2 text-xs font-black uppercase tracking-widest text-slate-300 hover:text-white flex items-center gap-2">
-                <GraduationCap size={14} className="text-indigo-400" />
-                Student Overview
-              </Link>
-              <Link to="/admin/student-fee-tracker" className="glass-button px-4 py-2 text-xs font-black uppercase tracking-widest text-slate-300 hover:text-white flex items-center gap-2">
-                <UserCheck size={14} className="text-emerald-400" />
-                Fee Tracker
-              </Link>
-              <Link to="/admin/attendance" className="glass-button px-4 py-2 text-xs font-black uppercase tracking-widest text-slate-300">
-                Attendance
-              </Link>
-              <Link to="/admin/settings" className="indigo-button px-5 py-2 text-xs font-black uppercase tracking-widest flex items-center gap-2">
-                <Settings size={14} />
-                Settings
-              </Link>
+              
+              {/* Desktop quick links */}
+              <div className="hidden md:flex gap-2.5 items-center">
+                <Link to="/admin/student-overview" className="glass-button px-3.5 py-2 text-xs font-black uppercase tracking-widest text-slate-300 hover:text-white flex items-center gap-1.5">
+                  <GraduationCap size={14} className="text-indigo-400" />
+                  Overview
+                </Link>
+                <Link to="/admin/student-fee-tracker" className="glass-button px-3.5 py-2 text-xs font-black uppercase tracking-widest text-slate-300 hover:text-white flex items-center gap-1.5">
+                  <UserCheck size={14} className="text-emerald-400" />
+                  Fee Tracker
+                </Link>
+                <Link to="/admin/attendance" className="glass-button px-3.5 py-2 text-xs font-black uppercase tracking-widest text-slate-300">
+                  Attendance
+                </Link>
+                <Link to="/admin/settings" className="indigo-button px-4 py-2 text-xs font-black uppercase tracking-widest flex items-center gap-1.5">
+                  <Settings size={14} />
+                  Settings
+                </Link>
+              </div>
            </div>
         </header>
 
@@ -456,6 +465,58 @@ export default function AdminDashboard() {
           </Routes>
         </div>
       </main>
+
+      {/* Sign Out Confirmation Modal (Works globally across mobile and desktop) */}
+      <AnimatePresence>
+        {showLogoutConfirm && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="bg-slate-900 border border-white/10 p-6 sm:p-7 rounded-3xl max-w-sm w-full shadow-2xl space-y-5"
+            >
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0 border border-rose-500/30">
+                  <LogOut size={22} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-white uppercase tracking-tight">Sign Out</h3>
+                  <p className="text-xs text-slate-400">Leave Administrator Portal</p>
+                </div>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/5 space-y-1">
+                <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">Current Session</p>
+                <p className="text-xs font-bold text-white">{currentUser?.name || currentUser?.username || 'Administrator'}</p>
+                <p className="text-[10px] text-slate-400 font-mono">Role: {currentUser?.role || 'Admin'}</p>
+              </div>
+
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Are you sure you want to sign out? You will need to enter your credentials again to access the portal.
+              </p>
+
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="flex-1 py-3 px-4 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-lg shadow-rose-600/30 active:scale-95 text-center flex items-center justify-center gap-2"
+                >
+                  <LogOut size={14} />
+                  <span>Yes, Sign Out</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowLogoutConfirm(false)}
+                  className="flex-1 py-3 px-4 rounded-2xl bg-white/10 hover:bg-white/15 text-slate-300 font-bold text-xs uppercase tracking-wider transition-all active:scale-95 text-center"
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <style>{`
         .custom-scrollbar::-webkit-scrollbar {
