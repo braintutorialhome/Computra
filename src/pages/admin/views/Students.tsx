@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useStorage } from '../../../hooks/useStorage';
 import { Search, User, Trash2, Edit2, Filter, Phone, MapPin, X, Save, Hash, RotateCcw, AlertTriangle, MessageSquare } from 'lucide-react';
 import { Student } from '../../../types';
@@ -69,9 +69,29 @@ export default function StudentManagement() {
   const studentSemesters = Array.from(new Set(approved.map(s => String(s.semester || '').trim()).filter(Boolean)));
   const semesters = ['All', ...Array.from(new Set([...defaultSemesters, ...studentSemesters]))];
 
-  const defaultSessions = ['2024-2025', '2025-2026', '2026-2027'];
-  const studentSessions = Array.from(new Set(approved.map(s => String(s.session || '').trim()).filter(Boolean)));
-  const sessions = ['All', ...Array.from(new Set([...defaultSessions, ...studentSessions]))];
+  const normalizeSession = (val?: string | null): string => {
+    if (!val) return '';
+    return String(val)
+      .trim()
+      .toLowerCase()
+      .replace(/[\u2010-\u2015\u2212]/g, '-')
+      .replace(/\s*-\s*/g, '-');
+  };
+
+  const sessions = useMemo(() => {
+    const sessionMap = new Map<string, string>();
+    approved.forEach(s => {
+      const raw = String(s.session || '').trim();
+      const norm = normalizeSession(raw);
+      if (raw && !['undefined', 'null', 'n/a', 'na', 'none', '-', '--', 'nil', 'all'].includes(norm)) {
+        if (!sessionMap.has(norm)) {
+          sessionMap.set(norm, raw);
+        }
+      }
+    });
+    const sorted = Array.from(sessionMap.values()).sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
+    return ['All', ...sorted];
+  }, [approved]);
 
   const filtered = displayList.filter(s => {
     const sName = String(s.name || '').toLowerCase();
@@ -86,7 +106,7 @@ export default function StudentManagement() {
                           sSession.includes(search);
     const matchesClass = filterClass === 'All' || s.class === filterClass;
     const matchesSemester = filterSemester === 'All' || s.semester === filterSemester;
-    const matchesSession = filterSession === 'All' || s.session === filterSession;
+    const matchesSession = filterSession === 'All' || normalizeSession(s.session) === normalizeSession(filterSession);
     return matchesSearch && matchesClass && matchesSemester && matchesSession;
   });
 

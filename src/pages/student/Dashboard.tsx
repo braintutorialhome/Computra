@@ -124,20 +124,53 @@ export default function StudentDashboard() {
     return myDueFees.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
   }, [myDueFees]);
 
-  const myResultsCount = useMemo(() => {
-    if (resultLinks.length > 0) return resultLinks.length;
-    if (!currentStudent) return 0;
-    return testResults.filter(r => r.studentId === currentStudent.id).length;
-  }, [resultLinks, testResults, currentStudent]);
-
   const sClassClean = String(currentStudent?.class || '').replace('Class-', '').trim();
+  const sSemesterClean = String(currentStudent?.semester || 'Semester-I').trim();
+
   const myMaterialsCount = useMemo(() => {
     return materials.filter(m => {
-      if (!m.class) return true;
-      const mClassClean = String(m.class).replace('Class-', '').trim();
-      return !sClassClean || mClassClean === sClassClean;
+      const mSem = (m.semester || '').trim();
+      const isSemMatch = !mSem || mSem === 'All' || mSem === 'all' || mSem.toLowerCase() === sSemesterClean.toLowerCase();
+      if (!isSemMatch) return false;
+
+      if (m.class && m.class !== 'All' && m.class !== 'all' && sClassClean) {
+        const mClassClean = String(m.class).replace('Class-', '').trim();
+        if (mClassClean !== sClassClean) return false;
+      }
+      return true;
     }).length;
-  }, [materials, sClassClean]);
+  }, [materials, sClassClean, sSemesterClean]);
+
+  const myResultsCount = useMemo(() => {
+    const semResults = resultLinks.filter(r => {
+      const rSem = (r.semester || '').trim();
+      const isSemMatch = !rSem || rSem === 'All' || rSem === 'all' || rSem.toLowerCase() === sSemesterClean.toLowerCase();
+      if (!isSemMatch) return false;
+
+      if (r.class && r.class !== 'All' && r.class !== 'all' && sClassClean) {
+        const rClassClean = String(r.class).replace('Class-', '').trim();
+        if (rClassClean !== sClassClean) return false;
+      }
+      return true;
+    }).length;
+
+    const myOnlineTests = currentStudent ? testResults.filter(r => r.studentId === currentStudent.id).length : 0;
+    return semResults + myOnlineTests;
+  }, [resultLinks, testResults, currentStudent, sClassClean, sSemesterClean]);
+
+  const myExternalTestsCount = useMemo(() => {
+    return externalTests.filter(t => {
+      const tSem = (t.semester || '').trim();
+      const isSemMatch = !tSem || tSem === 'All' || tSem === 'all' || tSem.toLowerCase() === sSemesterClean.toLowerCase();
+      if (!isSemMatch) return false;
+
+      if (t.class && t.class !== 'All' && t.class !== 'all' && sClassClean) {
+        const tClassClean = String(t.class).replace('Class-', '').trim();
+        if (tClassClean.toLowerCase() !== sClassClean.toLowerCase()) return false;
+      }
+      return true;
+    }).length;
+  }, [externalTests, sClassClean, sSemesterClean]);
 
   const myRemarksCount = useMemo(() => {
     if (!currentStudent) return 0;
@@ -189,7 +222,7 @@ export default function StudentDashboard() {
           to: '/student/test-master', 
           icon: ExternalLink, 
           label: 'Exam Portal',
-          badge: externalTests.length > 0 ? externalTests.length : null,
+          badge: myExternalTestsCount > 0 ? myExternalTestsCount : null,
           badgeColor: 'purple' as const
         },
         { 
@@ -535,8 +568,8 @@ export default function StudentDashboard() {
                 <Route path="remarks" element={<StudentRemarksView student={currentStudent} />} />
                 <Route path="fees" element={<StudentFees student={currentStudent} />} />
                 <Route path="due-fees" element={<StudentDueFees student={currentStudent} />} />
-                <Route path="test-master" element={<StudentTestMaster />} />
-                <Route path="results" element={<StudentResults />} />
+                <Route path="test-master" element={<StudentTestMaster student={currentStudent} />} />
+                <Route path="results" element={<StudentResults student={currentStudent} />} />
                 <Route path="materials" element={<StudentMaterials student={currentStudent} />} />
                 <Route path="notices" element={<StudentNotices student={currentStudent} />} />
                 <Route path="/" element={<StudentHome student={currentStudent} />} />

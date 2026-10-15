@@ -57,10 +57,28 @@ export default function StudentOverview() {
     return ['all', ...Array.from(new Set([...defaultSemesters, ...list]))];
   }, [students]);
 
-  const defaultSessions = ['2024-2025', '2025-2026', '2026-2027'];
+  const normalizeSession = (val?: string | null): string => {
+    if (!val) return '';
+    return String(val)
+      .trim()
+      .toLowerCase()
+      .replace(/[\u2010-\u2015\u2212]/g, '-')
+      .replace(/\s*-\s*/g, '-');
+  };
+
   const sessions = useMemo(() => {
-    const list = students.map(s => String(s.session || '').trim()).filter(Boolean);
-    return ['all', ...Array.from(new Set([...defaultSessions, ...list]))];
+    const sessionMap = new Map<string, string>();
+    students.forEach(s => {
+      const raw = String(s.session || '').trim();
+      const norm = normalizeSession(raw);
+      if (raw && !['undefined', 'null', 'n/a', 'na', 'none', '-', '--', 'nil', 'all'].includes(norm)) {
+        if (!sessionMap.has(norm)) {
+          sessionMap.set(norm, raw);
+        }
+      }
+    });
+    const sorted = Array.from(sessionMap.values()).sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
+    return ['all', ...sorted];
   }, [students]);
 
   // Aggregate student data with fees and dues
@@ -152,8 +170,9 @@ export default function StudentOverview() {
 
       // Session
       if (sessionFilter !== 'all') {
-        const studentSess = String(student.session || '').trim();
-        if (studentSess !== sessionFilter) return false;
+        const studentSessNorm = normalizeSession(student.session);
+        const filterSessNorm = normalizeSession(sessionFilter);
+        if (studentSessNorm !== filterSessNorm) return false;
       }
 
       return true;

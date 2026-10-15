@@ -81,15 +81,39 @@ export default function StudentHome({ student }: { student: Student }) {
       .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
   }, [testResults, student.id]);
 
-  // Materials for student's class
+  // Materials & Exams strictly for student's enrolled semester & class
   const sClassClean = String(student.class || '').replace('Class-', '').trim();
+  const sSemesterClean = String(student.semester || 'Semester-I').trim();
+
   const studentMaterials = useMemo(() => {
     return materials.filter(m => {
-      if (!m.class) return true;
-      const mClassClean = String(m.class).replace('Class-', '').trim();
-      return !sClassClean || mClassClean === sClassClean;
+      const mSem = (m.semester || '').trim();
+      const isSemMatch = !mSem || mSem === 'All' || mSem.toLowerCase() === 'all' || 
+                         mSem.toLowerCase() === sSemesterClean.toLowerCase();
+      if (!isSemMatch) return false;
+
+      if (m.class && m.class !== 'All' && m.class.toLowerCase() !== 'all' && sClassClean) {
+        const mClassClean = String(m.class).replace('Class-', '').trim();
+        if (mClassClean.toLowerCase() !== sClassClean.toLowerCase()) return false;
+      }
+      return true;
     });
-  }, [materials, sClassClean]);
+  }, [materials, sClassClean, sSemesterClean]);
+
+  const mySemesterTests = useMemo(() => {
+    return externalTests.filter(t => {
+      const tSem = (t.semester || '').trim();
+      const isSemMatch = !tSem || tSem === 'All' || tSem.toLowerCase() === 'all' || 
+                         tSem.toLowerCase() === sSemesterClean.toLowerCase();
+      if (!isSemMatch) return false;
+
+      if (t.class && t.class !== 'All' && t.class.toLowerCase() !== 'all' && sClassClean) {
+        const tClassClean = String(t.class).replace('Class-', '').trim();
+        if (tClassClean.toLowerCase() !== sClassClean.toLowerCase()) return false;
+      }
+      return true;
+    });
+  }, [externalTests, sClassClean, sSemesterClean]);
 
   // Latest notice
   const latestNotice = notices.length > 0 ? notices[notices.length - 1] : null;
@@ -328,8 +352,13 @@ export default function StudentHome({ student }: { student: Student }) {
                 <ExternalLink size={18} />
               </div>
               <div>
-                <h3 className="text-lg font-black text-white">Online Exam Portal</h3>
-                <p className="text-xs text-slate-400">Live tests and practice assessments</p>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg font-black text-white">Online Exam Portal</h3>
+                  <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-purple-500/15 text-purple-300 border border-purple-500/25">
+                    {sSemesterClean}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400">Live tests and practice assessments for {sSemesterClean}</p>
               </div>
             </div>
             <Link to="/student/test-master" className="text-xs font-black uppercase tracking-wider text-purple-400 hover:text-purple-300 flex items-center gap-1">
@@ -337,13 +366,15 @@ export default function StudentHome({ student }: { student: Student }) {
             </Link>
           </div>
 
-          {externalTests.length > 0 ? (
+          {mySemesterTests.length > 0 ? (
             <div className="space-y-2.5">
-              {externalTests.slice(0, 3).map(test => (
+              {mySemesterTests.slice(0, 3).map(test => (
                 <div key={test.id} className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 flex items-center justify-between gap-3 hover:border-purple-500/30 transition-all">
                   <div className="min-w-0">
                     <p className="text-xs font-bold text-white truncate">{test.title}</p>
-                    <p className="text-[11px] text-slate-400 truncate">{test.description}</p>
+                    <p className="text-[11px] text-slate-400 truncate">
+                      {test.description || `${test.subject || 'Exam'} • ${test.semester || sSemesterClean}`}
+                    </p>
                   </div>
                   <a 
                     href={test.url} 
@@ -357,7 +388,7 @@ export default function StudentHome({ student }: { student: Student }) {
               ))}
             </div>
           ) : (
-            <p className="text-xs text-slate-400 py-6 text-center">No active exams scheduled right now</p>
+            <p className="text-xs text-slate-400 py-6 text-center">No active exams scheduled for {sSemesterClean} right now</p>
           )}
         </div>
       </div>

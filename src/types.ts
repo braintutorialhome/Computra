@@ -115,6 +115,10 @@ export interface ExternalTest {
   description: string;
   url: string;
   date: string;
+  class?: string;
+  semester?: string;
+  subject?: string;
+  session?: string;
 }
 
 export interface ResultLink {
@@ -123,6 +127,10 @@ export interface ResultLink {
   description: string;
   url: string;
   date: string;
+  class?: string;
+  semester?: string;
+  subject?: string;
+  session?: string;
 }
 
 export interface StudentRemark {

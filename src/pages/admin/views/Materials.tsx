@@ -161,13 +161,19 @@ export default function StudyMaterialManagement() {
                     value={formData.class}
                     onChange={(e) => {
                       const selectedClass = e.target.value;
-                      const defaultSem = selectedClass === 'XI' ? 'Semester-I' : 'Semester-III';
+                      let defaultSem = formData.semester;
+                      if (selectedClass === 'XI' && !['Semester-I', 'Semester-II', 'All'].includes(defaultSem)) {
+                        defaultSem = 'Semester-I';
+                      } else if (selectedClass === 'XII' && !['Semester-III', 'Semester-IV', 'All'].includes(defaultSem)) {
+                        defaultSem = 'Semester-III';
+                      }
                       setFormData({...formData, class: selectedClass, semester: defaultSem});
                     }}
                     className="input-glass w-full py-4 px-6 rounded-2xl font-bold cursor-pointer text-white"
                   >
                     <option value="XI" className="bg-slate-900">Class-XI</option>
                     <option value="XII" className="bg-slate-900">Class-XII</option>
+                    <option value="All" className="bg-slate-900">All Classes</option>
                   </select>
                 </div>
 
@@ -178,17 +184,11 @@ export default function StudyMaterialManagement() {
                     onChange={(e) => setFormData({...formData, semester: e.target.value})}
                     className="input-glass w-full py-4 px-6 rounded-2xl font-bold cursor-pointer text-white"
                   >
-                    {formData.class === 'XI' ? (
-                      <>
-                        <option value="Semester-I" className="bg-slate-900">Semester-I</option>
-                        <option value="Semester-II" className="bg-slate-900">Semester-II</option>
-                      </>
-                    ) : (
-                      <>
-                        <option value="Semester-III" className="bg-slate-900">Semester-III</option>
-                        <option value="Semester-IV" className="bg-slate-900">Semester-IV</option>
-                      </>
-                    )}
+                    <option value="Semester-I" className="bg-slate-900">Semester-I</option>
+                    <option value="Semester-II" className="bg-slate-900">Semester-II</option>
+                    <option value="Semester-III" className="bg-slate-900">Semester-III</option>
+                    <option value="Semester-IV" className="bg-slate-900">Semester-IV</option>
+                    <option value="All" className="bg-slate-900">All Semesters</option>
                   </select>
                 </div>
               </div>
