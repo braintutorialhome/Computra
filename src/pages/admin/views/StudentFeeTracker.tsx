@@ -26,7 +26,7 @@ export default function StudentFeeTracker() {
   const [statusFilter, setStatusFilter] = useState('All');
   const [filterClass, setFilterClass] = useState('All');
   const [filterSemester, setFilterSemester] = useState('All');
-  const [filterSession, setFilterSession] = useState('All');
+  const [filterSession, setFilterSession] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('cards');
   
   // Selected student modal
@@ -85,44 +85,13 @@ export default function StudentFeeTracker() {
     );
   }
 
-  // Normalize session string to canonical academic year format (e.g. '2025 - 2026', '2025-26', '2025/2026' -> '2025-2026')
   const normalizeSession = (val?: string | null): string => {
     if (!val) return '';
-    const clean = String(val)
+    return String(val)
       .trim()
+      .toLowerCase()
       .replace(/[\u2010-\u2015\u2212/]/g, '-')
       .replace(/\s*-\s*/g, '-');
-
-    // Match 4-digit start year and 2-to-4 digit end year (e.g. 2025-2026 or 2025-26)
-    const matchYears = clean.match(/(\d{4})\s*-\s*(\d{2,4})/);
-    if (matchYears) {
-      const startYear = matchYears[1];
-      let endYear = matchYears[2];
-      if (endYear.length === 2) {
-        endYear = startYear.slice(0, 2) + endYear;
-      }
-      return `${startYear}-${endYear}`;
-    }
-
-    // Match single 4-digit academic year (e.g. 2025 -> 2025-2026)
-    const matchSingle = clean.match(/\b(20\d{2})\b/);
-    if (matchSingle) {
-      const startYear = matchSingle[1];
-      const endYear = String(Number(startYear) + 1);
-      return `${startYear}-${endYear}`;
-    }
-
-    return clean;
-  };
-
-  // Rejects empty, dummy, or placeholder sessions
-  const isValidSession = (val?: string | null): boolean => {
-    if (!val) return false;
-    const str = String(val).trim().toLowerCase();
-    if (!str || ['undefined', 'null', 'n/a', 'na', 'none', '-', '--', 'nil', 'all', 'empty', 'test', 'demo', 'sample'].includes(str)) {
-      return false;
-    }
-    return true;
   };
 
   // Filter approved/active non-deleted students
@@ -158,63 +127,21 @@ export default function StudentFeeTracker() {
     return ['All', ...Array.from(new Set([...defaultSemesters, ...studentSemesters]))];
   }, [activeStudents]);
 
-  // Extract ONLY real, related sessions that exist among students (no dummy / unpopulated default sessions)
-  const sessionFilterOptions = useMemo(() => {
-    const sessionMap = new Map<string, { key: string; display: string; count: number }>();
-    let unassignedCount = 0;
-
+  // Session options exactly as in Student Overview
+  const sessions = useMemo(() => {
+    const sessionMap = new Map<string, string>();
     activeStudents.forEach(s => {
       const raw = String(s.session || '').trim();
-      if (isValidSession(raw)) {
-        const norm = normalizeSession(raw);
-        if (norm) {
-          const existing = sessionMap.get(norm);
-          if (existing) {
-            existing.count += 1;
-          } else {
-            sessionMap.set(norm, {
-              key: norm,
-              display: norm,
-              count: 1
-            });
-          }
-        } else {
-          unassignedCount += 1;
+      const norm = normalizeSession(raw);
+      if (raw && !['undefined', 'null', 'n/a', 'na', 'none', '-', '--', 'nil', 'all'].includes(norm)) {
+        if (!sessionMap.has(norm)) {
+          sessionMap.set(norm, raw);
         }
-      } else {
-        unassignedCount += 1;
       }
     });
-
-    // Sort descending by session year (e.g. 2026-2027, 2025-2026, 2024-2025)
-    const sorted = Array.from(sessionMap.values()).sort((a, b) => 
-      b.key.localeCompare(a.key, undefined, { numeric: true })
-    );
-
-    const options = [
-      { value: 'All', label: `All Sessions (${activeStudents.length})` },
-      ...sorted.map(item => ({
-        value: item.key,
-        label: `Session: ${item.display} (${item.count})`
-      }))
-    ];
-
-    if (unassignedCount > 0) {
-      options.push({
-        value: 'unassigned',
-        label: `Unassigned / No Session (${unassignedCount})`
-      });
-    }
-
-    return options;
+    const sorted = Array.from(sessionMap.values()).sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
+    return ['all', ...sorted];
   }, [activeStudents]);
-
-  // Automatically reset filterSession if current selection is no longer valid
-  useEffect(() => {
-    if (filterSession !== 'All' && !sessionFilterOptions.some(o => o.value === filterSession)) {
-      setFilterSession('All');
-    }
-  }, [sessionFilterOptions, filterSession]);
 
   // Filtered students list
   const filteredData = studentFeeData.filter(item => {
@@ -246,21 +173,10 @@ export default function StudentFeeTracker() {
       item.student.semester === filterSemester;
 
     const matchesSession = (() => {
-      if (filterSession === 'All') return true;
-      if (filterSession === 'unassigned') {
-        const raw = String(item.student.session || '').trim();
-        return !raw || !isValidSession(raw);
-      }
-      const rawSession = String(item.student.session || '').trim();
-      if (!rawSession || !isValidSession(rawSession)) return false;
-      const normStudent = normalizeSession(rawSession);
-      const normFilter = normalizeSession(filterSession);
-      return (
-        normStudent === normFilter || 
-        rawSession.toLowerCase() === filterSession.toLowerCase() ||
-        normStudent === filterSession ||
-        rawSession === filterSession
-      );
+      if (filterSession === 'all' || filterSession === 'All') return true;
+      const studentSessNorm = normalizeSession(item.student.session);
+      const filterSessNorm = normalizeSession(filterSession);
+      return studentSessNorm === filterSessNorm;
     })();
 
     const matchesStatus = statusFilter === 'All' ||
@@ -559,32 +475,15 @@ export default function StudentFeeTracker() {
 
           {/* Session Filter */}
           <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400">Session</label>
-              {filterSession !== 'All' && (
-                <button
-                  type="button"
-                  onClick={() => setFilterSession('All')}
-                  className="text-[9px] font-black text-indigo-400 hover:text-indigo-300 uppercase tracking-widest cursor-pointer"
-                  title="Clear session filter"
-                >
-                  Reset
-                </button>
-              )}
-            </div>
+            <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Session</label>
             <select
               value={filterSession}
               onChange={(e) => setFilterSession(e.target.value)}
-              className={`w-full px-3 py-2.5 border rounded-xl text-xs font-bold transition-all focus:outline-none focus:border-indigo-500 ${
-                filterSession !== 'All'
-                  ? 'bg-indigo-500/15 border-indigo-500/50 text-indigo-200 shadow-sm shadow-indigo-950/20'
-                  : 'bg-white/5 border-white/10 text-slate-300'
-              }`}
+              className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-slate-300 focus:outline-none focus:border-indigo-500"
             >
-              {sessionFilterOptions.map(opt => (
-                <option key={`tracker-sess-${opt.value}`} value={opt.value} className="bg-slate-900 text-white">
-                  {opt.label}
-                </option>
+              <option value="all" className="bg-slate-900 text-white">All Sessions</option>
+              {sessions.filter(s => s !== 'all' && s !== 'All').map(sess => (
+                <option key={`tracker-sess-${sess}`} value={sess} className="bg-slate-900 text-white">{sess}</option>
               ))}
             </select>
           </div>
@@ -593,14 +492,14 @@ export default function StudentFeeTracker() {
         {/* Filter Summary Counter */}
         <div className="flex items-center justify-between text-[11px] text-slate-400 font-bold pt-1">
           <span>Showing {filteredData.length} of {activeStudents.length} students</span>
-          {(searchTerm || statusFilter !== 'All' || filterClass !== 'All' || filterSemester !== 'All' || filterSession !== 'All') && (
+          {(searchTerm || statusFilter !== 'All' || filterClass !== 'All' || filterSemester !== 'All' || (filterSession !== 'all' && filterSession !== 'All')) && (
             <button
               onClick={() => {
                 setSearchTerm('');
                 setStatusFilter('All');
                 setFilterClass('All');
                 setFilterSemester('All');
-                setFilterSession('All');
+                setFilterSession('all');
               }}
               className="text-indigo-400 hover:text-indigo-300 underline font-semibold cursor-pointer"
             >
